@@ -69,6 +69,10 @@ Started: 2026-09-16 18:41:15 America/Sao_Paulo
 Objetivo:
 - Produzir um `PageState` semântico e sanitizado, com elementos interativos visíveis identificados por refs efêmeras.
 
+Incrementos concluídos:
+- 2026-09-16 18:41:15 America/Sao_Paulo — contratos de Page State e Element Registry por geração.
+- 2026-09-16 18:46:09 America/Sao_Paulo — scanner semântico, nomes acessíveis, visibilidade, mascaramento de elementos sensíveis e bundle do content script.
+
 ### Milestone 3 — Executor de ações
 
 Status: NOT_STARTED

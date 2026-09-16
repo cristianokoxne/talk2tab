@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Chrome extension that lets you navigate and operate websites using natural language and voice",
   "scripts": {
-    "build": "tsc --project tsconfig.json && node scripts/copy-public.mjs",
+    "build": "tsc --project tsconfig.json && node scripts/bundle-content.mjs && node scripts/copy-public.mjs",
     "dev": "tsc --project tsconfig.json --watch && node scripts/copy-public.mjs",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "lint": "eslint src --ext .ts",
@@ -16,6 +16,8 @@
   "devDependencies": {
     "@types/chrome": "^0.3.0",
     "@vitest/coverage-v8": "^1.0.0",
+    "esbuild": "^0.25.0",
+    "jsdom": "^30.0.1",
     "typescript": "^5.4.0",
     "eslint": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
