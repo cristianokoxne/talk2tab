@@ -1,10 +1,13 @@
 import { ElementRegistry } from "./registry/elementRegistry.js";
 import { scanPage } from "./scanner/pageScanner.js";
+import { removeDebugOverlay, showDebugOverlay } from "./overlay/debugOverlay.js";
 
 interface ScanRequest {
   type: "PAGE_SCAN_REQUEST";
   requestId: string;
 }
+
+interface OverlayRequest { type: "SCANNER_OVERLAY"; enabled: boolean; }
 
 function isScanRequest(value: unknown): value is ScanRequest {
   if (typeof value !== "object" || value === null) return false;
@@ -14,8 +17,18 @@ function isScanRequest(value: unknown): value is ScanRequest {
 
 export function initContentScript(chromeApi: typeof chrome, document: Document, window: Window): void {
   const registry = new ElementRegistry();
+  let latestState: ReturnType<typeof scanPage> | undefined;
   chromeApi.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
-    if (!isScanRequest(message)) return;
-    sendResponse({ ok: true, requestId: message.requestId, data: scanPage(document, window, registry) });
+    if (isScanRequest(message)) {
+      latestState = scanPage(document, window, registry);
+      sendResponse({ ok: true, requestId: message.requestId, data: latestState });
+      return;
+    }
+    if (typeof message === "object" && message !== null && (message as OverlayRequest).type === "SCANNER_OVERLAY") {
+      const request = message as OverlayRequest;
+      if (request.enabled && latestState) showDebugOverlay(document, registry, latestState.elements);
+      else removeDebugOverlay(document);
+      sendResponse({ ok: true });
+    }
   });
 }

@@ -14,7 +14,14 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const status = document.querySelector<HTMLElement>("#status");
   const pageState = document.querySelector<HTMLElement>("#page-state");
   const elements = document.querySelector<HTMLUListElement>("#elements");
-  if (!status || !pageState || !elements) return;
+  const debugOverlay = document.querySelector<HTMLInputElement>("#debug-overlay");
+  if (!status || !pageState || !elements || !debugOverlay) return;
+
+  debugOverlay.addEventListener("change", () => {
+    void chromeApi.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
+      if (tab.id !== undefined) void chromeApi.tabs.sendMessage(tab.id, { type: "SCANNER_OVERLAY", enabled: debugOverlay.checked });
+    });
+  });
 
   status.textContent = "Inspecionando a página ativa…";
   chromeApi.runtime.sendMessage({ type: "SCAN_PAGE", requestId: requestId() }, (response: ScanResponse | undefined) => {
