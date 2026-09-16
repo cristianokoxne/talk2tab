@@ -39,24 +39,45 @@ export interface AgentSession {
   cancelled: boolean;
 }
 
+export interface ViewportState {
+  width: number;
+  height: number;
+  scrollY: number;
+}
+
+export interface ElementBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface PageState {
   url: string;
   title: string;
+  viewport: ViewportState;
+  pageTextSummary: string;
+  fingerprint: string;
   elements: ElementRef[];
-  text: string;
+  limitations: string[];
 }
 
 export interface ElementRef {
   ref: string;
+  frameId: number;
   tag: string;
-  text: string;
-  selector: string;
-  visible: boolean;
-  enabled: boolean;
   role?: string;
+  name?: string;
   type?: string;
   placeholder?: string;
-  ariaLabel?: string;
+  text?: string;
+  href?: string;
+  visible: boolean;
+  enabled: boolean;
+  checked?: boolean;
+  selected?: boolean;
+  sensitive?: boolean;
+  bounds: ElementBounds;
 }
 
 export interface AgentMessage {

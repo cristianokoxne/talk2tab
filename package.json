@@ -7,7 +7,7 @@
     "dev": "tsc --project tsconfig.json --watch && node scripts/copy-public.mjs",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "lint": "eslint src --ext .ts",
-    "test": "node --test tests/**/*.test.mjs",
+    "test": "npm run build && node --test tests/**/*.test.mjs",
     "test:watch": "node --test --watch tests/**/*.test.mjs"
   },
   "keywords": ["chrome-extension", "side-panel", "manifest-v3"],

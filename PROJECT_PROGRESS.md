@@ -2,11 +2,11 @@
 
 ## Current Status
 
-Última atualização: 2026-09-16 18:40:07 America/Sao_Paulo
+Última atualização: 2026-09-16 18:41:15 America/Sao_Paulo
 
-Etapa atual: Milestone 1 — Bootstrap da extensão
+Etapa atual: Milestone 2 — Scanner de página e refs
 
-Status: COMPLETED
+Status: IN_PROGRESS
 
 ---
 
@@ -62,7 +62,12 @@ Smoke test manual:
 
 ### Milestone 2 — Scanner de página e refs
 
-Status: NOT_STARTED
+Status: IN_PROGRESS
+
+Started: 2026-09-16 18:41:15 America/Sao_Paulo
+
+Objetivo:
+- Produzir um `PageState` semântico e sanitizado, com elementos interativos visíveis identificados por refs efêmeras.
 
 ### Milestone 3 — Executor de ações
 
