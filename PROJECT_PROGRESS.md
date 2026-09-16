@@ -74,6 +74,7 @@ Incrementos concluídos:
 - 2026-09-16 18:46:09 America/Sao_Paulo — scanner semântico, nomes acessíveis, visibilidade, mascaramento de elementos sensíveis e bundle do content script.
 - 2026-09-16 18:46:47 America/Sao_Paulo — Side Panel passa a listar controles visíveis com refs.
 - 2026-09-16 18:48:25 America/Sao_Paulo — overlay de depuração opcional destaca os elementos e suas refs na página.
+- 2026-09-16 18:52:29 America/Sao_Paulo — controle do overlay reposicionado antes da lista para uso em páginas longas.
 
 ### Milestone 3 — Executor de ações
 
