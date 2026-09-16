@@ -2,11 +2,11 @@
 
 ## Current Status
 
-Última atualização: 2026-09-15 22:32:13 America/Sao_Paulo
+Última atualização: 2026-09-16 18:40:07 America/Sao_Paulo
 
 Etapa atual: Milestone 1 — Bootstrap da extensão
 
-Status: PARTIAL
+Status: COMPLETED
 
 ---
 
@@ -14,9 +14,11 @@ Status: PARTIAL
 
 ### Milestone 1 — Bootstrap da extensão
 
-Status: PARTIAL
+Status: COMPLETED
 
 Started: 2026-09-15 22:25:37 America/Sao_Paulo
+
+Finished: 2026-09-16 18:40:07 America/Sao_Paulo
 
 Objetivo:
 - Entregar manifest MV3, service worker, Side Panel, content script e mensageria tipada para solicitar e receber o título da página ativa.
@@ -45,13 +47,16 @@ Testes executados:
 - `npm run build` — PASS.
 
 Não concluído:
-- Smoke test manual em Chrome: exige instalar a extensão unpacked pela UI, ação que requer confirmação explícita do usuário.
+- Nada pendente nesta milestone.
 
 Limitações:
 - `npm install` reporta 5 vulnerabilidades transitivas (2 moderadas, 1 alta e 2 críticas); não foram aplicadas correções potencialmente disruptivas nesta milestone.
 
 Próxima ação:
-- Com autorização, carregar `dist/` como extensão unpacked no Chrome e verificar Side Panel → `SCAN_PAGE` em uma página HTTP(S). Se passar, marcar esta mesma milestone como COMPLETED; não iniciar a Milestone 2 antes disso.
+- Iniciar a Milestone 2 em uma nova execução.
+
+Smoke test manual:
+- PASS em 2026-09-16: extensão carregada unpacked a partir de `dist/` no Chrome; o Side Panel exibiu “Página conectada”, título “YouTube” e `https://www.youtube.com/`.
 
 ---
 
