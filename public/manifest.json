@@ -1,0 +1,30 @@
+﻿{
+  "manifest_version": 3,
+  "name": "Voice Browser Agent",
+  "version": "0.1.0",
+  "description": "Navigate and operate websites using natural language and voice",
+  "permissions": ["storage", "scripting", "tabs", "activeTab", "sidePanel"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "Voice Browser Agent"
+  },
+  "side_panel": {
+    "default_title": "Voice Browser Agent",
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["agent/contentScriptEntry.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  }
+}

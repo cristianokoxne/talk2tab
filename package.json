@@ -1,0 +1,25 @@
+﻿{
+  "name": "voice-browser-agent",
+  "version": "0.1.0",
+  "description": "Chrome extension that lets you navigate and operate websites using natural language and voice",
+  "scripts": {
+    "build": "tsc --project tsconfig.json && node scripts/copy-public.mjs",
+    "dev": "tsc --project tsconfig.json --watch && node scripts/copy-public.mjs",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "node --test tests/**/*.test.mjs",
+    "test:watch": "node --test --watch tests/**/*.test.mjs"
+  },
+  "keywords": ["chrome-extension", "side-panel", "manifest-v3"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.3.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "typescript": "^5.4.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "vitest": "^1.0.0"
+  }
+}
