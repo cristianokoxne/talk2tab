@@ -1,3 +1,6 @@
 ﻿#app { font-family: system-ui; padding: 8px; }
 h1 { font-size: 14px; margin: 0 0 8px; }
 #status { color: #666; font-size: 12px; }
+#elements { margin: 12px 0; padding: 0; list-style: none; font-size: 12px; }
+#elements li { border-top: 1px solid #eee; padding: 6px 0; }
+#elements code { color: #7c3aed; }

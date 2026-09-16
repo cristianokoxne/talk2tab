@@ -1,6 +1,8 @@
+import type { PageState } from "./types.js";
+
 interface ScanResponse {
   ok: boolean;
-  data?: { title: string; url: string };
+  data?: PageState;
   error?: string;
 }
 
@@ -11,7 +13,8 @@ function requestId(): string {
 export function initSidePanel(chromeApi: typeof chrome): void {
   const status = document.querySelector<HTMLElement>("#status");
   const pageState = document.querySelector<HTMLElement>("#page-state");
-  if (!status || !pageState) return;
+  const elements = document.querySelector<HTMLUListElement>("#elements");
+  if (!status || !pageState || !elements) return;
 
   status.textContent = "Inspecionando a página ativa…";
   chromeApi.runtime.sendMessage({ type: "SCAN_PAGE", requestId: requestId() }, (response: ScanResponse | undefined) => {
@@ -21,5 +24,12 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     }
     status.textContent = "Página conectada";
     pageState.textContent = `${response.data.title || "Sem título"} — ${response.data.url}`;
+    elements.replaceChildren(...response.data.elements.map((element) => {
+      const item = document.createElement("li");
+      const ref = document.createElement("code");
+      ref.textContent = element.ref;
+      item.append(ref, document.createTextNode(` ${element.role ?? element.tag}: ${element.name ?? element.text ?? "sem nome"}`));
+      return item;
+    }));
   });
 }
