@@ -2,9 +2,10 @@
 
 export interface ClickAction { type: "click"; target: { ref: string }; }
 export interface TypeAction { type: "type"; target: { ref: string }; text: string; replace?: boolean; }
+export interface SelectAction { type: "select"; target: { ref: string }; value: string; }
 export interface ScrollAction { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; }
 export interface KeyPressAction { type: "keypress"; key: string; }
-export type BrowserAction = ClickAction | TypeAction | ScrollAction | KeyPressAction;
+export type BrowserAction = ClickAction | TypeAction | SelectAction | ScrollAction | KeyPressAction;
 
 export interface ActionRequest { id: string; action: BrowserAction; }
 
