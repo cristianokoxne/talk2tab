@@ -6,7 +6,7 @@
 
 Etapa atual: Milestone 3 — Executor de ações
 
-Status: IN_PROGRESS
+Status: COMPLETED
 
 ---
 
@@ -72,12 +72,6 @@ Objetivo:
 - Produzir um `PageState` semântico e sanitizado, com elementos interativos visíveis identificados por refs efêmeras.
 
 Incrementos concluídos:
-- 2026-09-18 22:25:00 America/Sao_Paulo — painel de teste manual para executar `click` e `type` por ref na aba ativa.
-- 2026-09-18 22:20:00 America/Sao_Paulo — executor `keypress` com whitelist de teclas e eventos `keydown`/`keyup`.
-- 2026-09-18 22:15:00 America/Sao_Paulo — executor `scroll` com viewport/pixels, direção validada e limite de segurança.
-- 2026-09-18 22:12:00 America/Sao_Paulo — executor `select` por valor ou rótulo visível, com eventos `input`/`change`.
-- 2026-09-18 22:08:18 America/Sao_Paulo — executor `type` com eventos nativos, contenteditable e bloqueio de campos sensíveis.
-- 2026-09-18 22:05:43 America/Sao_Paulo — DSL inicial de ações e executor seguro de clique por ref.
 - 2026-09-16 18:41:15 America/Sao_Paulo — contratos de Page State e Element Registry por geração.
 - 2026-09-16 18:46:09 America/Sao_Paulo — scanner semântico, nomes acessíveis, visibilidade, mascaramento de elementos sensíveis e bundle do content script.
 - 2026-09-16 18:46:47 America/Sao_Paulo — Side Panel passa a listar controles visíveis com refs.
@@ -98,12 +92,29 @@ Próxima ação:
 
 ### Milestone 3 — Executor de ações
 
-Status: IN_PROGRESS
+Status: COMPLETED
 
 Started: 2026-09-18 22:10:00 America/Sao_Paulo
 
+Finished: 2026-09-18 22:23:59 America/Sao_Paulo
+
 Objetivo:
 - Executar ações DOM somente por refs efêmeras validadas, começando pelo clique seguro.
+
+Incrementos concluídos:
+- 2026-09-18 22:05:43 America/Sao_Paulo — DSL inicial e executor seguro de clique por ref.
+- 2026-09-18 22:08:18 America/Sao_Paulo — executor `type` com eventos nativos, contenteditable e bloqueio de campos sensíveis.
+- 2026-09-18 22:12:00 America/Sao_Paulo — executor `select` por valor ou rótulo visível.
+- 2026-09-18 22:15:00 America/Sao_Paulo — executor `scroll` com viewport/pixels e limite de segurança.
+- 2026-09-18 22:20:00 America/Sao_Paulo — executor `keypress` com whitelist de teclas.
+- 2026-09-18 22:25:00 America/Sao_Paulo — painel de teste manual para `click` e `type` por ref.
+
+Validação final:
+- PASS — o usuário confirmou o funcionamento do painel de ações no Chrome.
+- `npm run typecheck`, `npm run lint`, `npm test` (8 testes) e `npm run build` passaram.
+
+Próxima ação:
+- Iniciar a Milestone 4 em uma nova execução.
 
 ### Milestone 4 — Provider OpenAI-compatible
 
