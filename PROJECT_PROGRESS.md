@@ -2,11 +2,11 @@
 
 ## Current Status
 
-Última atualização: 2026-09-16 18:41:15 America/Sao_Paulo
+Última atualização: 2026-09-18 22:02:45 America/Sao_Paulo
 
 Etapa atual: Milestone 2 — Scanner de página e refs
 
-Status: IN_PROGRESS
+Status: COMPLETED
 
 ---
 
@@ -66,6 +66,8 @@ Status: IN_PROGRESS
 
 Started: 2026-09-16 18:41:15 America/Sao_Paulo
 
+Finished: 2026-09-18 22:02:45 America/Sao_Paulo
+
 Objetivo:
 - Produzir um `PageState` semântico e sanitizado, com elementos interativos visíveis identificados por refs efêmeras.
 
@@ -75,6 +77,18 @@ Incrementos concluídos:
 - 2026-09-16 18:46:47 America/Sao_Paulo — Side Panel passa a listar controles visíveis com refs.
 - 2026-09-16 18:48:25 America/Sao_Paulo — overlay de depuração opcional destaca os elementos e suas refs na página.
 - 2026-09-16 18:52:29 America/Sao_Paulo — controle do overlay reposicionado antes da lista para uso em páginas longas.
+
+Validação final:
+- PASS em 2026-09-18 — em páginas reais do YouTube e ChatGPT, o painel listou elementos interativos com refs; o usuário confirmou o overlay de destaque.
+
+Testes finais:
+- `npm run typecheck` — PASS.
+- `npm run lint` — PASS.
+- `npm test` — PASS (3 testes).
+- `npm run build` — PASS.
+
+Próxima ação:
+- Iniciar a Milestone 3 em uma nova execução.
 
 ### Milestone 3 — Executor de ações
 
