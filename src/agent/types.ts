@@ -1,13 +1,12 @@
 ﻿export type RiskLevel = "read" | "edit" | "critical";
 
-export interface ActionRequest {
-  id: string;
-  type: string;
-  target?: { ref?: string; selector?: string; text?: string; url?: string; value?: string; key?: string };
-  params?: Record<string, unknown>;
-  riskLevel?: RiskLevel;
-  confirm?: boolean;
-}
+export interface ClickAction { type: "click"; target: { ref: string }; }
+export interface TypeAction { type: "type"; target: { ref: string }; text: string; replace?: boolean; }
+export interface ScrollAction { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; }
+export interface KeyPressAction { type: "keypress"; key: string; }
+export type BrowserAction = ClickAction | TypeAction | ScrollAction | KeyPressAction;
+
+export interface ActionRequest { id: string; action: BrowserAction; }
 
 export interface ActionResult {
   ok: boolean;
@@ -16,6 +15,7 @@ export interface ActionResult {
   code?: string;
   changed?: boolean;
   snapshot?: string;
+  status?: "success" | "failed";
 }
 
 export interface ProviderConfig {

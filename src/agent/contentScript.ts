@@ -1,6 +1,7 @@
 import { ElementRegistry } from "./registry/elementRegistry.js";
 import { scanPage } from "./scanner/pageScanner.js";
 import { removeDebugOverlay, showDebugOverlay } from "./overlay/debugOverlay.js";
+import { executeClick } from "./executor/click.js";
 
 interface ScanRequest {
   type: "PAGE_SCAN_REQUEST";
@@ -8,6 +9,7 @@ interface ScanRequest {
 }
 
 interface OverlayRequest { type: "SCANNER_OVERLAY"; enabled: boolean; }
+interface ExecuteClickRequest { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } }; }
 
 function isScanRequest(value: unknown): value is ScanRequest {
   if (typeof value !== "object" || value === null) return false;
@@ -29,6 +31,15 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
       if (request.enabled && latestState) showDebugOverlay(document, registry, latestState.elements);
       else removeDebugOverlay(document);
       sendResponse({ ok: true });
+      return;
+    }
+    if (typeof message === "object" && message !== null && (message as ExecuteClickRequest).type === "EXECUTE_ACTION") {
+      const request = message as ExecuteClickRequest;
+      if (request.action?.type !== "click" || typeof request.actionId !== "string" || typeof request.action.target?.ref !== "string") {
+        sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid click action." });
+        return;
+      }
+      sendResponse(executeClick(request.actionId, registry, request.action.target.ref));
     }
   });
 }
