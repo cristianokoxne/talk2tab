@@ -72,6 +72,7 @@ Objetivo:
 - Produzir um `PageState` semântico e sanitizado, com elementos interativos visíveis identificados por refs efêmeras.
 
 Incrementos concluídos:
+- 2026-09-18 22:08:18 America/Sao_Paulo — executor `type` com eventos nativos, contenteditable e bloqueio de campos sensíveis.
 - 2026-09-18 22:05:43 America/Sao_Paulo — DSL inicial de ações e executor seguro de clique por ref.
 - 2026-09-16 18:41:15 America/Sao_Paulo — contratos de Page State e Element Registry por geração.
 - 2026-09-16 18:46:09 America/Sao_Paulo — scanner semântico, nomes acessíveis, visibilidade, mascaramento de elementos sensíveis e bundle do content script.

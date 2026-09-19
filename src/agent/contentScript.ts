@@ -2,6 +2,7 @@ import { ElementRegistry } from "./registry/elementRegistry.js";
 import { scanPage } from "./scanner/pageScanner.js";
 import { removeDebugOverlay, showDebugOverlay } from "./overlay/debugOverlay.js";
 import { executeClick } from "./executor/click.js";
+import { executeType } from "./executor/type.js";
 
 interface ScanRequest {
   type: "PAGE_SCAN_REQUEST";
@@ -9,7 +10,9 @@ interface ScanRequest {
 }
 
 interface OverlayRequest { type: "SCANNER_OVERLAY"; enabled: boolean; }
-interface ExecuteClickRequest { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } }; }
+type ExecuteActionRequest =
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } } }
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "type"; target: { ref: string }; text: string; replace?: boolean } };
 
 function isScanRequest(value: unknown): value is ScanRequest {
   if (typeof value !== "object" || value === null) return false;
@@ -33,8 +36,16 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
       sendResponse({ ok: true });
       return;
     }
-    if (typeof message === "object" && message !== null && (message as ExecuteClickRequest).type === "EXECUTE_ACTION") {
-      const request = message as ExecuteClickRequest;
+    if (typeof message === "object" && message !== null && (message as ExecuteActionRequest).type === "EXECUTE_ACTION") {
+      const request = message as ExecuteActionRequest;
+      if (request.action?.type === "type") {
+        if (typeof request.actionId !== "string" || typeof request.action.target?.ref !== "string" || typeof request.action.text !== "string") {
+          sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid type action." });
+          return;
+        }
+        sendResponse(executeType(request.actionId, registry, request.action.target.ref, request.action.text, request.action.replace));
+        return;
+      }
       if (request.action?.type !== "click" || typeof request.actionId !== "string" || typeof request.action.target?.ref !== "string") {
         sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid click action." });
         return;
