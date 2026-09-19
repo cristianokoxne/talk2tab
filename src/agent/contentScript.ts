@@ -4,6 +4,7 @@ import { removeDebugOverlay, showDebugOverlay } from "./overlay/debugOverlay.js"
 import { executeClick } from "./executor/click.js";
 import { executeType } from "./executor/type.js";
 import { executeSelect } from "./executor/select.js";
+import { executeScroll } from "./executor/scroll.js";
 
 interface ScanRequest {
   type: "PAGE_SCAN_REQUEST";
@@ -14,7 +15,8 @@ interface OverlayRequest { type: "SCANNER_OVERLAY"; enabled: boolean; }
 type ExecuteActionRequest =
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "type"; target: { ref: string }; text: string; replace?: boolean } }
-  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "select"; target: { ref: string }; value: string } };
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "select"; target: { ref: string }; value: string } }
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number } };
 
 function isScanRequest(value: unknown): value is ScanRequest {
   if (typeof value !== "object" || value === null) return false;
@@ -54,6 +56,14 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
           return;
         }
         sendResponse(executeSelect(request.actionId, registry, request.action.target.ref, request.action.value));
+        return;
+      }
+      if (request.action?.type === "scroll") {
+        if (typeof request.actionId !== "string" || !["up", "down"].includes(request.action.direction) || (request.action.amount !== "viewport" && typeof request.action.amount !== "number")) {
+          sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid scroll action." });
+          return;
+        }
+        sendResponse(executeScroll(request.actionId, window, request.action));
         return;
       }
       if (request.action?.type !== "click" || typeof request.actionId !== "string" || typeof request.action.target?.ref !== "string") {
