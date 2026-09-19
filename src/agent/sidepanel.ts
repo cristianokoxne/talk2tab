@@ -15,7 +15,24 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const pageState = document.querySelector<HTMLElement>("#page-state");
   const elements = document.querySelector<HTMLUListElement>("#elements");
   const debugOverlay = document.querySelector<HTMLInputElement>("#debug-overlay");
-  if (!status || !pageState || !elements || !debugOverlay) return;
+  const actionRef = document.querySelector<HTMLInputElement>("#action-ref");
+  const actionText = document.querySelector<HTMLInputElement>("#action-text");
+  const actionResult = document.querySelector<HTMLOutputElement>("#action-result");
+  const clickButton = document.querySelector<HTMLButtonElement>("#action-click");
+  const typeButton = document.querySelector<HTMLButtonElement>("#action-type");
+  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !clickButton || !typeButton) return;
+
+  const sendAction = (action: unknown): void => {
+    actionResult.textContent = "Executando…";
+    void chromeApi.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
+      if (tab.id === undefined) throw new Error("Aba ativa indisponível");
+      return chromeApi.tabs.sendMessage(tab.id, { type: "EXECUTE_ACTION", actionId: requestId(), action });
+    }).then((response: { ok?: boolean; code?: string; error?: string } | undefined) => {
+      actionResult.textContent = response?.ok ? "Ação executada" : `${response?.code ?? "ERRO"}: ${response?.error ?? "falha"}`;
+    }).catch((error: unknown) => { actionResult.textContent = error instanceof Error ? error.message : "Falha ao executar ação"; });
+  };
+  clickButton.addEventListener("click", () => sendAction({ type: "click", target: { ref: actionRef.value.trim() } }));
+  typeButton.addEventListener("click", () => sendAction({ type: "type", target: { ref: actionRef.value.trim() }, text: actionText.value, replace: true }));
 
   debugOverlay.addEventListener("change", () => {
     void chromeApi.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {

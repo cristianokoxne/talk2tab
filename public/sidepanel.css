@@ -4,3 +4,7 @@ h1 { font-size: 14px; margin: 0 0 8px; }
 #elements { margin: 12px 0; padding: 0; list-style: none; font-size: 12px; }
 #elements li { border-top: 1px solid #eee; padding: 6px 0; }
 #elements code { color: #7c3aed; }
+#action-debug { border: 1px solid #ddd; margin: 10px 0; padding: 8px; font-size: 12px; }
+#action-debug input { box-sizing: border-box; margin: 2px 0; padding: 5px; width: 100%; }
+#action-debug button { margin: 4px 4px 4px 0; }
+#action-result { display: block; color: #666; }

@@ -11,6 +11,14 @@
     <div id="status">Inicializando...</div>
     <div id="page-state"></div>
     <label><input id="debug-overlay" type="checkbox"> Mostrar refs na página</label>
+    <fieldset id="action-debug">
+      <legend>Teste manual de ação</legend>
+      <input id="action-ref" placeholder="Ref (ex.: el_1_3)" aria-label="Ref do elemento">
+      <input id="action-text" placeholder="Texto para type" aria-label="Texto da ação">
+      <button id="action-click" type="button">Click</button>
+      <button id="action-type" type="button">Type</button>
+      <output id="action-result" aria-live="polite"></output>
+    </fieldset>
     <ul id="elements" aria-label="Elementos interativos"></ul>
     <div id="action-output"></div>
   </div>
