@@ -62,7 +62,7 @@ Smoke test manual:
 
 ### Milestone 2 — Scanner de página e refs
 
-Status: IN_PROGRESS
+Status: COMPLETED
 
 Started: 2026-09-16 18:41:15 America/Sao_Paulo
 
