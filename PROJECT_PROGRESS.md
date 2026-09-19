@@ -72,6 +72,7 @@ Objetivo:
 - Produzir um `PageState` semântico e sanitizado, com elementos interativos visíveis identificados por refs efêmeras.
 
 Incrementos concluídos:
+- 2026-09-18 22:20:00 America/Sao_Paulo — executor `keypress` com whitelist de teclas e eventos `keydown`/`keyup`.
 - 2026-09-18 22:15:00 America/Sao_Paulo — executor `scroll` com viewport/pixels, direção validada e limite de segurança.
 - 2026-09-18 22:12:00 America/Sao_Paulo — executor `select` por valor ou rótulo visível, com eventos `input`/`change`.
 - 2026-09-18 22:08:18 America/Sao_Paulo — executor `type` com eventos nativos, contenteditable e bloqueio de campos sensíveis.

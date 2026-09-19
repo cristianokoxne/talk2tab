@@ -5,6 +5,7 @@ import { executeClick } from "./executor/click.js";
 import { executeType } from "./executor/type.js";
 import { executeSelect } from "./executor/select.js";
 import { executeScroll } from "./executor/scroll.js";
+import { executeKeyPress } from "./executor/keypress.js";
 
 interface ScanRequest {
   type: "PAGE_SCAN_REQUEST";
@@ -16,7 +17,8 @@ type ExecuteActionRequest =
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "type"; target: { ref: string }; text: string; replace?: boolean } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "select"; target: { ref: string }; value: string } }
-  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number } };
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number } }
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "keypress"; key: string } };
 
 function isScanRequest(value: unknown): value is ScanRequest {
   if (typeof value !== "object" || value === null) return false;
@@ -64,6 +66,14 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
           return;
         }
         sendResponse(executeScroll(request.actionId, window, request.action));
+        return;
+      }
+      if (request.action?.type === "keypress") {
+        if (typeof request.actionId !== "string" || typeof request.action.key !== "string") {
+          sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid keypress action." });
+          return;
+        }
+        sendResponse(executeKeyPress(request.actionId, document, request.action.key));
         return;
       }
       if (request.action?.type !== "click" || typeof request.actionId !== "string" || typeof request.action.target?.ref !== "string") {
