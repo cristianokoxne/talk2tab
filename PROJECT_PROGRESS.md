@@ -116,13 +116,40 @@ Validação final:
 Próxima ação:
 - Iniciar a Milestone 4 em uma nova execução.
 
-### Milestone 4 — Provider OpenAI-compatible
+### Milestone 4 — Provider Jev (System One)
 
-Status: NOT_STARTED
+Status: IN_PROGRESS
+
+Implementado nesta etapa:
+- Adaptador HTTP nativo para o endpoint System One do Jev, sem OpenAI e sem OpenRouter.
+- Mapa fechado de comandos para `click`, `type`, `select`, `scroll` e `finish`.
+- Validação da escolha retornada pelo Jev contra as opções geradas localmente.
+- Probabilidades e confiança preservadas para futuras decisões de segurança.
+- Onboarding obrigatório no Side Panel para inserir e salvar a API key do Jev.
+- Storage local restrito a contextos confiáveis da extensão; a chave não é enviada ao content script.
+- Testes do mapa e do provider; suíte completa com 10 testes passando.
+
+Pendente:
+- Implementar o loop multi-etapas de observar → decidir → executar → verificar (Milestone 5).
+- Definir como o texto da ação `type` será fornecido pelo comando/transcrição do usuário.
 
 ### Milestone 5 — Agent loop
 
-Status: NOT_STARTED
+Status: IN_PROGRESS
+
+Implementado nesta etapa:
+- Loop `observe → decide → execute → observe` integrado ao orquestrador.
+- Uma ação por decisão do Jev.
+- Encerramento por `finish`, falha de execução ou limite máximo de 8 passos.
+- Cancelamento explícito por sessão, com `AbortController` e botão no Side Panel.
+- Verificação pós-ação determinística de navegação, fingerprint, viewport e resultado do executor.
+- Detecção de estagnação após ações repetidas sem progresso.
+- Ações `type` só são mapeadas quando há texto explícito no objetivo; `select` usa opções reais da página.
+- Histórico resumido das decisões e resultados retornado ao Side Panel.
+- Testes de conclusão, cancelamento e limite de segurança; suíte completa com 13 testes passando.
+
+Pendente:
+- Verificação semântica orientada ao objetivo, além das mudanças observáveis da página.
 
 ### Milestone 6 — Safety
 
@@ -130,7 +157,19 @@ Status: NOT_STARTED
 
 ### Milestone 7 — Voice
 
-Status: NOT_STARTED
+Status: IN_PROGRESS
+
+Implementado nesta etapa:
+- Speech-to-text local no navegador com Transformers.js e Whisper Tiny multilíngue.
+- Português fixado como idioma de transcrição para reduzir ambiguidades.
+- Fallback WASM e aceleração WebGPU quando disponível.
+- Captura de microfone pelo Side Panel com botões Falar/Parar gravação.
+- Modelo carregado sob demanda e reutilizado pelo cache do navegador.
+- A transcrição é colocada no objetivo para revisão antes de ser enviada ao Jev.
+
+Pendente:
+- Mover a inferência para Web Worker para não bloquear a interface.
+- Teste manual de microfone em Chrome e medição de latência/memória.
 
 ### Milestone 8 — Testes e benchmark
 

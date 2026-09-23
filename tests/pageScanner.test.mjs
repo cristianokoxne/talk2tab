@@ -40,3 +40,19 @@ test("collects visible interactive controls with accessible names and no sensiti
   assert.equal("value" in state.elements[1], false);
   assert.equal(state.elements[3].href, "https://example.test/support");
 });
+
+test("scans interactive controls inside open shadow roots", () => {
+  const dom = new JSDOM(`<main><search-widget></search-widget></main>`, { url: "https://youtube.com", pretendToBeVisual: true });
+  const host = dom.window.document.querySelector("search-widget");
+  const shadow = host.attachShadow({ mode: "open" });
+  shadow.innerHTML = `<input id="search" type="search" placeholder="Pesquisar">`;
+  const input = shadow.querySelector("input");
+  input.getBoundingClientRect = () => ({ x: 10, y: 10, width: 300, height: 30, top: 10, right: 310, bottom: 40, left: 10, toJSON: () => ({}) });
+  Object.assign(globalThis, { HTMLInputElement: dom.window.HTMLInputElement, HTMLTextAreaElement: dom.window.HTMLTextAreaElement, HTMLSelectElement: dom.window.HTMLSelectElement, HTMLButtonElement: dom.window.HTMLButtonElement, HTMLAnchorElement: dom.window.HTMLAnchorElement });
+  Object.defineProperty(dom.window, "innerWidth", { value: 1280 });
+  Object.defineProperty(dom.window, "innerHeight", { value: 720 });
+  const state = scanPage(dom.window.document, dom.window, new ElementRegistry());
+  assert.equal(state.elements.length, 1);
+  assert.equal(state.elements[0].role, "textbox");
+  assert.equal(state.elements[0].placeholder, "Pesquisar");
+});

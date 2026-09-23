@@ -17,7 +17,7 @@ type ExecuteActionRequest =
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "type"; target: { ref: string }; text: string; replace?: boolean } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "select"; target: { ref: string }; value: string } }
-  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number } }
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; target?: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "keypress"; key: string } };
 
 function isScanRequest(value: unknown): value is ScanRequest {
@@ -65,7 +65,12 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
           sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid scroll action." });
           return;
         }
-        sendResponse(executeScroll(request.actionId, window, request.action));
+        const target = request.action.target?.ref ? registry.get(request.action.target.ref) : undefined;
+        if (request.action.target?.ref && !target) {
+          sendResponse({ ok: false, actionId: request.actionId, status: "failed", code: "STALE_SCROLL_CONTAINER", error: "O contêiner de rolagem ficou obsoleto." });
+          return;
+        }
+        sendResponse(executeScroll(request.actionId, window, request.action, target));
         return;
       }
       if (request.action?.type === "keypress") {

@@ -6,22 +6,49 @@
   <link rel="stylesheet" href="sidepanel.css">
 </head>
 <body>
-  <div id="app">
-    <h1>Voice Browser Agent</h1>
-    <div id="status">Inicializando...</div>
-    <div id="page-state"></div>
-    <label><input id="debug-overlay" type="checkbox"> Mostrar refs na página</label>
-    <fieldset id="action-debug">
-      <legend>Teste manual de ação</legend>
-      <input id="action-ref" placeholder="Ref (ex.: el_1_3)" aria-label="Ref do elemento">
-      <input id="action-text" placeholder="Texto para type" aria-label="Texto da ação">
-      <button id="action-click" type="button">Click</button>
-      <button id="action-type" type="button">Type</button>
-      <output id="action-result" aria-live="polite"></output>
-    </fieldset>
-    <ul id="elements" aria-label="Elementos interativos"></ul>
+  <main id="app">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">V</div>
+      <div class="brand-copy"><p class="brand-name">Voice Browser Agent</p><p class="brand-state"><span class="status-dot"></span> local control layer</p></div>
+      <button id="jev-edit-key" class="edit-key" type="button" hidden><i data-lucide="settings-2"></i><span>Editar chave</span></button>
+    </header>
+    <section id="jev-onboarding" class="onboarding-card" aria-labelledby="onboarding-title">
+      <div class="eyebrow"><span>01</span> primeira configuração</div>
+      <div class="jev-lockup"><span class="jev-symbol">J</span><span>Jev / TypeSafe</span><i data-lucide="sparkles"></i></div>
+      <h1 id="onboarding-title">Navegue com<br><em>intenção.</em></h1>
+      <p class="lead">O Jev transforma uma instrução curta em uma decisão segura para a página que está aberta.</p>
+      <div class="feature-row" aria-label="Benefícios"><span><b>01</b> decisões tipadas</span><span><b>02</b> chave local</span></div>
+      <form class="key-form" onsubmit="return false">
+        <label for="jev-api-key">Sua API key da TypeSafe</label>
+        <div class="key-input-wrap"><input id="jev-api-key" type="password" autocomplete="off" placeholder="apikey_..." aria-label="API key do Jev"><span class="key-shield" aria-hidden="true">✦</span></div>
+        <p class="field-note">Guardada somente no armazenamento protegido da extensão.</p>
+        <button id="jev-save-key" class="primary-button" type="button"><span>Conectar ao Jev</span><i data-lucide="arrow-up-right"></i></button>
+        <output id="jev-onboarding-status" aria-live="polite"></output>
+      </form>
+    </section>
+    <div class="workspace" aria-label="Área de trabalho do agente">
+      <div id="status" class="status-line">Inicializando...</div>
+      <div class="workspace-heading"><div><span class="eyebrow">workspace</span><h2>Pronto para navegar</h2></div><span class="mode-pill">JEV / 01</span></div>
+      <div id="page-state" class="page-context"></div>
+      <fieldset id="agent-controls" class="panel-card">
+        <legend>Agente Jev</legend>
+        <label class="field-label" for="agent-goal">O que você quer fazer?</label>
+        <div class="goal-row"><input id="agent-goal" placeholder="Ex.: encontre meus pedidos" aria-label="Objetivo do agente"><button id="voice-start" class="icon-button" type="button" title="Falar" aria-label="Falar"><i data-lucide="mic"></i></button><button id="voice-stop" class="icon-button recording" type="button" disabled title="Parar gravação" aria-label="Parar gravação"><i data-lucide="square"></i></button></div>
+        <div class="action-row"><button id="agent-run" class="primary-button compact" type="button"><span>Executar com Jev</span><i data-lucide="arrow-up-right"></i></button><button id="agent-cancel" class="secondary-button" type="button" disabled><i data-lucide="x"></i><span>Cancelar</span></button></div>
+        <output id="agent-result" aria-live="polite"></output>
+      </fieldset>
+      <label class="toggle-row"><input id="debug-overlay" type="checkbox"><span>Mostrar refs na página</span><span class="toggle-hint">debug</span></label>
+      <fieldset id="action-debug" class="panel-card utility-card">
+        <legend>Teste manual</legend>
+        <div class="utility-grid"><input id="action-ref" placeholder="Ref (ex.: el_1_3)" aria-label="Ref do elemento"><input id="action-text" placeholder="Texto para type" aria-label="Texto da ação"></div>
+        <button id="action-click" class="secondary-button" type="button"><i data-lucide="mouse-pointer-2"></i><span>Click</span></button><button id="action-type" class="secondary-button" type="button"><i data-lucide="text-cursor-input"></i><span>Type</span></button>
+        <output id="action-result" aria-live="polite"></output>
+      </fieldset>
+      <div class="refs-heading"><span class="eyebrow">page map</span><span>controles visíveis</span></div>
+      <ul id="elements" aria-label="Elementos interativos"></ul>
+    </div>
     <div id="action-output"></div>
-  </div>
+  </main>
   <script type="module" src="sidepanel.js"></script>
 </body>
 </html>

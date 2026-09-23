@@ -17,5 +17,12 @@ export function executeKeyPress(actionId: string, document: Document, key: strin
   const init = { key: resolved, code: resolved.length === 1 ? `Key${resolved.toUpperCase()}` : resolved, bubbles: true, cancelable: true };
   target.dispatchEvent(new view.KeyboardEvent("keydown", init));
   target.dispatchEvent(new view.KeyboardEvent("keyup", init));
+  if (resolved === "Enter" && target instanceof view.HTMLElement) {
+    const form = target.closest("form");
+    if (form) {
+      if (typeof form.requestSubmit === "function") form.requestSubmit();
+      else form.submit();
+    }
+  }
   return { ok: true, actionId, status: "success", changed: true };
 }

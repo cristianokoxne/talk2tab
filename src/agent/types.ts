@@ -3,9 +3,17 @@
 export interface ClickAction { type: "click"; target: { ref: string }; }
 export interface TypeAction { type: "type"; target: { ref: string }; text: string; replace?: boolean; }
 export interface SelectAction { type: "select"; target: { ref: string }; value: string; }
-export interface ScrollAction { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; }
+export interface ScrollAction { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; target?: { ref: string }; }
 export interface KeyPressAction { type: "keypress"; key: string; }
-export type BrowserAction = ClickAction | TypeAction | SelectAction | ScrollAction | KeyPressAction;
+export interface NavigateAction { type: "navigate"; url: string; }
+export interface SearchWebAction { type: "search_web"; query: string; }
+export interface OpenTabAction { type: "open_tab"; url: string; }
+export interface OpenWindowAction { type: "open_window"; url: string; }
+export interface SwitchTabAction { type: "switch_tab"; tabId: number; }
+export interface CloseTabAction { type: "close_tab"; tabId: number; }
+export type BrowserAction = ClickAction | TypeAction | SelectAction | ScrollAction | KeyPressAction | NavigateAction | SearchWebAction | OpenTabAction | OpenWindowAction | SwitchTabAction | CloseTabAction;
+export interface FinishAction { type: "finish"; status: "success" | "failed"; message: string; }
+export type AgentAction = BrowserAction | FinishAction;
 
 export interface ActionRequest { id: string; action: BrowserAction; }
 
@@ -21,11 +29,10 @@ export interface ActionResult {
 
 export interface ProviderConfig {
   id: string;
-  endpoint: string;
+  endpoint?: string;
   apiKey?: string;
-  model: string;
-  temperature?: number;
-  maxTokens?: number;
+  model?: string;
+  timeoutMs?: number;
 }
 
 export interface AgentSession {
@@ -60,7 +67,17 @@ export interface PageState {
   pageTextSummary: string;
   fingerprint: string;
   elements: ElementRef[];
+  scrollContainers?: ScrollContainerRef[];
   limitations: string[];
+}
+
+export interface ScrollContainerRef {
+  ref: string;
+  label: string;
+  scrollTop: number;
+  clientHeight: number;
+  scrollHeight: number;
+  bounds: ElementBounds;
 }
 
 export interface ElementRef {
@@ -77,6 +94,7 @@ export interface ElementRef {
   enabled: boolean;
   checked?: boolean;
   selected?: boolean;
+  options?: Array<{ value: string; label: string }>;
   sensitive?: boolean;
   bounds: ElementBounds;
 }

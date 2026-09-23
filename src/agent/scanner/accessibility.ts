@@ -27,6 +27,7 @@ export function getAccessibleName(element: HTMLElement, document: Document): str
 export function inferRole(element: HTMLElement): string | undefined {
   const explicitRole = element.getAttribute("role");
   if (explicitRole) return explicitRole;
+  if (element.isContentEditable) return "textbox";
   switch (element.tagName.toLowerCase()) {
     case "a": return "link";
     case "button": return "button";

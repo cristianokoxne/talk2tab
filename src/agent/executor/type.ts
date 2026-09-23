@@ -35,12 +35,14 @@ export function executeType(actionId: string, registry: ElementRegistry, ref: st
     setNativeValue(element, value);
     element.dispatchEvent(new view.Event("input", { bubbles: true }));
     element.dispatchEvent(new view.Event("change", { bubbles: true }));
+    if (element.value !== value) return { ok: false, actionId, status: "failed", code: "INPUT_NOT_APPLIED", error: "O campo não aceitou o texto informado." };
     return { ok: true, actionId, status: "success", changed: true };
   }
   if (element.isContentEditable) {
     if (replace) element.textContent = text;
     else element.textContent = `${element.textContent ?? ""}${text}`;
     element.dispatchEvent(new view.InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
+    if ((element.textContent ?? "") !== (replace ? text : `${element.textContent ?? ""}`)) return { ok: false, actionId, status: "failed", code: "INPUT_NOT_APPLIED", error: "O campo editável não aceitou o texto informado." };
     return { ok: true, actionId, status: "success", changed: true };
   }
   return { ok: false, actionId, status: "failed", code: "UNSUPPORTED_CONTROL", error: "Element does not support text input." };

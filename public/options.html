@@ -8,7 +8,15 @@
 <body>
   <div id="options">
     <h1>Configurações</h1>
-    <p>Em breve: configuração de provider e modelo.</p>
+    <p>Configuração do Jev (TypeSafe System One).</p>
+    <form id="jev-form">
+      <label>Endpoint <input id="jev-endpoint" type="url" required></label>
+      <label>Modelo <input id="jev-model" required></label>
+      <label>API key <input id="jev-api-key" type="password" autocomplete="off"></label>
+      <button type="submit">Salvar</button>
+      <output id="jev-status" aria-live="polite"></output>
+    </form>
   </div>
+  <script src="options.js"></script>
 </body>
 </html>
