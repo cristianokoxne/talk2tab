@@ -78,5 +78,18 @@ h1 em { color:var(--accent); font-style:italic; }
 #elements li { border-bottom:1px solid var(--line); color:var(--muted); font-size:11px; padding:8px 2px; }
 #elements code { color:var(--accent); }
 [hidden] { display:none !important; }
+.voice-modal { align-items:center; background:rgba(5,8,13,.78); display:flex; inset:0; justify-content:center; padding:14px; position:fixed; z-index:20; }
+.voice-modal-card { background:var(--panel); border:1px solid var(--accent); border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.55); max-width:390px; padding:16px; width:100%; }
+.voice-modal-header { align-items:flex-start; display:flex; justify-content:space-between; }
+.voice-modal-header h2 { color:var(--ink); font-family:Georgia,serif; font-size:22px; font-weight:400; margin:4px 0 0; }
+.voice-modal-header .icon-button { color:var(--muted); font-size:20px; height:28px; width:28px; }
+.voice-modal-copy, .voice-modal-note { color:var(--soft); font-size:11px; line-height:1.45; }
+.voice-device-select { background:var(--panel-2); border:1px solid var(--line); border-radius:8px; color:var(--ink); font:inherit; margin-bottom:12px; padding:10px; width:100%; }
+.voice-meter { background:var(--panel-2); border:1px solid var(--line); border-radius:6px; height:10px; margin:7px 0; overflow:hidden; }
+.voice-meter span { background:var(--green); display:block; height:100%; transform:scaleX(0); transform-origin:left; transition:transform .08s linear; width:100%; }
+#voice-device-status { color:var(--accent-strong); display:block; font-size:10px; min-height:15px; }
+.voice-modal-actions { display:flex; gap:7px; margin-top:12px; }
+.voice-modal-actions .primary-button { flex:1; }
+.voice-modal-note { color:var(--dim); font-size:9px; margin-bottom:0; }
 @keyframes rise { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
 @media (max-width:360px) { #app { padding-left:10px; padding-right:10px; } .onboarding-card { padding-left:16px; padding-right:16px; } .workspace-heading h2 { font-size:22px; } .privacy-note { left:16px; right:16px; } }

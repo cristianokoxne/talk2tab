@@ -16,8 +16,18 @@ const files = [
   "sidepanel.html",
   "sidepanel.css",
   "sidepanel.js",
+  "microphone-permission.html",
   "options.html",
   "options.css",
 ];
 
 await Promise.all(files.map((file) => copyFile(join(source, file), join(destination, file))));
+
+const onnxRuntimeFiles = [
+  "ort-wasm-simd-threaded.asyncify.mjs",
+  "ort-wasm-simd-threaded.asyncify.wasm",
+];
+await Promise.all(onnxRuntimeFiles.map((file) => copyFile(
+  join(root, "node_modules", "onnxruntime-web", "dist", file),
+  join(destination, file),
+)));

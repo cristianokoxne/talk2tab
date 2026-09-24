@@ -33,7 +33,7 @@
       <fieldset id="agent-controls" class="panel-card">
         <legend>Agente Jev</legend>
         <label class="field-label" for="agent-goal">O que você quer fazer?</label>
-        <div class="goal-row"><input id="agent-goal" placeholder="Ex.: encontre meus pedidos" aria-label="Objetivo do agente"><button id="voice-start" class="icon-button" type="button" title="Falar" aria-label="Falar"><i data-lucide="mic"></i></button><button id="voice-stop" class="icon-button recording" type="button" disabled title="Parar gravação" aria-label="Parar gravação"><i data-lucide="square"></i></button></div>
+        <div class="goal-row"><input id="agent-goal" placeholder="Ex.: encontre meus pedidos" aria-label="Objetivo do agente"><button id="voice-start" class="icon-button" type="button" title="Ouvir" aria-label="Ouvir"><i data-lucide="mic"></i></button><button id="voice-config" class="icon-button" type="button" title="Configurar microfone" aria-label="Configurar microfone"><i data-lucide="settings-2"></i></button><button id="voice-stop" class="icon-button recording" type="button" disabled title="Parar gravação" aria-label="Parar gravação"><i data-lucide="square"></i></button></div>
         <div class="action-row"><button id="agent-run" class="primary-button compact" type="button"><span>Executar com Jev</span><i data-lucide="arrow-up-right"></i></button><button id="agent-cancel" class="secondary-button" type="button" disabled><i data-lucide="x"></i><span>Cancelar</span></button></div>
         <output id="agent-result" aria-live="polite"></output>
       </fieldset>
@@ -49,6 +49,18 @@
     </div>
     <div id="action-output"></div>
   </main>
+  <section id="voice-device-modal" class="voice-modal" hidden role="dialog" aria-modal="true" aria-labelledby="voice-device-title">
+    <div class="voice-modal-card">
+      <div class="voice-modal-header"><div><span class="eyebrow">configuração</span><h2 id="voice-device-title">Escolha o microfone</h2></div><button id="voice-device-close" class="icon-button" type="button" aria-label="Fechar">×</button></div>
+      <p class="voice-modal-copy">Selecione um microfone e fale para conferir o nível captado antes de iniciar.</p>
+      <label class="field-label" for="voice-device-select">Dispositivo de entrada</label>
+      <select id="voice-device-select" class="voice-device-select" aria-label="Dispositivo de entrada"></select>
+      <div class="voice-meter" aria-label="Nível do microfone"><span id="voice-meter-level"></span></div>
+      <output id="voice-device-status" aria-live="polite">Aguardando seleção.</output>
+      <div class="voice-modal-actions"><button id="voice-device-cancel" class="secondary-button" type="button">Cancelar</button><button id="voice-device-confirm" class="primary-button compact" type="button">Salvar microfone</button></div>
+      <p class="voice-modal-note">A transcrição instantânea do Chrome usa o microfone padrão do navegador. Este teste ajuda a identificar qual dispositivo está captando som.</p>
+    </div>
+  </section>
   <script type="module" src="sidepanel.js"></script>
 </body>
 </html>

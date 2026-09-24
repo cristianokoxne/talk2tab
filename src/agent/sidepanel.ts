@@ -1,5 +1,5 @@
 import type { PageState } from "./types.js";
-import { startVoiceRecorder, type VoiceRecorder } from "./voice/recorder.js";
+import { startWhisperLiveRecorder, type SpeechRecognitionRecorder } from "./voice/recorder.js";
 import { createIcons, icons } from "lucide";
 
 interface ScanResponse {
@@ -36,14 +36,22 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const agentRun = document.querySelector<HTMLButtonElement>("#agent-run");
   const agentCancel = document.querySelector<HTMLButtonElement>("#agent-cancel");
   const voiceStart = document.querySelector<HTMLButtonElement>("#voice-start");
+  const voiceConfig = document.querySelector<HTMLButtonElement>("#voice-config");
   const voiceStop = document.querySelector<HTMLButtonElement>("#voice-stop");
   const agentResult = document.querySelector<HTMLOutputElement>("#agent-result");
+  const voiceDeviceModal = document.querySelector<HTMLElement>("#voice-device-modal");
+  const voiceDeviceSelect = document.querySelector<HTMLSelectElement>("#voice-device-select");
+  const voiceDeviceClose = document.querySelector<HTMLButtonElement>("#voice-device-close");
+  const voiceDeviceCancel = document.querySelector<HTMLButtonElement>("#voice-device-cancel");
+  const voiceDeviceConfirm = document.querySelector<HTMLButtonElement>("#voice-device-confirm");
+  const voiceDeviceStatus = document.querySelector<HTMLOutputElement>("#voice-device-status");
+  const voiceMeterLevel = document.querySelector<HTMLElement>("#voice-meter-level");
   const onboarding = document.querySelector<HTMLElement>("#jev-onboarding");
   const apiKeyInput = document.querySelector<HTMLInputElement>("#jev-api-key");
   const saveKeyButton = document.querySelector<HTMLButtonElement>("#jev-save-key");
   const onboardingStatus = document.querySelector<HTMLOutputElement>("#jev-onboarding-status");
   const editKeyButton = document.querySelector<HTMLButtonElement>("#jev-edit-key");
-  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStop || !agentResult || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
+  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceConfig || !voiceStop || !agentResult || !voiceDeviceModal || !voiceDeviceSelect || !voiceDeviceClose || !voiceDeviceCancel || !voiceDeviceConfirm || !voiceDeviceStatus || !voiceMeterLevel || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
   createIcons({ icons });
 
   const renderPageMap = (data: PageState, label: string): void => {
@@ -161,32 +169,115 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     agentResult.textContent = "Cancelando…";
     chromeApi.runtime.sendMessage({ type: "CANCEL_AGENT", requestId: activeRequestId });
   });
-  let voiceRecorder: VoiceRecorder | undefined;
-  voiceStart.addEventListener("click", () => {
+  let voiceRecorder: SpeechRecognitionRecorder | undefined;
+  interface SavedMicrophone { deviceId: string; label: string; }
+  let savedMicrophone: SavedMicrophone | undefined;
+  void chromeApi.storage.local.get("voiceMicrophone").then((stored) => {
+    savedMicrophone = stored.voiceMicrophone as SavedMicrophone | undefined;
+  });
+  let microphoneTestStream: MediaStream | undefined;
+  let microphoneTestContext: AudioContext | undefined;
+  let microphoneTestFrame: number | undefined;
+  const closeVoiceDeviceModal = (): void => {
+    if (microphoneTestFrame !== undefined) cancelAnimationFrame(microphoneTestFrame);
+    microphoneTestStream?.getTracks().forEach((track) => track.stop());
+    microphoneTestStream = undefined;
+    void microphoneTestContext?.close();
+    microphoneTestContext = undefined;
+    voiceDeviceModal.hidden = true;
+  };
+  const openVoiceDeviceModal = async (): Promise<void> => {
+    voiceDeviceStatus.textContent = "Detectando microfones…";
+    voiceDeviceSelect.replaceChildren();
+    voiceDeviceModal.hidden = false;
+    try {
+      const permissionStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      permissionStream.getTracks().forEach((track) => track.stop());
+      const devices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audioinput");
+      devices.forEach((device, index) => {
+        const option = document.createElement("option");
+        option.value = device.deviceId;
+        option.textContent = device.label || `Microfone ${index + 1}`;
+        voiceDeviceSelect.append(option);
+      });
+      if (devices.length === 0) throw new Error("Nenhum microfone foi encontrado.");
+      const stored = await chromeApi.storage.local.get("voiceMicrophone");
+      const saved = stored.voiceMicrophone as SavedMicrophone | undefined;
+      if (saved?.deviceId && devices.some((device) => device.deviceId === saved.deviceId)) voiceDeviceSelect.value = saved.deviceId;
+      voiceDeviceStatus.textContent = "Fale agora para testar o microfone selecionado.";
+      const testSelectedDevice = async (): Promise<void> => {
+        microphoneTestStream?.getTracks().forEach((track) => track.stop());
+        microphoneTestStream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: voiceDeviceSelect.value } } });
+        microphoneTestContext = new AudioContext();
+        const analyser = microphoneTestContext.createAnalyser();
+        analyser.fftSize = 512;
+        microphoneTestContext.createMediaStreamSource(microphoneTestStream).connect(analyser);
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        const drawLevel = (): void => {
+          analyser.getByteTimeDomainData(data);
+          let peak = 0;
+          for (const value of data) peak = Math.max(peak, Math.abs(value - 128));
+          voiceMeterLevel.style.transform = `scaleX(${Math.min(1, peak / 64)})`;
+          microphoneTestFrame = requestAnimationFrame(drawLevel);
+        };
+        drawLevel();
+      };
+      await testSelectedDevice();
+      voiceDeviceSelect.addEventListener("change", () => { void testSelectedDevice(); }, { once: true });
+    } catch (error) {
+      voiceDeviceStatus.textContent = error instanceof Error ? error.message : "Não foi possível acessar os microfones.";
+    }
+  };
+  const startSpeech = (): void => {
+    closeVoiceDeviceModal();
     voiceStart.disabled = true;
-    voiceStop.disabled = false;
-    agentResult.textContent = "Gravando…";
-    void startVoiceRecorder((progress) => { agentResult.textContent = `${progress.status}${progress.progress ? ` ${Math.round(progress.progress)}%` : ""}`; }).then((recorder) => {
+    voiceStop.disabled = true;
+    agentResult.textContent = "Iniciando transcrição…";
+    if (!savedMicrophone?.deviceId) {
+      voiceStart.disabled = false;
+      agentResult.textContent = "Configure o microfone no botão de configurações antes de ouvir.";
+      return;
+    }
+    void startWhisperLiveRecorder(savedMicrophone.deviceId, (text) => {
+      agentGoal.value = text;
+      agentResult.textContent = "Transcrição parcial…";
+    }, (statusText) => {
+      agentResult.textContent = statusText;
+    }).then((recorder) => {
       voiceRecorder = recorder;
+      voiceStop.disabled = false;
     }).catch((error: unknown) => {
       voiceStart.disabled = false;
       voiceStop.disabled = true;
-      agentResult.textContent = error instanceof Error ? error.message : "Não foi possível acessar o microfone.";
+      agentResult.textContent = error instanceof Error ? error.message : "Não foi possível iniciar a transcrição.";
     });
+  };
+  voiceStart.addEventListener("click", startSpeech);
+  voiceConfig.addEventListener("click", () => { void openVoiceDeviceModal(); });
+  voiceDeviceClose.addEventListener("click", closeVoiceDeviceModal);
+  voiceDeviceCancel.addEventListener("click", closeVoiceDeviceModal);
+  voiceDeviceConfirm.addEventListener("click", () => {
+    const selected = voiceDeviceSelect.selectedOptions[0];
+    if (!selected) { voiceDeviceStatus.textContent = "Selecione um microfone."; return; }
+    void chromeApi.storage.local.set({ voiceMicrophone: { deviceId: selected.value, label: selected.textContent ?? "Microfone" } }).then(() => {
+      savedMicrophone = { deviceId: selected.value, label: selected.textContent ?? "Microfone" };
+      voiceDeviceStatus.textContent = `Salvo: ${selected.textContent ?? "microfone"}.`;
+      setTimeout(closeVoiceDeviceModal, 500);
+    }).catch(() => { voiceDeviceStatus.textContent = "Não foi possível salvar o microfone."; });
   });
   voiceStop.addEventListener("click", () => {
     if (!voiceRecorder) return;
     voiceStop.disabled = true;
-    agentResult.textContent = "Transcrevendo localmente…";
+    agentResult.textContent = "Finalizando transcrição…";
     void voiceRecorder.stop().then((text) => {
       voiceRecorder = undefined;
       voiceStart.disabled = false;
       agentGoal.value = text;
       agentResult.textContent = text ? "Transcrição pronta. Revise e execute com Jev." : "Nenhuma fala detectada.";
-    }).catch(() => {
+    }).catch((error: unknown) => {
       voiceRecorder = undefined;
       voiceStart.disabled = false;
-      agentResult.textContent = "Não foi possível transcrever o áudio.";
+      agentResult.textContent = error instanceof Error ? error.message : "Não foi possível transcrever o áudio.";
     });
   });
 

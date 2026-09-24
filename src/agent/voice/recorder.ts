@@ -1,6 +1,6 @@
-import { transcribeAudio, type SpeechToTextProgress } from "./speechToText.js";
+import { transcribeAudio } from "./speechToText.js";
 
-export interface VoiceRecorder {
+export interface SpeechRecognitionRecorder {
   stop(): Promise<string>;
 }
 
@@ -19,32 +19,81 @@ function resample(channel: Float32Array, fromRate: number, toRate: number): Floa
   return result;
 }
 
-export async function startVoiceRecorder(onProgress?: (progress: SpeechToTextProgress) => void): Promise<VoiceRecorder> {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
-  const chunks: Blob[] = [];
-  recorder.addEventListener("dataavailable", (event) => { if (event.data.size > 0) chunks.push(event.data); });
-  recorder.start();
+function normalize(audio: Float32Array): Float32Array {
+  let peak = 0;
+  for (const sample of audio) peak = Math.max(peak, Math.abs(sample));
+  return peak > 0.01 && peak < 0.95 ? audio.map((sample) => sample * (0.9 / peak)) : audio;
+}
+
+function hasSpeech(audio: Float32Array): boolean {
+  let sum = 0;
+  for (const sample of audio) sum += sample * sample;
+  return Math.sqrt(sum / Math.max(audio.length, 1)) > 0.008;
+}
+
+export async function startWhisperLiveRecorder(
+  deviceId: string,
+  onTranscript: (text: string) => void,
+  onStatus?: (status: string) => void,
+): Promise<SpeechRecognitionRecorder> {
+  if (!navigator.mediaDevices?.getUserMedia) throw new Error("O navegador não oferece acesso ao microfone.");
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: deviceId } } });
+  const context = new AudioContext();
+  const source = context.createMediaStreamSource(stream);
+  const sampleRate = context.sampleRate;
+  const processor = context.createScriptProcessor(4096, 1, 1);
+  const silentGain = context.createGain();
+  silentGain.gain.value = 0;
+  const samples: number[] = [];
+  let stopped = false;
+  let transcribing = false;
+  const timer = window.setInterval(() => { void transcribePartial(); }, 2500);
+
+  processor.onaudioprocess = (event) => {
+    const input = event.inputBuffer.getChannelData(0);
+    for (const sample of input) samples.push(sample);
+  };
+  source.connect(processor);
+  processor.connect(silentGain);
+  silentGain.connect(context.destination);
+  onStatus?.("Microfone selecionado e capturando áudio…");
+
+  const snapshot = (maxSeconds?: number): Float32Array => {
+    const all = new Float32Array(samples);
+    const maxSamples = maxSeconds ? Math.round(maxSeconds * sampleRate) : all.length;
+    return all.length > maxSamples ? all.slice(all.length - maxSamples) : all;
+  };
+  const transcribePartial = async (): Promise<void> => {
+    if (stopped || transcribing) return;
+    const audio = snapshot(8);
+    if (audio.length < sampleRate * 0.7 || !hasSpeech(audio)) return;
+    transcribing = true;
+    try {
+      onStatus?.("Processando trecho com Whisper…");
+      const text = await transcribeAudio(normalize(resample(audio, sampleRate, 16_000)), (progress) => {
+        if (progress.status) onStatus?.(progress.progress ? `${progress.status} ${Math.round(progress.progress)}%` : progress.status);
+      });
+      if (text) onTranscript(text);
+    } catch (error) {
+      onStatus?.(error instanceof Error ? error.message : "Falha ao processar trecho de áudio.");
+    } finally {
+      transcribing = false;
+    }
+  };
   return {
-    stop: () => new Promise<string>((resolve, reject) => {
-      recorder.addEventListener("stop", () => {
-        void (async () => {
-          try {
-            const context = new AudioContext();
-            const buffer = await context.decodeAudioData(await new Blob(chunks).arrayBuffer());
-            const mono = new Float32Array(buffer.length);
-            for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
-              const samples = buffer.getChannelData(channel);
-              for (let index = 0; index < samples.length; index += 1) mono[index] += samples[index] / buffer.numberOfChannels;
-            }
-            const audio = resample(mono, buffer.sampleRate, 16_000);
-            resolve(await transcribeAudio(audio, onProgress));
-            await context.close();
-          } catch (error) { reject(error); }
-          finally { stream.getTracks().forEach((track) => track.stop()); }
-        })();
-      }, { once: true });
-      recorder.stop();
-    }),
+    stop: async () => {
+      if (stopped) return "";
+      stopped = true;
+      window.clearInterval(timer);
+      processor.disconnect();
+      source.disconnect();
+      silentGain.disconnect();
+      stream.getTracks().forEach((track) => track.stop());
+      await context.close().catch(() => undefined);
+      const audio = snapshot();
+      if (!hasSpeech(audio)) return "";
+      onStatus?.("Finalizando transcrição com Whisper…");
+      return transcribeAudio(normalize(resample(audio, sampleRate, 16_000)));
+    },
   };
 }

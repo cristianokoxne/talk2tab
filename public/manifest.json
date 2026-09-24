@@ -5,6 +5,9 @@
   "description": "Navigate and operate websites using natural language and voice",
   "permissions": ["storage", "scripting", "tabs", "activeTab", "windows", "sidePanel"],
   "host_permissions": ["<all_urls>", "https://huggingface.co/*", "https://cdn-lfs.huggingface.co/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
   "action": {
     "default_title": "Voice Browser Agent"
   },

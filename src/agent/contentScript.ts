@@ -29,7 +29,37 @@ function isScanRequest(value: unknown): value is ScanRequest {
 export function initContentScript(chromeApi: typeof chrome, document: Document, window: Window): void {
   const registry = new ElementRegistry();
   let latestState: ReturnType<typeof scanPage> | undefined;
+  const startPageSpeech = (): void => {
+    void chromeApi.runtime.sendMessage({ type: "PAGE_SPEECH_STATUS", status: "Content script recebeu o comando." });
+    void chromeApi.runtime.sendMessage({ type: "START_PAGE_SPEECH_MAIN" });
+  };
+  const stopPageSpeech = (): void => {
+    void chromeApi.runtime.sendMessage({ type: "PAGE_SPEECH_STATUS", status: "Parando reconhecimento na página." });
+    void chromeApi.runtime.sendMessage({ type: "STOP_PAGE_SPEECH_MAIN" });
+  };
+  window.addEventListener("message", (event: MessageEvent) => {
+    // Em content scripts isolados, o wrapper de `window` pode ser diferente
+    // do wrapper usado pelo mundo principal. Valide a assinatura da mensagem,
+    // mas não compare event.source com window.
+    if (typeof event.data !== "object" || event.data?.source !== "talk2tab") return;
+    if (event.data.type === "PAGE_SPEECH_RESULT" || event.data.type === "PAGE_SPEECH_STATUS") void chromeApi.runtime.sendMessage(event.data);
+  });
+  document.addEventListener("talk2tab-speech", (event: Event) => {
+    const detail = (event as CustomEvent<{ source?: string; type?: string; text?: string; status?: string }>).detail;
+    if (detail?.source !== "talk2tab") return;
+    if (detail.type === "PAGE_SPEECH_RESULT" || detail.type === "PAGE_SPEECH_STATUS") void chromeApi.runtime.sendMessage(detail);
+  });
   chromeApi.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
+    if (typeof message === "object" && message !== null && (message as { type?: unknown }).type === "START_PAGE_SPEECH") {
+      startPageSpeech();
+      sendResponse({ ok: true });
+      return;
+    }
+    if (typeof message === "object" && message !== null && (message as { type?: unknown }).type === "STOP_PAGE_SPEECH") {
+      stopPageSpeech();
+      sendResponse({ ok: true, text: "" });
+      return;
+    }
     if (isScanRequest(message)) {
       latestState = scanPage(document, window, registry);
       sendResponse({ ok: true, requestId: message.requestId, data: latestState });

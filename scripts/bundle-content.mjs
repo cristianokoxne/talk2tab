@@ -21,3 +21,12 @@ await build({
   platform: "browser",
   target: "chrome120",
 });
+
+await build({
+  bundle: true,
+  entryPoints: [resolve(root, "src/agent/microphonePermissionEntry.ts")],
+  format: "iife",
+  outfile: resolve(root, "dist/microphonePermission.js"),
+  platform: "browser",
+  target: "chrome120",
+});
