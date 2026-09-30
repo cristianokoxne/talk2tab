@@ -35,14 +35,20 @@ Já funciona:
 - loop de agente `observe → decide → execute → observe`;
 - limite de passos, cancelamento e detecção de estagnação;
 - integração com o provider Jev/System One;
-- transcrição de voz local com Transformers.js/Whisper Tiny multilíngue;
+- transcrição em português (Brasil) pelo reconhecimento de fala do Chrome, com resultados parciais e finais;
 - painel de depuração para testar ações manualmente.
+
+### Transcrição de voz
+
+A entrada de voz agora usa a Web Speech API fornecida pelo Chrome, configurada para português do Brasil (`pt-BR`). O Side Panel mostra o texto provisório enquanto você fala e mantém os resultados finais ao pressionar Parar. O navegador usa o microfone configurado no Chrome; a extensão não escolhe um dispositivo de entrada separado.
+
+Esta migração substituiu o Whisper local e removeu o download do modelo, Transformers.js e os arquivos WASM correspondentes. O processamento e a privacidade da fala dependem do mecanismo e das configurações do Chrome; o áudio pode ser enviado a um serviço on-line. A interface avisa sobre essa possibilidade antes do uso.
 
 Ainda está no roadmap:
 
 - política de risco completa com confirmação explícita para ações externas e críticas;
 - verificação semântica orientada ao objetivo;
-- mover a inferência de voz para um Web Worker;
+- comparar qualidade e latência da transcrição do Chrome em diferentes microfones e ambientes;
 - testes E2E e benchmark de tarefas;
 - suporte a mais providers, como endpoints OpenAI-compatible, Ollama e LM Studio;
 - onboarding, acessibilidade e preparação para distribuição pública.

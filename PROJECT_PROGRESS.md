@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Última atualização: 2026-09-18 22:10:00 America/Sao_Paulo
+Última atualização: 2026-09-29 America/Sao_Paulo
 
 Etapa atual: Milestone 3 — Executor de ações
 
@@ -160,16 +160,16 @@ Status: NOT_STARTED
 Status: IN_PROGRESS
 
 Implementado nesta etapa:
-- Speech-to-text local no navegador com Transformers.js e Whisper Tiny multilíngue.
-- Português fixado como idioma de transcrição para reduzir ambiguidades.
-- Fallback WASM e aceleração WebGPU quando disponível.
-- Captura de microfone pelo Side Panel com botões Falar/Parar gravação.
-- Modelo carregado sob demanda e reutilizado pelo cache do navegador.
-- A transcrição é colocada no objetivo para revisão antes de ser enviada ao Jev.
+- Migração do Whisper para a Web Speech API do Chrome, com idioma `pt-BR` e reconhecimento contínuo.
+- Resultados parciais são exibidos no objetivo; resultados finais são preservados ao encerrar com Parar.
+- Tratamento de indisponibilidade da API, permissão negada, microfone ausente, falta de fala e falha de rede.
+- Remoção do modelo Transformers.js, dos arquivos WASM e das permissões de rede usadas para baixar o Whisper.
+- Reconhecimento executado a partir do Side Panel, sem injeção no contexto da página ativa.
+- Interface informa que o Chrome pode processar o áudio on-line; a API usa o microfone configurado no Chrome.
 
 Pendente:
-- Mover a inferência para Web Worker para não bloquear a interface.
-- Teste manual de microfone em Chrome e medição de latência/memória.
+- Teste manual no Chrome para validar permissão, escolha efetiva do microfone, idioma, encerramento e qualidade da transcrição.
+- Medir latência e comparar resultados em frases representativas de uso real.
 
 ### Milestone 8 — Testes e benchmark
 

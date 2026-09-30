@@ -29,7 +29,6 @@
     "vitest": "^1.0.0"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.3.0",
     "lucide": "^1.47.0"
   }
 }
