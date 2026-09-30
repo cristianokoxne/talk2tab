@@ -57,13 +57,14 @@ function isSensitive(element: HTMLElement): boolean {
 function toElementRef(element: HTMLElement, ref: string, document: Document, window: Window): ElementRef {
   const input = element instanceof HTMLInputElement ? element : undefined;
   const select = element instanceof HTMLSelectElement ? element : undefined;
+  const button = element instanceof HTMLButtonElement ? element : undefined;
   return {
     ref,
     frameId: 0,
     tag: element.tagName.toLowerCase(),
     role: inferRole(element),
     name: getAccessibleName(element, document) || undefined,
-    type: input?.type,
+    type: input?.type ?? (button?.getAttribute("type")?.toLowerCase() ?? (button?.form ? "submit" : undefined)),
     placeholder: input?.placeholder || (element instanceof HTMLTextAreaElement ? element.placeholder : undefined),
     text: compactText(element.innerText || element.textContent || "", 160) || undefined,
     href: sanitizedHref(element),

@@ -40,7 +40,9 @@ Já funciona:
 
 ### Transcrição de voz
 
-A entrada de voz agora usa a Web Speech API fornecida pelo Chrome, configurada para português do Brasil (`pt-BR`). O Side Panel mostra o texto provisório enquanto você fala e mantém os resultados finais ao pressionar Parar. O navegador usa o microfone configurado no Chrome; a extensão não escolhe um dispositivo de entrada separado.
+A entrada de voz usa a Web Speech API fornecida pelo Chrome, configurada para português do Brasil (`pt-BR`). Clique no botão do microfone para começar a ouvir; o painel confirma com um sinal sonoro e mostra o estado “Ouvindo”. Clique novamente no mesmo botão para encerrar. O Side Panel mostra o texto provisório, mas apenas resultados finais entram no buffer. A cada 3 segundos, trechos completos são despachados após uma pausa de 1,2 segundo; o buffer também é enviado quando atinge 5 segundos. Um trecho precisa ter pelo menos 4 letras ou números e uma palavra com ao menos 4 letras; silêncio e fragmentos curtos são ignorados ou unidos à próxima fala. Ao encerrar a escuta, o último trecho válido é enviado uma única vez. O navegador usa o microfone configurado no Chrome; a extensão não escolhe um dispositivo de entrada separado.
+
+Comandos de voz aguardam em fila enquanto o Jev está ocupado e são processados em ordem. A execução de ações identificadas como envio, publicação, compra, pagamento, exclusão, transferência, reserva, assinatura, salvamento, atualização ou fechamento de aba fica pausada até confirmação no Side Panel. A confirmação expira após 60 segundos; recusar ou cancelar não executa a ação.
 
 Esta migração substituiu o Whisper local e removeu o download do modelo, Transformers.js e os arquivos WASM correspondentes. O processamento e a privacidade da fala dependem do mecanismo e das configurações do Chrome; o áudio pode ser enviado a um serviço on-line. A interface avisa sobre essa possibilidade antes do uso.
 

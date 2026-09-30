@@ -153,7 +153,15 @@ Pendente:
 
 ### Milestone 6 — Safety
 
-Status: NOT_STARTED
+Status: IN_PROGRESS
+
+Implementado nesta etapa:
+- Confirmação no Side Panel antes de controles de envio, publicação, compra, pagamento, exclusão, transferência, reserva, assinatura, salvamento, atualização, Enter fora de pesquisa e fechamento de aba.
+- A confirmação expira em 60 segundos; recusa, expiração ou cancelamento bloqueiam a ação.
+
+Pendente:
+- Ampliar a classificação de risco para sites e controles sem rótulos previsíveis; cobrir mais ações externas e críticas.
+- Avaliar e documentar as regras de confirmação com tarefas reais antes de liberar automação contínua.
 
 ### Milestone 7 — Voice
 
@@ -161,14 +169,18 @@ Status: IN_PROGRESS
 
 Implementado nesta etapa:
 - Migração do Whisper para a Web Speech API do Chrome, com idioma `pt-BR` e reconhecimento contínuo.
-- Resultados parciais são exibidos no objetivo; resultados finais são preservados ao encerrar com Parar.
+- Resultados parciais são exibidos no objetivo; somente segmentos finais alimentam o buffer de comandos.
+- Buffer avaliado a cada 3 s, enviado após 1,2 s de pausa ou 5 s de espera, com mínimo de 4 caracteres alfanuméricos e uma palavra de ao menos 4 letras.
+- Comandos automáticos enviados ao Jev em fila serial; encerrar a escuta descarrega o último comando válido sem duplicar segmentos anteriores.
+- O botão do microfone funciona como toggle; ao iniciar, toca um sinal sonoro e mostra “Ouvindo”, e um segundo clique encerra a captura.
+- Confirmação explícita antes de cliques com rótulos de alto impacto, Enter fora de objetivos de pesquisa e fechamento de abas; expiração após 60 s cancela a ação.
 - Tratamento de indisponibilidade da API, permissão negada, microfone ausente, falta de fala e falha de rede.
 - Remoção do modelo Transformers.js, dos arquivos WASM e das permissões de rede usadas para baixar o Whisper.
 - Reconhecimento executado a partir do Side Panel, sem injeção no contexto da página ativa.
 - Interface informa que o Chrome pode processar o áudio on-line; a API usa o microfone configurado no Chrome.
 
 Pendente:
-- Teste manual no Chrome para validar permissão, escolha efetiva do microfone, idioma, encerramento e qualidade da transcrição.
+- Teste manual no Chrome para validar permissão, escolha efetiva do microfone, idioma, encerramento, fila de voz e confirmação de ações sensíveis.
 - Medir latência e comparar resultados em frases representativas de uso real.
 
 ### Milestone 8 — Testes e benchmark

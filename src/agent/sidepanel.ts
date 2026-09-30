@@ -16,6 +16,9 @@ interface AgentPageStateMessage {
   data: PageState;
 }
 
+interface QueuedAgentGoal { goal: string; source: "manual" | "voice"; }
+interface PendingConfirmation { confirmationId: string; requestId: string; }
+
 function requestId(): string {
   return crypto.randomUUID();
 }
@@ -36,14 +39,20 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const agentRun = document.querySelector<HTMLButtonElement>("#agent-run");
   const agentCancel = document.querySelector<HTMLButtonElement>("#agent-cancel");
   const voiceStart = document.querySelector<HTMLButtonElement>("#voice-start");
-  const voiceStop = document.querySelector<HTMLButtonElement>("#voice-stop");
+  const voiceStatus = document.querySelector<HTMLOutputElement>("#voice-status");
   const agentResult = document.querySelector<HTMLOutputElement>("#agent-result");
+  const confirmationModal = document.querySelector<HTMLElement>("#agent-confirmation");
+  const confirmationSummary = document.querySelector<HTMLElement>("#agent-confirmation-summary");
+  const confirmationApprove = document.querySelector<HTMLButtonElement>("#agent-confirmation-approve");
+  const confirmationReject = document.querySelector<HTMLButtonElement>("#agent-confirmation-reject");
+  let pendingConfirmation: PendingConfirmation | undefined;
+  let confirmationTimeout: number | undefined;
   const onboarding = document.querySelector<HTMLElement>("#jev-onboarding");
   const apiKeyInput = document.querySelector<HTMLInputElement>("#jev-api-key");
   const saveKeyButton = document.querySelector<HTMLButtonElement>("#jev-save-key");
   const onboardingStatus = document.querySelector<HTMLOutputElement>("#jev-onboarding-status");
   const editKeyButton = document.querySelector<HTMLButtonElement>("#jev-edit-key");
-  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStop || !agentResult || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
+  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStatus || !agentResult || !confirmationModal || !confirmationSummary || !confirmationApprove || !confirmationReject || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
   createIcons({ icons });
 
   const renderPageMap = (data: PageState, label: string): void => {
@@ -71,9 +80,28 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   };
 
   chromeApi.runtime.onMessage.addListener((message: unknown) => {
-    if (typeof message !== "object" || message === null || (message as AgentPageStateMessage).type !== "AGENT_PAGE_STATE") return;
-    const update = message as AgentPageStateMessage;
-    renderPageMap(update.data, `Pagemap atualizado · passo ${update.step} · ${update.data.elements.length} refs`);
+    if (typeof message !== "object" || message === null) return;
+    const messageType = (message as { type?: unknown }).type;
+    if (messageType === "AGENT_PAGE_STATE") {
+      const update = message as AgentPageStateMessage;
+      renderPageMap(update.data, `Pagemap atualizado · passo ${update.step} · ${update.data.elements.length} refs`);
+      return;
+    }
+    if (messageType === "AGENT_ACTION_CONFIRMATION_REQUIRED") {
+      const confirmation = message as { confirmationId?: string; requestId?: string; summary?: string };
+      if (typeof confirmation.confirmationId !== "string" || typeof confirmation.requestId !== "string") return;
+      pendingConfirmation = { confirmationId: confirmation.confirmationId, requestId: confirmation.requestId };
+      confirmationSummary.textContent = confirmation.summary ?? "O agente quer executar uma ação que pode alterar ou enviar dados.";
+      confirmationModal.hidden = false;
+      confirmationApprove.focus();
+      if (confirmationTimeout !== undefined) window.clearTimeout(confirmationTimeout);
+      confirmationTimeout = window.setTimeout(() => {
+        if (pendingConfirmation?.confirmationId !== confirmation.confirmationId) return;
+        pendingConfirmation = undefined;
+        confirmationModal.hidden = true;
+        if (!activeRequestId) agentResult.textContent = "Confirmação expirou; a ação foi cancelada.";
+      }, 60_000);
+    }
   });
 
   const scanCurrentPage = (): Promise<PageState> => new Promise((resolve, reject) => {
@@ -133,6 +161,23 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   clickButton.addEventListener("click", () => sendAction({ type: "click", target: { ref: actionRef.value.trim() } }));
   typeButton.addEventListener("click", () => sendAction({ type: "type", target: { ref: actionRef.value.trim() }, text: actionText.value, replace: true }));
   let activeRequestId: string | undefined;
+  const queuedVoiceGoals: string[] = [];
+  const dispatchQueuedVoiceGoal = (): void => {
+    if (activeRequestId || queuedVoiceGoals.length === 0) return;
+    const nextGoal = queuedVoiceGoals.shift();
+    if (!nextGoal) return;
+    agentGoal.value = nextGoal;
+    agentRun.click();
+    agentGoal.value = "";
+  };
+  const enqueueVoiceGoal = (goal: string): void => {
+    const normalized = goal.trim();
+    if (!normalized) return;
+    if (agentGoal.value.trim() === normalized) agentGoal.value = "";
+    queuedVoiceGoals.push(normalized);
+    if (activeRequestId) agentResult.textContent = `Comando de voz na fila (${queuedVoiceGoals.length}).`;
+    dispatchQueuedVoiceGoal();
+  };
   agentRun.addEventListener("click", () => {
     const goal = agentGoal.value.trim();
     if (!goal) { agentResult.textContent = "Informe um objetivo."; return; }
@@ -146,6 +191,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
       agentRun.disabled = false;
       agentCancel.disabled = true;
       activeRequestId = undefined;
+      window.setTimeout(dispatchQueuedVoiceGoal, 0);
       const cancelLabel = agentCancel.querySelector("span");
       if (cancelLabel) cancelLabel.textContent = "Cancelar";
       if (chromeApi.runtime.lastError || !response?.ok) {
@@ -157,49 +203,176 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   });
   agentCancel.addEventListener("click", () => {
     if (!activeRequestId) return;
+    const requestToCancel = activeRequestId;
+    queuedVoiceGoals.length = 0;
+    if (pendingConfirmation?.requestId === requestToCancel) resolveActionConfirmation(false);
     agentCancel.disabled = true;
     agentResult.textContent = "Cancelando…";
-    chromeApi.runtime.sendMessage({ type: "CANCEL_AGENT", requestId: activeRequestId });
+    chromeApi.runtime.sendMessage({ type: "CANCEL_AGENT", requestId: requestToCancel });
   });
+  const resolveActionConfirmation = (approved: boolean): void => {
+    if (!pendingConfirmation) return;
+    const confirmation = pendingConfirmation;
+    pendingConfirmation = undefined;
+    if (confirmationTimeout !== undefined) window.clearTimeout(confirmationTimeout);
+    confirmationTimeout = undefined;
+    confirmationModal.hidden = true;
+    chromeApi.runtime.sendMessage({
+      type: "RESOLVE_AGENT_ACTION_CONFIRMATION",
+      confirmationId: confirmation.confirmationId,
+      requestId: confirmation.requestId,
+      approved,
+    });
+  };
+  confirmationApprove.addEventListener("click", () => resolveActionConfirmation(true));
+  confirmationReject.addEventListener("click", () => resolveActionConfirmation(false));
   let voiceRecorder: SpeechRecognitionRecorder | undefined;
+  const pendingVoiceSegments: string[] = [];
+  let pendingVoiceSince: number | undefined;
+  let lastVoiceFinalAt: number | undefined;
+  let voiceFlushInterval: number | undefined;
+  const minVoiceLetters = 4;
+  const voiceQuietPeriodMs = 1200;
+  const voiceMaxBufferMs = 5000;
+  const voiceCheckIntervalMs = 3000;
+  let voiceAudioContext: AudioContext | undefined;
+  const normalizeSpeech = (text: string): string => text.replace(/\s+/g, " ").trim();
+  const setVoiceListening = (listening: boolean): void => {
+    voiceStart.classList.toggle("recording", listening);
+    voiceStart.setAttribute("aria-pressed", String(listening));
+    voiceStart.title = listening ? "Encerrar escuta" : "Começar a ouvir";
+    voiceStart.setAttribute("aria-label", voiceStart.title);
+    voiceStart.innerHTML = `<i data-lucide="${listening ? "mic-off" : "mic"}"></i>`;
+    createIcons({ icons });
+    voiceStatus.textContent = listening ? "Ouvindo" : "Microfone desligado";
+    voiceStatus.classList.toggle("active", listening);
+  };
+  const playListeningCue = (): void => {
+    try {
+      const AudioContextConstructor = window.AudioContext;
+      if (!AudioContextConstructor) return;
+      voiceAudioContext ??= new AudioContextConstructor();
+      if (voiceAudioContext.state === "suspended") void voiceAudioContext.resume();
+      const oscillator = voiceAudioContext.createOscillator();
+      const gain = voiceAudioContext.createGain();
+      oscillator.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, voiceAudioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, voiceAudioContext.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, voiceAudioContext.currentTime + 0.16);
+      oscillator.connect(gain);
+      gain.connect(voiceAudioContext.destination);
+      oscillator.start();
+      oscillator.stop(voiceAudioContext.currentTime + 0.17);
+    } catch { /* O indicador visual continua disponível se o áudio estiver indisponível. */ }
+  };
+  const isVoiceCommandLongEnough = (text: string): boolean => {
+    const normalized = normalizeSpeech(text);
+    const lettersAndNumbers = normalized.match(/[\p{L}\p{N}]/gu) ?? [];
+    const meaningfulWords = normalized.split(/\s+/).filter((word) => (word.match(/[\p{L}]/gu) ?? []).length >= minVoiceLetters);
+    return lettersAndNumbers.length >= minVoiceLetters && meaningfulWords.length > 0;
+  };
+  const clearVoiceTimers = (): void => {
+    if (voiceFlushInterval !== undefined) window.clearInterval(voiceFlushInterval);
+    voiceFlushInterval = undefined;
+  };
+  const flushVoiceBuffer = (force = false): boolean => {
+    const text = normalizeSpeech(pendingVoiceSegments.join(" "));
+    if (!text || !isVoiceCommandLongEnough(text)) return false;
+    const now = Date.now();
+    const quietEnough = lastVoiceFinalAt !== undefined && now - lastVoiceFinalAt >= voiceQuietPeriodMs;
+    const waitedLongEnough = pendingVoiceSince !== undefined && now - pendingVoiceSince >= voiceMaxBufferMs;
+    if (!force && !quietEnough && !waitedLongEnough) return false;
+    pendingVoiceSegments.length = 0;
+    pendingVoiceSince = undefined;
+    lastVoiceFinalAt = undefined;
+    if (normalizeSpeech(agentGoal.value) === text) agentGoal.value = "";
+    enqueueVoiceGoal(text);
+    return true;
+  };
+  const finalizeVoiceBuffer = (): void => {
+    const text = normalizeSpeech(pendingVoiceSegments.join(" "));
+    clearVoiceTimers();
+    if (!text) return;
+    if (flushVoiceBuffer(true)) return;
+    pendingVoiceSegments.length = 0;
+    pendingVoiceSince = undefined;
+    lastVoiceFinalAt = undefined;
+    if (!activeRequestId && queuedVoiceGoals.length === 0) agentResult.textContent = "Trecho curto ignorado; fale um comando mais completo.";
+  };
   const startSpeech = (): void => {
     voiceStart.disabled = true;
-    voiceStop.disabled = true;
+    voiceStatus.textContent = "Iniciando microfone…";
     agentGoal.value = "";
     agentResult.textContent = "Iniciando reconhecimento de voz do Chrome…";
     try {
+      if (window.AudioContext) {
+        voiceAudioContext ??= new window.AudioContext();
+        if (voiceAudioContext.state === "suspended") void voiceAudioContext.resume();
+      }
       voiceRecorder = startChromeSpeechRecognition((text) => {
-        agentGoal.value = text;
-        agentResult.textContent = "Transcrição parcial…";
+        agentGoal.value = normalizeSpeech(`${pendingVoiceSegments.join(" ")} ${text}`);
+      }, (segment) => {
+        const normalized = normalizeSpeech(segment);
+        if (!normalized) return;
+        pendingVoiceSegments.push(normalized);
+        agentGoal.value = normalizeSpeech(pendingVoiceSegments.join(" "));
+        const now = Date.now();
+        pendingVoiceSince ??= now;
+        lastVoiceFinalAt = now;
       }, (statusText) => {
-        agentResult.textContent = statusText;
+        if (statusText.includes("está ouvindo")) {
+          setVoiceListening(true);
+          playListeningCue();
+        } else if (statusText) {
+          voiceStatus.textContent = statusText;
+          voiceStatus.classList.remove("active");
+        }
+        if (!activeRequestId && queuedVoiceGoals.length === 0) agentResult.textContent = statusText;
       }, () => {
+        clearVoiceTimers();
+        voiceRecorder = undefined;
         voiceStart.disabled = false;
-        voiceStop.disabled = true;
+        setVoiceListening(false);
+        finalizeVoiceBuffer();
       });
-      voiceStop.disabled = false;
+      voiceFlushInterval = window.setInterval(() => { flushVoiceBuffer(); }, voiceCheckIntervalMs);
+      voiceStart.disabled = false;
     } catch (error) {
       voiceRecorder = undefined;
+      clearVoiceTimers();
       voiceStart.disabled = false;
-      voiceStop.disabled = true;
+      setVoiceListening(false);
+      voiceStatus.textContent = error instanceof Error ? error.message : "Não foi possível iniciar o microfone.";
       agentResult.textContent = error instanceof Error ? error.message : "Não foi possível iniciar a transcrição.";
     }
   };
-  voiceStart.addEventListener("click", startSpeech);
-  voiceStop.addEventListener("click", () => {
-    if (!voiceRecorder) return;
-    voiceStop.disabled = true;
+  const stopSpeech = (): void => {
+    const recorder = voiceRecorder;
+    if (!recorder) return;
+    voiceStart.disabled = true;
+    voiceStatus.textContent = "Encerrando escuta…";
     agentResult.textContent = "Finalizando transcrição…";
-    void voiceRecorder.stop().then((text) => {
-      voiceRecorder = undefined;
-      voiceStart.disabled = false;
-      agentGoal.value = text;
-      agentResult.textContent = text ? "Transcrição pronta. Revise e execute com Jev." : "Nenhuma fala detectada.";
+    void recorder.stop().then((text) => {
+      if (voiceRecorder === recorder) {
+        clearVoiceTimers();
+        voiceRecorder = undefined;
+        voiceStart.disabled = false;
+        setVoiceListening(false);
+        finalizeVoiceBuffer();
+      }
+      if (!activeRequestId && queuedVoiceGoals.length === 0 && !text) agentResult.textContent = "Nenhuma fala suficiente para enviar.";
     }).catch((error: unknown) => {
+      clearVoiceTimers();
       voiceRecorder = undefined;
       voiceStart.disabled = false;
+      setVoiceListening(false);
+      voiceStatus.textContent = error instanceof Error ? error.message : "Não foi possível acessar o microfone.";
       agentResult.textContent = error instanceof Error ? error.message : "Não foi possível transcrever o áudio.";
     });
+  };
+  voiceStart.addEventListener("click", () => {
+    if (voiceRecorder) stopSpeech();
+    else startSpeech();
   });
 
   debugOverlay.addEventListener("change", () => {

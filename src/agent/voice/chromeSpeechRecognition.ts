@@ -55,7 +55,8 @@ function getRecognitionConstructor(): RecognitionConstructor | undefined {
 }
 
 export function startChromeSpeechRecognition(
-  onTranscript: (text: string) => void,
+  onInterim: (text: string) => void,
+  onFinalSegment: (text: string) => void,
   onStatus?: (status: string) => void,
   onEnded?: () => void,
 ): SpeechRecognitionRecorder {
@@ -69,6 +70,7 @@ export function startChromeSpeechRecognition(
   recognition.maxAlternatives = 1;
 
   let finalTranscript = "";
+  let seenFinalIndexes = new Set<number>();
   let stopping = false;
   let settled = false;
   let resolveStopped: ((text: string) => void) | undefined;
@@ -84,17 +86,28 @@ export function startChromeSpeechRecognition(
     onEnded?.();
   };
 
-  recognition.onstart = () => onStatus?.("O Chrome está ouvindo em português (Brasil)…");
+  recognition.onstart = () => {
+    seenFinalIndexes = new Set<number>();
+    onStatus?.("O Chrome está ouvindo em português (Brasil)…");
+  };
   recognition.onresult = (event) => {
     let interimTranscript = "";
-    for (let index = event.resultIndex; index < event.results.length; index += 1) {
+    const newFinalSegments: string[] = [];
+    for (let index = 0; index < event.results.length; index += 1) {
       const result = event.results[index];
       const transcript = result[0]?.transcript?.trim();
       if (!transcript) continue;
-      if (result.isFinal) finalTranscript = `${finalTranscript} ${transcript}`.trim();
-      else interimTranscript = `${interimTranscript} ${transcript}`.trim();
+      if (result.isFinal) {
+        if (index >= event.resultIndex && !seenFinalIndexes.has(index)) {
+          seenFinalIndexes.add(index);
+          newFinalSegments.push(transcript);
+          finalTranscript = `${finalTranscript} ${transcript}`.trim();
+        }
+      } else interimTranscript = `${interimTranscript} ${transcript}`.trim();
     }
-    onTranscript(`${finalTranscript} ${interimTranscript}`.trim());
+    const newFinalText = newFinalSegments.join(" ").trim();
+    if (newFinalText) onFinalSegment(newFinalText);
+    onInterim(interimTranscript.trim());
   };
   recognition.onerror = (event) => {
     const message = ERROR_MESSAGES[event.error ?? ""] ?? `Erro no reconhecimento de voz do Chrome: ${event.error ?? "desconhecido"}.`;

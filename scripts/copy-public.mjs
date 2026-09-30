@@ -1,4 +1,4 @@
-﻿import { mkdir, copyFile } from "node:fs/promises";
+import { cp, mkdir, copyFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,3 +21,4 @@ const files = [
 ];
 
 await Promise.all(files.map((file) => copyFile(join(source, file), join(destination, file))));
+await cp(join(source, "icons"), join(destination, "icons"), { recursive: true });
