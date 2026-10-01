@@ -40,6 +40,9 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const agentCancel = document.querySelector<HTMLButtonElement>("#agent-cancel");
   const voiceStart = document.querySelector<HTMLButtonElement>("#voice-start");
   const voiceStatus = document.querySelector<HTMLOutputElement>("#voice-status");
+  const voiceMode = document.querySelector<HTMLElement>("#voice-mode");
+  const voiceModeStatus = document.querySelector<HTMLElement>("#voice-mode-status");
+  const voiceModeExit = document.querySelector<HTMLButtonElement>("#voice-mode-exit");
   const agentResult = document.querySelector<HTMLOutputElement>("#agent-result");
   const confirmationModal = document.querySelector<HTMLElement>("#agent-confirmation");
   const confirmationSummary = document.querySelector<HTMLElement>("#agent-confirmation-summary");
@@ -52,7 +55,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const saveKeyButton = document.querySelector<HTMLButtonElement>("#jev-save-key");
   const onboardingStatus = document.querySelector<HTMLOutputElement>("#jev-onboarding-status");
   const editKeyButton = document.querySelector<HTMLButtonElement>("#jev-edit-key");
-  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStatus || !agentResult || !confirmationModal || !confirmationSummary || !confirmationApprove || !confirmationReject || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
+  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStatus || !voiceMode || !voiceModeStatus || !voiceModeExit || !agentResult || !confirmationModal || !confirmationSummary || !confirmationApprove || !confirmationReject || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
   createIcons({ icons });
 
   const renderPageMap = (data: PageState, label: string): void => {
@@ -247,6 +250,30 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     voiceStatus.textContent = listening ? "Ouvindo" : "Microfone desligado";
     voiceStatus.classList.toggle("active", listening);
   };
+  const setVoiceMode = (active: boolean, label = "Ouvindo sua voz…"): void => {
+    voiceMode.hidden = !active;
+    voiceMode.setAttribute("aria-hidden", String(!active));
+    document.body.classList.toggle("voice-mode-open", active);
+    if (!active) {
+      if (voiceActivityTimer !== undefined) window.clearTimeout(voiceActivityTimer);
+      voiceActivityTimer = undefined;
+      voiceMode.classList.remove("is-speaking");
+    }
+    if (active) {
+      voiceModeStatus.textContent = label;
+      voiceModeExit.focus();
+    }
+  };
+  let voiceActivityTimer: number | undefined;
+  const markVoiceActivity = (): void => {
+    voiceMode.classList.add("is-speaking");
+    if (voiceActivityTimer !== undefined) window.clearTimeout(voiceActivityTimer);
+    voiceActivityTimer = window.setTimeout(() => {
+      voiceMode.classList.remove("is-speaking");
+      voiceActivityTimer = undefined;
+      if (voiceRecorder) voiceModeStatus.textContent = "Ouvindo sua voz…";
+    }, 650);
+  };
   const playListeningCue = (): void => {
     try {
       const AudioContextConstructor = window.AudioContext;
@@ -302,6 +329,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const startSpeech = (): void => {
     voiceStart.disabled = true;
     voiceStatus.textContent = "Iniciando microfone…";
+    setVoiceMode(true, "Preparando escuta…");
     agentGoal.value = "";
     agentResult.textContent = "Iniciando reconhecimento de voz do Chrome…";
     try {
@@ -311,21 +339,29 @@ export function initSidePanel(chromeApi: typeof chrome): void {
       }
       voiceRecorder = startChromeSpeechRecognition((text) => {
         agentGoal.value = normalizeSpeech(`${pendingVoiceSegments.join(" ")} ${text}`);
+        if (text) {
+          voiceModeStatus.textContent = "Reconhecendo sua voz…";
+          markVoiceActivity();
+        }
       }, (segment) => {
         const normalized = normalizeSpeech(segment);
         if (!normalized) return;
         pendingVoiceSegments.push(normalized);
         agentGoal.value = normalizeSpeech(pendingVoiceSegments.join(" "));
+        voiceModeStatus.textContent = "Comando reconhecido";
+        markVoiceActivity();
         const now = Date.now();
         pendingVoiceSince ??= now;
         lastVoiceFinalAt = now;
       }, (statusText) => {
         if (statusText.includes("está ouvindo")) {
           setVoiceListening(true);
+          voiceModeStatus.textContent = "Ouvindo sua voz…";
           playListeningCue();
         } else if (statusText) {
           voiceStatus.textContent = statusText;
           voiceStatus.classList.remove("active");
+          voiceModeStatus.textContent = statusText;
         }
         if (!activeRequestId && queuedVoiceGoals.length === 0) agentResult.textContent = statusText;
       }, () => {
@@ -333,6 +369,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
         voiceRecorder = undefined;
         voiceStart.disabled = false;
         setVoiceListening(false);
+        setVoiceMode(false);
         finalizeVoiceBuffer();
       });
       voiceFlushInterval = window.setInterval(() => { flushVoiceBuffer(); }, voiceCheckIntervalMs);
@@ -342,6 +379,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
       clearVoiceTimers();
       voiceStart.disabled = false;
       setVoiceListening(false);
+      setVoiceMode(false);
       voiceStatus.textContent = error instanceof Error ? error.message : "Não foi possível iniciar o microfone.";
       agentResult.textContent = error instanceof Error ? error.message : "Não foi possível iniciar a transcrição.";
     }
@@ -358,6 +396,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
         voiceRecorder = undefined;
         voiceStart.disabled = false;
         setVoiceListening(false);
+        setVoiceMode(false);
         finalizeVoiceBuffer();
       }
       if (!activeRequestId && queuedVoiceGoals.length === 0 && !text) agentResult.textContent = "Nenhuma fala suficiente para enviar.";
@@ -366,6 +405,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
       voiceRecorder = undefined;
       voiceStart.disabled = false;
       setVoiceListening(false);
+      setVoiceMode(false);
       voiceStatus.textContent = error instanceof Error ? error.message : "Não foi possível acessar o microfone.";
       agentResult.textContent = error instanceof Error ? error.message : "Não foi possível transcrever o áudio.";
     });
@@ -373,6 +413,17 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   voiceStart.addEventListener("click", () => {
     if (voiceRecorder) stopSpeech();
     else startSpeech();
+  });
+  voiceModeExit.addEventListener("click", () => {
+    stopSpeech();
+    setVoiceMode(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !voiceMode.hidden) {
+      event.preventDefault();
+      stopSpeech();
+      setVoiceMode(false);
+    }
   });
 
   debugOverlay.addEventListener("change", () => {

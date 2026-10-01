@@ -62,6 +62,22 @@
       </div>
     </div>
   </section>
+  <section id="voice-mode" class="voice-mode" hidden aria-label="Reconhecimento de voz">
+    <div class="voice-mode__topline"><span class="voice-mode__dot"></span><span>ESCUTA ATIVA</span></div>
+    <div class="voice-mode__center">
+      <div class="voice-orb" aria-hidden="true">
+        <span class="voice-orb__ring voice-orb__ring--outer"></span>
+        <span class="voice-orb__ring voice-orb__ring--middle"></span>
+        <span class="voice-orb__ring voice-orb__ring--inner"></span>
+        <span class="voice-orb__satellite"></span>
+        <span class="voice-orb__core"><span></span></span>
+      </div>
+      <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p id="voice-mode-status" class="voice-mode__status" role="status" aria-live="polite">Preparando escuta…</p>
+      <p class="voice-mode__hint">Fale seu comando com naturalidade</p>
+    </div>
+    <button id="voice-mode-exit" class="voice-mode__exit" type="button"><span class="voice-mode__exit-icon" aria-hidden="true">×</span><span>Sair da escuta</span></button>
+  </section>
   <script type="module" src="sidepanel.js"></script>
 </body>
 </html>
