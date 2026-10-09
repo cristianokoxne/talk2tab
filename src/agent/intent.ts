@@ -9,6 +9,8 @@ export interface GoalStage {
 
 export interface GoalHistoryEvent {
   type: string;
+  actionKey?: string;
+  dispatched?: boolean;
   targetLabel?: string;
   valueLength?: number;
   progressed: boolean;
