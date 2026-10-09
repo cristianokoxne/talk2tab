@@ -120,3 +120,64 @@ test("action history stores field metadata and value length without the typed va
   assert.equal(historyForFinish[0].valueLength, value.length);
   assert.equal(JSON.stringify(historyForFinish).includes(value), false);
 });
+
+test("stale refs are re-observed and re-decided without retrying the stale action", async () => {
+  let executions = 0;
+  let decisions = 0;
+  let observations = 0;
+  const result = await runAgentLoop({
+    observe: async () => ({ ...page, fingerprint: observations++ === 0 ? "initial" : "refreshed" }),
+    decide: async () => ({ optionId: `click-${++decisions}`, action: { type: "click", target: { ref: `el_1_${decisions}` } }, probabilities: {} }),
+    execute: async (_action, actionId) => {
+      executions += 1;
+      return executions === 1
+        ? { ok: false, actionId, code: "STALE_ELEMENT", error: "stale", dispatched: false }
+        : { ok: true, actionId, changed: true };
+    },
+    verify: (_before, after, _action, actionResult) => ({ ok: true, progressed: actionResult.changed === true, evidence: [after.fingerprint], reason: "checked" }),
+  }, 5, undefined, { maxProviderCalls: 2 });
+  assert.equal(result.status, "max_provider_calls");
+  assert.equal(executions, 2);
+  assert.equal(decisions, 2);
+});
+
+test("provider retries only transient errors with a bounded backoff", async () => {
+  let calls = 0;
+  const result = await runAgentLoop({
+    observe: async () => page,
+    decide: async () => {
+      calls += 1;
+      if (calls === 1) throw Object.assign(new Error("offline"), { code: "PROVIDER_NETWORK_ERROR" });
+      return { optionId: "finish", action: { type: "finish", status: "failed", message: "provider restored" }, probabilities: {} };
+    },
+    execute: async () => ({ ok: false }),
+  }, 5, undefined, { maxProviderCalls: 3 });
+  assert.equal(result.status, "failed");
+  assert.equal(calls, 2);
+});
+
+test("uncertain post-action observation failure does not repeat a dispatched action", async () => {
+  let executions = 0;
+  const result = await runAgentLoop({
+    observe: async () => page,
+    decide: async () => ({ optionId: "send", action: { type: "click", target: { ref: "el_1_1" } }, probabilities: {} }),
+    execute: async (_action, actionId) => { executions += 1; return { ok: true, actionId, dispatched: true }; },
+    waitForEffect: async () => { throw new Error("tab became unavailable after dispatch"); },
+  });
+  assert.equal(result.status, "needs_help");
+  assert.equal(executions, 1);
+  assert.match(result.message, /Não vou repeti-la/);
+});
+
+test("an action with unknown effect cannot be dispatched again before reconciliation", async () => {
+  let executions = 0;
+  const result = await runAgentLoop({
+    observe: async () => page,
+    decide: async () => ({ optionId: "submit", action: { type: "click", target: { ref: "el_1_1" } }, probabilities: {} }),
+    execute: async (_action, actionId) => { executions += 1; return { ok: true, actionId, dispatched: true, changed: false }; },
+    verify: () => ({ ok: true, progressed: false, reason: "No semantic change yet." }),
+  }, 5);
+  assert.equal(result.status, "needs_help");
+  assert.equal(executions, 1);
+  assert.match(result.message, /efeito continua desconhecido/);
+});

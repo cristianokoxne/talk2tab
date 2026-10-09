@@ -5,6 +5,7 @@ import { JevProvider, JevProviderError } from "./provider/jev.js";
 import { runAgentLoop } from "./loop.js";
 import { verifyAction } from "./verification.js";
 import { parseGoal, updateGoalProgress } from "./intent.js";
+import { waitForPageEffect } from "./waitForEffect.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
@@ -350,6 +351,14 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       return result;
     },
     verify: verifyAction,
+    waitForEffect: async (before, action, _result, observe, waitSignal) => {
+      if (action.type !== "click" && action.type !== "keypress") return undefined;
+      const page = await waitForPageEffect(observe, before, waitSignal, { timeoutMs: 3_000, pollIntervalMs: 50, quietWindowMs: 120 });
+      latestPage = page;
+      observationStep += 1;
+      publishPageState(chromeApi, message.requestId, observationStep, currentTabId.value, page);
+      return page;
+    },
     verifyCompletion: (_page, history) => {
       const plan = parseGoal(message.goal);
       if (plan.needsClarification) return { complete: false, reason: plan.clarification ?? "Preciso de mais informações." };

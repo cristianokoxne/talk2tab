@@ -24,7 +24,7 @@ interface JevResponse {
 export const JEV_ADAPTER_VERSION = "2";
 
 export class JevProviderError extends Error {
-  constructor(message: string, readonly code: string, options?: ErrorOptions) {
+  constructor(message: string, readonly code: string, options?: ErrorOptions, readonly status?: number) {
     super(message, options);
     this.name = "JevProviderError";
   }
@@ -69,7 +69,7 @@ export class JevProvider {
         } catch {
           details = "sem detalhes adicionais";
         }
-        throw new JevProviderError(`Jev retornou HTTP ${response.status}: ${details}`, "PROVIDER_HTTP_ERROR");
+        throw new JevProviderError(`Jev retornou HTTP ${response.status}: ${details}`, "PROVIDER_HTTP_ERROR", undefined, response.status);
       }
       let payload: JevResponse;
       try {

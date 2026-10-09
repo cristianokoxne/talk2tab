@@ -32,6 +32,7 @@ export interface AgentLoopDriver {
   execute(action: AgentAction, actionId: string): Promise<ActionResult>;
   verify?(before: PageState, after: PageState, action: AgentAction, result: ActionResult): ActionVerification;
   verifyCompletion?(page: PageState, history: GoalHistoryEvent[]): { complete: boolean; reason: string };
+  waitForEffect?(before: PageState, action: AgentAction, result: ActionResult, observe: () => Promise<PageState>, signal?: AbortSignal): Promise<PageState | undefined>;
 }
 
 export interface AgentLoopBudgets { maxDurationMs?: number; maxProviderCalls?: number; }
@@ -39,9 +40,16 @@ export interface AgentLoopBudgets { maxDurationMs?: number; maxProviderCalls?: n
 function actionHistoryEntry(before: PageState, after: PageState, action: AgentAction, result: ActionResult, verification: ActionVerification): GoalHistoryEvent {
   const targetRef = "target" in action ? action.target?.ref : action.type === "keypress" ? before.focusedElement : undefined;
   const target = targetRef ? before.elements.find((element) => element.ref === targetRef) : undefined;
+  const targetLabel = target?.sensitive ? "sensitive control" : [target?.name, target?.context].filter(Boolean).join(" ") || target?.role;
+  const actionKey = action.type === "keypress" ? `${action.type}:${action.key.toLowerCase()}`
+    : targetLabel ? `${action.type}:${targetLabel.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`
+      : action.type === "navigate" || action.type === "open_tab" || action.type === "open_window" ? `${action.type}:${action.url.split(/[?#]/, 1)[0]}`
+        : action.type;
   const event: GoalHistoryEvent = {
     type: action.type,
-    targetLabel: target?.sensitive ? "sensitive control" : target?.name ?? target?.text ?? target?.role,
+    actionKey,
+    targetLabel,
+    dispatched: result.dispatched === true,
     progressed: verification.progressed,
     beforeUrl: before.url.split(/[?#]/, 1)[0],
     afterUrl: after.url.split(/[?#]/, 1)[0],
@@ -54,30 +62,65 @@ function actionHistoryEntry(before: PageState, after: PageState, action: AgentAc
   return event;
 }
 
+function backoff(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal?.aborted) { resolve(); return; }
+    const timer = setTimeout(() => { signal?.removeEventListener("abort", abort); resolve(); }, ms);
+    const abort = (): void => { clearTimeout(timer); signal?.removeEventListener("abort", abort); resolve(); };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
+}
+
+async function observeWithRetry(driver: AgentLoopDriver, signal?: AbortSignal): Promise<PageState> {
+  for (let attempt = 0; ; attempt += 1) {
+    try { return await driver.observe(); }
+    catch (error) {
+      if (signal?.aborted || attempt >= 2) throw error;
+      await backoff([100, 250][attempt], signal);
+    }
+  }
+}
+
+function isRetryableProviderError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const value = error as { code?: unknown; status?: unknown };
+  return value.code === "PROVIDER_NETWORK_ERROR" || (value.code === "PROVIDER_HTTP_ERROR" && [429, 502, 503, 504].includes(Number(value.status)));
+}
+
+const recoverablePreDispatchCodes = new Set(["STALE_ELEMENT", "STALE_SCROLL_CONTAINER"]);
+
 /** Runs one-action-at-a-time: observe → decide → execute → observe. */
 export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal?: AbortSignal, budgets: AgentLoopBudgets = {}): Promise<AgentLoopResult> {
   const steps: AgentLoopStep[] = [];
   const history: GoalHistoryEvent[] = [];
+  if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
   const startedAt = Date.now();
   const maxDurationMs = Math.max(1_000, budgets.maxDurationMs ?? 120_000);
   const maxProviderCalls = Math.max(1, budgets.maxProviderCalls ?? maxSteps + 1);
   let providerCalls = 0;
-  let page = await driver.observe();
+  let page = await observeWithRetry(driver, signal);
   let stalledSteps = 0;
   let previousOptionId: string | undefined;
   const visitedStates = new Set([page.fingerprint]);
+  const staleRetries = new Map<string, number>();
   for (let step = 1; step <= maxSteps; step += 1) {
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     if (Date.now() - startedAt >= maxDurationMs) return { status: "max_duration", steps, history, message: `Tempo limite de ${maxDurationMs} ms atingido após ${history.length} ações verificadas; progresso parcial preservado.` };
     if (providerCalls >= maxProviderCalls) return { status: "max_provider_calls", steps, history, message: `Limite de ${maxProviderCalls} decisões do Jev atingido; progresso parcial preservado.` };
-    let decision: JevDecision;
-    try {
-      providerCalls += 1;
-      decision = await driver.decide(page, signal, history.slice(-12));
-    } catch (error) {
-      if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
-      throw error;
+    let decision: JevDecision | undefined;
+    for (let attempt = 0; attempt <= 2; attempt += 1) {
+      try {
+        providerCalls += 1;
+        decision = await driver.decide(page, signal, history.slice(-12));
+        break;
+      } catch (error) {
+        if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
+        if (isRetryableProviderError(error) && providerCalls >= maxProviderCalls) return { status: "max_provider_calls", steps, history, message: `Limite de ${maxProviderCalls} chamadas do Jev atingido após erro transitório; progresso parcial preservado.` };
+        if (!isRetryableProviderError(error) || attempt >= 2 || providerCalls >= maxProviderCalls) throw error;
+        await backoff([100, 300][attempt], signal);
+      }
     }
+    if (!decision) return { status: "failed", steps, history, message: "O provider não retornou uma decisão válida." };
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     if (Date.now() - startedAt >= maxDurationMs) return { status: "max_duration", steps, history, message: `Tempo limite de ${maxDurationMs} ms atingido; decisão não executada e progresso parcial preservado.` };
     const trace: AgentLoopStep = {
@@ -86,6 +129,17 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
       optionId: decision.optionId,
       confidence: decision.confidence,
     };
+    const repeatedUnknownEffect = history.at(-1);
+    const actionTargetRef = "target" in decision.action ? decision.action.target?.ref : undefined;
+    const targetForAction = actionTargetRef ? page.elements.find((element) => element.ref === actionTargetRef) : undefined;
+    const stableTargetLabel = targetForAction?.sensitive ? "sensitive control" : [targetForAction?.name, targetForAction?.context].filter(Boolean).join(" ") || targetForAction?.role;
+    const retryKey = decision.action.type === "keypress" ? `${decision.action.type}:${decision.action.key.toLowerCase()}`
+      : stableTargetLabel ? `${decision.action.type}:${stableTargetLabel.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`
+        : decision.action.type === "navigate" || decision.action.type === "open_tab" || decision.action.type === "open_window" ? `${decision.action.type}:${decision.action.url.split(/[?#]/, 1)[0]}`
+          : decision.action.type;
+    if (repeatedUnknownEffect?.dispatched && !repeatedUnknownEffect.progressed && repeatedUnknownEffect.actionKey === retryKey) {
+      return { status: "needs_help", steps, history, message: "A última ação foi enviada, mas seu efeito continua desconhecido. Não vou repeti-la sem reconciliação." };
+    }
     steps.push(trace);
 
     if (decision.action.type === "finish") {
@@ -100,6 +154,15 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     trace.result = result;
     if (!result.ok) {
       history.push(actionHistoryEntry(page, page, decision.action, result, { ok: false, progressed: false, reason: result.error ?? "A ação falhou." }));
+      const retries = result.code ? staleRetries.get(result.code) ?? 0 : 0;
+      if (result.code && recoverablePreDispatchCodes.has(result.code) && result.dispatched !== true && retries < 2) {
+        staleRetries.set(result.code, retries + 1);
+        page = await observeWithRetry(driver, signal);
+        visitedStates.add(page.fingerprint);
+        previousOptionId = undefined;
+        stalledSteps = 0;
+        continue;
+      }
       return { status: "failed", steps, history, message: result.error ?? "A ação falhou." };
     }
     if (decision.action.type === "expand_candidates") {
@@ -109,7 +172,17 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     }
 
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
-    const nextPage = await driver.observe();
+    const observe = (): Promise<PageState> => observeWithRetry(driver, signal);
+    let nextPage: PageState;
+    try {
+      nextPage = await driver.waitForEffect?.(page, decision.action, result, observe, signal) ?? await observe();
+    } catch (error) {
+      if (signal?.aborted) return { status: "cancelled", steps, history, message: "Sessão cancelada depois da ação; o efeito pode ser desconhecido e ela não foi repetida." };
+      const uncertain = actionHistoryEntry(page, page, decision.action, result, { ok: false, progressed: false, reason: "A ação foi enviada, mas a página não pôde ser observada depois." });
+      uncertain.errorCode = "OBSERVATION_FAILED_AFTER_ACTION";
+      history.push(uncertain);
+      return { status: "needs_help", steps, history, message: "A ação pode ter sido executada, mas não consegui observar o resultado. Não vou repeti-la automaticamente." };
+    }
     const verification = driver.verify?.(page, nextPage, decision.action, result) ?? { ok: true, progressed: true, reason: "Ação executada." };
     trace.verification = verification;
     history.push(actionHistoryEntry(page, nextPage, decision.action, result, verification));
