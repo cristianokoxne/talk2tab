@@ -56,3 +56,31 @@ test("scans interactive controls inside open shadow roots", () => {
   assert.equal(state.elements[0].role, "textbox");
   assert.equal(state.elements[0].placeholder, "Pesquisar");
 });
+
+test("semantic fingerprint ignores fresh refs and debug overlay but tracks checkbox state", () => {
+  const dom = new JSDOM(`<main><label><input id="available" type="checkbox"> Available</label></main>`, { url: "https://example.test/items", pretendToBeVisual: true });
+  const { document, window } = dom.window;
+  Object.assign(globalThis, {
+    HTMLAnchorElement: window.HTMLAnchorElement,
+    HTMLButtonElement: window.HTMLButtonElement,
+    HTMLInputElement: window.HTMLInputElement,
+    HTMLSelectElement: window.HTMLSelectElement,
+    HTMLTextAreaElement: window.HTMLTextAreaElement,
+  });
+  Object.defineProperty(window, "innerWidth", { value: 1280 });
+  Object.defineProperty(window, "innerHeight", { value: 720 });
+  const checkbox = document.querySelector("input");
+  checkbox.getBoundingClientRect = () => ({ x: 0, y: 0, width: 120, height: 30, top: 0, right: 120, bottom: 30, left: 0, toJSON: () => ({}) });
+  const registry = new ElementRegistry();
+  const fingerprints = Array.from({ length: 10 }, () => scanPage(document, window, registry).fingerprint);
+  assert.equal(new Set(fingerprints).size, 1);
+
+  const overlay = document.createElement("div");
+  overlay.id = "voice-browser-agent-debug-overlay";
+  overlay.textContent = "ephemeral-debug-ref";
+  document.body.append(overlay);
+  assert.equal(scanPage(document, window, registry).fingerprint, fingerprints[0]);
+
+  checkbox.checked = true;
+  assert.notEqual(scanPage(document, window, registry).fingerprint, fingerprints[0]);
+});

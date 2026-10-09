@@ -19,6 +19,8 @@ export interface AgentLoopResult {
 export interface ActionVerification {
   ok: boolean;
   progressed: boolean;
+  effectObserved?: boolean;
+  evidence?: string[];
   reason: string;
 }
 
@@ -35,6 +37,7 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
   let page = await driver.observe();
   let stalledSteps = 0;
   let previousOptionId: string | undefined;
+  const visitedStates = new Set([page.fingerprint]);
   for (let step = 1; step <= maxSteps; step += 1) {
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     const decision = await driver.decide(page);
@@ -59,6 +62,10 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     const verification = driver.verify?.(page, nextPage, decision.action, result) ?? { ok: true, progressed: true, reason: "Ação executada." };
     trace.verification = verification;
     if (!verification.ok) return { status: "failed", steps, message: verification.reason };
+    if (verification.progressed && visitedStates.has(nextPage.fingerprint) && nextPage.fingerprint !== page.fingerprint) {
+      return { status: "stalled", steps, message: "A navegação retornou a um estado já observado e entrou em ciclo." };
+    }
+    visitedStates.add(nextPage.fingerprint);
     if (!verification.progressed && previousOptionId === decision.optionId) stalledSteps += 1;
     else stalledSteps = 0;
     if (stalledSteps >= 2) return { status: "stalled", steps, message: "O agente não detectou progresso após ações repetidas." };

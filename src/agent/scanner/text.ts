@@ -6,5 +6,8 @@ export function compactText(value: string, maximumLength = 160): string {
 }
 
 export function summarizePageText(document: Document): string {
-  return compactText(document.body?.innerText ?? "", 500);
+  if (!document.body) return "";
+  const body = document.body.cloneNode(true) as HTMLElement;
+  body.querySelector("#voice-browser-agent-debug-overlay")?.remove();
+  return compactText(body.innerText ?? body.textContent ?? "", 500);
 }

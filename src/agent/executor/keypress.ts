@@ -24,5 +24,5 @@ export function executeKeyPress(actionId: string, document: Document, key: strin
       else form.submit();
     }
   }
-  return { ok: true, actionId, status: "success", changed: true };
+  return { ok: true, actionId, status: "success", dispatched: true, changed: false };
 }

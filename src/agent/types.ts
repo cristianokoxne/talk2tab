@@ -20,8 +20,11 @@ export interface ActionRequest { id: string; action: BrowserAction; }
 export interface ActionResult {
   ok: boolean;
   actionId: string;
+  /** True when the executor sent an interaction to the target. */
+  dispatched?: boolean;
   error?: string;
   code?: string;
+  /** True only when the executor directly observed a local state change. */
   changed?: boolean;
   snapshot?: string;
   status?: "success" | "failed";

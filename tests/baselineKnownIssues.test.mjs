@@ -43,7 +43,7 @@ test("baseline: a canceled decision can still dispatch its late action", async (
   assert.equal(dispatched, true, "Known baseline: cancellation is checked after the action, not before dispatch");
 });
 
-test("baseline: scroll boundary reports no movement", () => {
+test("scroll boundary reports no movement", () => {
   const panel = { scrollTop: 100, scrollHeight: 200, clientHeight: 100 };
   const result = executeScroll("scroll-at-end", { innerHeight: 800 }, { type: "scroll", direction: "down", amount: 60 }, panel);
   assert.equal(result.ok, true);

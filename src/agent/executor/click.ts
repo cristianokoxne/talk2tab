@@ -18,5 +18,5 @@ export function executeClick(actionId: string, registry: ElementRegistry, ref: s
   element.scrollIntoView({ block: "center", inline: "nearest" });
   element.focus({ preventScroll: true });
   element.click();
-  return { ok: true, actionId, status: "success", changed: true };
+  return { ok: true, actionId, status: "success", dispatched: true, changed: false };
 }

@@ -137,17 +137,18 @@ test("fixture harness rejects an intentionally incorrect final oracle", () => {
   assert.throws(() => assert.deepEqual(wrong, expected), /Expected values to be strictly deep-equal/);
 });
 
-test("baseline captures unstable fingerprints and click success without an effect", async () => {
+test("semantic fingerprints are stable and clicks report dispatch separately from effect", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);
   const first = await pageScan(worker, page);
   const second = await pageScan(worker, page);
-  assert.notEqual(first.data.fingerprint, second.data.fingerprint, "Known baseline: ephemeral refs currently alter the fingerprint");
+  assert.equal(first.data.fingerprint, second.data.fingerprint, "Ephemeral refs must not alter semantic state identity");
   const before = await page.locator("#status").textContent();
   const noop = second.data.elements.find((element) => element.name === "Controle sem efeito");
   const result = await execute(worker, page, { type: "click", target: { ref: noop.ref } });
   const after = await page.locator("#status").textContent();
-  assert.equal(result.changed, true, "Known baseline: executor reports a change when click was dispatched");
+  assert.equal(result.dispatched, true);
+  assert.equal(result.changed, false, "A dispatched click does not prove an effect");
   assert.equal(after, before, "The fixture confirms that the click produced no observable effect");
   await page.close();
 });

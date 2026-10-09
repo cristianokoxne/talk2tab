@@ -78,7 +78,30 @@ function toElementRef(element: HTMLElement, ref: string, document: Document, win
 }
 
 function fingerprint(state: Omit<PageState, "fingerprint">): string {
-  const source = `${state.url}|${state.title}|${state.elements.map((element) => `${element.ref}:${element.name}`).join("|")}`;
+  const source = JSON.stringify({
+    url: state.url,
+    title: state.title,
+    pageTextSummary: state.pageTextSummary,
+    viewport: { scrollY: state.viewport.scrollY },
+    elements: state.elements.map((element) => ({
+      tag: element.tag,
+      role: element.role,
+      name: element.name,
+      text: element.text,
+      href: element.href,
+      type: element.type,
+      visible: element.visible,
+      enabled: element.enabled,
+      checked: element.checked,
+      selected: element.selected,
+    })),
+    scrollContainers: state.scrollContainers?.map((container) => ({
+      label: container.label,
+      scrollTop: container.scrollTop,
+      clientHeight: container.clientHeight,
+      scrollHeight: container.scrollHeight,
+    })),
+  });
   let hash = 2166136261;
   for (const character of source) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
   return `p_${(hash >>> 0).toString(36)}`;

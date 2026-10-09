@@ -42,3 +42,17 @@ test("agent loop supports explicit cancellation", async () => {
   assert.equal(result.status, "cancelled");
   assert.equal(result.steps.length, 1);
 });
+
+test("agent loop stops when progress returns to an already observed page state", async () => {
+  const states = ["state-a", "state-b", "state-a"];
+  let observation = 0;
+  const result = await runAgentLoop({
+    observe: async () => ({ ...page, fingerprint: states[Math.min(observation++, states.length - 1)] }),
+    decide: async () => ({ optionId: "toggle", action: { type: "click", target: { ref: "el_1_1" } }, probabilities: {} }),
+    execute: async () => ({ ok: true, dispatched: true, changed: false }),
+    verify: (before, after) => ({ ok: true, progressed: before.fingerprint !== after.fingerprint, reason: "state changed" }),
+  }, 8);
+  assert.equal(result.status, "stalled");
+  assert.match(result.message, /estado já observado/);
+  assert.equal(result.steps.length, 2);
+});
