@@ -285,7 +285,7 @@ async function loadProviderConfig(chromeApi: typeof chrome): Promise<ProviderCon
   const stored = await chromeApi.storage.local.get("jevProvider");
   return {
     id: "jev",
-    endpoint: "https://api.typesafe.ai/v1/systemone",
+    endpoint: "https://system-one.dev/v1/systemone",
     model: "jev-latest",
     ...(stored.jevProvider as Partial<ProviderConfig> | undefined),
   };

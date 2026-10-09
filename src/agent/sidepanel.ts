@@ -125,7 +125,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     if (!apiKey.startsWith("apikey_")) { onboardingStatus.textContent = "A chave deve começar com apikey_."; return; }
     saveKeyButton.disabled = true;
     onboardingStatus.textContent = "Salvando…";
-    void chromeApi.storage.local.set({ jevProvider: { id: "jev", endpoint: "https://api.typesafe.ai/v1/systemone", model: "jev-latest", apiKey } }).then(() => {
+    void chromeApi.storage.local.set({ jevProvider: { id: "jev", endpoint: "https://system-one.dev/v1/systemone", model: "jev-latest", apiKey } }).then(() => {
       apiKeyInput.value = "";
       onboardingStatus.textContent = "Configurado. Você já pode usar o agente.";
       setConfiguredUi(true);

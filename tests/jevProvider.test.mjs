@@ -36,13 +36,42 @@ test("Jev provider resolves a typed choice to the mapped action", async () => {
     request = { _url, init };
     const choice = Object.entries(JSON.parse(request.init.body).questions.next_action.criteria)
       .find(([, criterion]) => criterion.description.includes("Continuar"))?.[0];
-    return { ok: true, status: 200, json: async () => ({ answers: { next_action: { choice, confidence: 0.93, probabilities: { [choice]: 0.93 } } } }) };
+    return { ok: true, status: 200, json: async () => ({ model: "jev-test-2026", answers: { next_action: { type: "choice", choice, confidence: 0.93, probabilities: { [choice]: 0.93 } } } }) };
   };
   const decision = await new JevProvider({ id: "jev", endpoint: "https://jev.test/v1/systemone", apiKey: "secret", model: "jev-latest" }, fakeFetch).chooseNextAction(map, options);
   assert.equal(decision.action.type, "click");
   assert.equal(decision.confidence, 0.93);
+  assert.equal(decision.model, "jev-test-2026");
   assert.equal(request.init.method, "POST");
   assert.match(request.init.headers.authorization, /secret/);
+});
+
+test("Jev provider tolerates omitted optional confidence and probabilities", async () => {
+  const { map, options } = buildJevCommandMap("continuar", page);
+  const selected = options[0];
+  const provider = new JevProvider({ id: "jev", apiKey: "test" }, async () => ({
+    ok: true, status: 200, json: async () => ({ answers: { next_action: { choice: selected.id } } }),
+  }));
+  const decision = await provider.chooseNextAction(map, options);
+  assert.equal(decision.optionId, selected.id);
+  assert.deepEqual(decision.probabilities, {});
+  assert.equal(decision.confidence, undefined);
+});
+
+test("Jev provider rejects malformed and unknown probability outputs before execution", async () => {
+  const { map, options } = buildJevCommandMap("continuar", page);
+  for (const probabilities of [{ unknown_choice: 1 }, { choice_001: 1.2 }]) {
+    const provider = new JevProvider({ id: "jev", apiKey: "test" }, async () => ({
+      ok: true, status: 200, json: async () => ({ answers: { next_action: { choice: options[0].id, probabilities } } }),
+    }));
+    const error = await provider.chooseNextAction(map, options).then(() => { throw new Error("Expected invalid response."); }, (caught) => caught);
+    assert.equal(error.code, "PROVIDER_INVALID_RESPONSE");
+  }
+  const unknownProvider = new JevProvider({ id: "jev", apiKey: "test" }, async () => ({
+    ok: true, status: 200, json: async () => ({ answers: { next_action: { choice: "unmapped" } } }),
+  }));
+  const unknown = await unknownProvider.chooseNextAction(map, options).then(() => { throw new Error("Expected unknown choice."); }, (caught) => caught);
+  assert.equal(unknown.code, "PROVIDER_UNKNOWN_CHOICE");
 });
 
 test("Jev provider abort signal cancels an in-flight request", async () => {

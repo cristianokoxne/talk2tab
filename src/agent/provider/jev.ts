@@ -2,6 +2,7 @@ import type { AgentAction, ProviderConfig } from "../types.js";
 import type { JevCommandMap, CommandOption } from "./commandMap.js";
 
 export interface JevChoiceAnswer {
+  type?: string;
   choice: string;
   probabilities?: Record<string, number>;
   confidence?: number;
@@ -12,11 +13,15 @@ export interface JevDecision {
   action: AgentAction;
   confidence?: number;
   probabilities: Record<string, number>;
+  model?: string;
 }
 
 interface JevResponse {
+  model?: unknown;
   answers?: { next_action?: JevChoiceAnswer };
 }
+
+export const JEV_ADAPTER_VERSION = "2";
 
 export class JevProviderError extends Error {
   constructor(message: string, readonly code: string, options?: ErrorOptions) {
@@ -32,7 +37,7 @@ export class JevProvider {
   constructor(config: ProviderConfig, fetchImpl: typeof fetch = globalThis.fetch.bind(globalThis)) {
     this.config = {
       ...config,
-      endpoint: config.endpoint || "https://api.typesafe.ai/v1/systemone",
+      endpoint: config.endpoint || "https://system-one.dev/v1/systemone",
       model: config.model || "jev-latest",
     };
     this.fetchImpl = fetchImpl;
@@ -74,13 +79,22 @@ export class JevProvider {
       }
       const answer = payload.answers?.next_action;
       if (!answer?.choice) throw new JevProviderError("Resposta do Jev sem escolha next_action.", "PROVIDER_INVALID_RESPONSE");
+      if (answer.type !== undefined && answer.type !== "choice") throw new JevProviderError("Resposta do Jev não corresponde ao tipo choice.", "PROVIDER_INVALID_RESPONSE");
       const selected = options.find((option) => option.id === answer.choice);
       if (!selected) throw new JevProviderError(`Jev escolheu uma opção desconhecida: ${answer.choice}.`, "PROVIDER_UNKNOWN_CHOICE");
+      const knownIds = new Set(options.map((option) => option.id));
+      if (answer.probabilities !== undefined && (!answer.probabilities || typeof answer.probabilities !== "object" || Object.entries(answer.probabilities).some(([id, probability]) => !knownIds.has(id) || !Number.isFinite(probability) || probability < 0 || probability > 1))) {
+        throw new JevProviderError("Resposta do Jev contém probabilidades inválidas ou opções desconhecidas.", "PROVIDER_INVALID_RESPONSE");
+      }
+      if (answer.confidence !== undefined && (!Number.isFinite(answer.confidence) || answer.confidence < 0 || answer.confidence > 1)) {
+        throw new JevProviderError("Resposta do Jev contém confidence fora do intervalo de 0 a 1.", "PROVIDER_INVALID_RESPONSE");
+      }
       return {
         optionId: selected.id,
         action: selected.action,
         confidence: answer.confidence,
         probabilities: answer.probabilities ?? {},
+        model: typeof payload.model === "string" ? payload.model : undefined,
       };
     } catch (error) {
       if (timedOut) throw new JevProviderError(`Jev request timed out after ${timeoutMs}ms.`, "PROVIDER_TIMEOUT", { cause: error });
