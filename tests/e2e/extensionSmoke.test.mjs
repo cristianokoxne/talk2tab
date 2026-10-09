@@ -250,6 +250,44 @@ test("click executor refuses a target covered by an overlay", async () => {
   await page.close();
 });
 
+test("controlled field waits for mask acceptance and reports a reverted value", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  let observation = await pageScan(worker, page);
+  const controlled = observation.data.elements.find((element) => element.name === "Campo controlado com máscara");
+  const accepted = await execute(worker, page, { type: "type", target: { ref: controlled.ref }, text: "hello", replace: true });
+  assert.equal(accepted.ok, true);
+  assert.equal(await page.locator("#controlled").inputValue(), "HELLO");
+
+  observation = await pageScan(worker, page);
+  const rollback = observation.data.elements.find((element) => element.name === "Campo que rejeita atualização");
+  const rejected = await execute(worker, page, { type: "type", target: { ref: rollback.ref }, text: "reject", replace: true });
+  assert.equal(rejected.ok, false);
+  assert.equal(rejected.code, "INPUT_REVERTED");
+  assert.equal(await page.locator("#rollback").inputValue(), "");
+  await page.close();
+});
+
+test("native date and time inputs keep canonical values in Chromium", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    const form = document.createElement("form");
+    form.innerHTML = `<label for="native-date">Data canônica</label><input id="native-date" type="date"><label for="native-time">Hora canônica</label><input id="native-time" type="time"><label for="native-number">Número limitado</label><input id="native-number" type="number" min="1" max="5" step="2">`;
+    document.body.append(form);
+  });
+  const observation = await pageScan(worker, page);
+  const date = observation.data.elements.find((element) => element.name === "Data canônica");
+  const time = observation.data.elements.find((element) => element.name === "Hora canônica");
+  const number = observation.data.elements.find((element) => element.name === "Número limitado");
+  assert.equal((await execute(worker, page, { type: "type", target: { ref: date.ref }, text: "2026-10-09" })).ok, true);
+  assert.equal((await execute(worker, page, { type: "type", target: { ref: time.ref }, text: "14:30" })).ok, true);
+  assert.equal(await page.locator("#native-date").inputValue(), "2026-10-09");
+  assert.equal(await page.locator("#native-time").inputValue(), "14:30");
+  assert.equal((await execute(worker, page, { type: "type", target: { ref: number.ref }, text: "4" })).code, "INVALID_VALUE");
+  await page.close();
+});
+
 test("extension submits an empty search without claiming results exist", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);

@@ -7,6 +7,10 @@
     <label for="query">Buscar no catálogo</label>
     <input id="query" type="search" placeholder="Digite sua busca">
     <button id="search">Pesquisar</button>
+    <label for="controlled">Campo controlado com máscara</label>
+    <input id="controlled" type="text" autocomplete="off">
+    <label for="rollback">Campo que rejeita atualização</label>
+    <input id="rollback" type="text" autocomplete="off">
     <button id="no-op">Controle sem efeito</button>
     <p id="status" role="status">Pronto</p>
     <button id="open-dialog" aria-haspopup="dialog">Filtros</button>
@@ -31,6 +35,14 @@
     });
     document.querySelector('#open-dialog').addEventListener('click', () => document.querySelector('#filters').showModal());
     document.querySelector('#close-dialog').addEventListener('click', () => document.querySelector('#filters').close());
+    document.querySelector('#controlled').addEventListener('input', (event) => {
+      const input = event.currentTarget;
+      setTimeout(() => { input.value = input.value.toUpperCase(); }, 80);
+    });
+    document.querySelector('#rollback').addEventListener('input', (event) => {
+      const input = event.currentTarget;
+      setTimeout(() => { input.value = ''; }, 80);
+    });
   </script>
 </body>
 </html>

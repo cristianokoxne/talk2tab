@@ -49,8 +49,10 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
           sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid type action." });
           return;
         }
-        sendResponse(executeType(request.actionId, registry, request.action.target.ref, request.action.text, request.action.replace));
-        return;
+        void executeType(request.actionId, registry, request.action.target.ref, request.action.text, request.action.replace)
+          .then(sendResponse)
+          .catch(() => sendResponse({ ok: false, actionId: request.actionId, status: "failed", code: "INPUT_EXECUTION_FAILED", error: "Unable to verify the field update." }));
+        return true;
       }
       if (request.action?.type === "select") {
         if (typeof request.actionId !== "string" || typeof request.action.target?.ref !== "string" || typeof request.action.value !== "string") {
