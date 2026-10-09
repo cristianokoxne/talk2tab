@@ -49,6 +49,7 @@ export function inferRole(element: HTMLElement): string | undefined {
   switch (element.tagName.toLowerCase()) {
     case "a": return "link";
     case "button": return "button";
+    case "summary": return "button";
     case "textarea": return "textbox";
     case "select": return "combobox";
     case "input": {

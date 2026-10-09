@@ -195,6 +195,61 @@ test("extension can uncheck a selected checkbox in the active dialog", async () 
   await page.close();
 });
 
+test("keyboard Escape dismisses a dialog and Tab advances actual focus", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  let observation = await pageScan(worker, page);
+  const opener = observation.data.elements.find((element) => element.name === "Filtros");
+  await execute(worker, page, { type: "click", target: { ref: opener.ref } });
+  const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
+  const key = (name) => worker.evaluate(async ({ tabId: targetTabId, key: keyName }) => chrome.tabs.sendMessage(targetTabId, { type: "EXECUTE_ACTION", actionId: crypto.randomUUID(), action: { type: "keypress", key: keyName } }), { tabId, key: name });
+  await key("Escape");
+  assert.equal(await page.locator("#filters").evaluate((dialog) => dialog.open), false);
+
+  await page.locator("#query").focus();
+  await key("Tab");
+  assert.equal(await page.evaluate(() => document.activeElement.id), "search");
+  await page.close();
+});
+
+test("keyboard events reach a focused control in an open shadow root", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    const host = document.createElement("div");
+    host.id = "shadow-host";
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `<input aria-label="Campo no shadow"><output></output>`;
+    root.querySelector("input").addEventListener("keydown", (event) => { root.querySelector("output").textContent = event.key; });
+    document.body.append(host);
+  });
+  const observation = await pageScan(worker, page);
+  const shadowInput = observation.data.elements.find((element) => element.name === "Campo no shadow");
+  assert.ok(shadowInput);
+  await page.locator("#shadow-host").evaluate((host) => host.shadowRoot.querySelector("input").focus());
+  const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
+  await worker.evaluate(async ({ tabId: targetTabId }) => chrome.tabs.sendMessage(targetTabId, { type: "EXECUTE_ACTION", actionId: crypto.randomUUID(), action: { type: "keypress", key: "x" } }), { tabId });
+  assert.equal(await page.locator("#shadow-host").evaluate((host) => host.shadowRoot.querySelector("output").textContent), "x");
+  await page.close();
+});
+
+test("click executor refuses a target covered by an overlay", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    const overlay = document.createElement("div");
+    overlay.id = "test-overlay";
+    Object.assign(overlay.style, { position: "fixed", inset: "0", zIndex: "99999" });
+    document.body.append(overlay);
+  });
+  const observation = await pageScan(worker, page);
+  const search = observation.data.elements.find((element) => element.name === "Pesquisar");
+  const result = await execute(worker, page, { type: "click", target: { ref: search.ref } });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, "CLICK_OBSCURED");
+  await page.close();
+});
+
 test("extension submits an empty search without claiming results exist", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);

@@ -8,7 +8,7 @@ export function verifyAction(before: PageState, after: PageState, action: AgentA
   const changedTitle = after.title !== before.title;
   const changedFingerprint = after.fingerprint !== before.fingerprint;
   const changedViewport = after.viewport.scrollY !== before.viewport.scrollY;
-  const directlyObservedByExecutor = result.changed === true && (action.type === "type" || action.type === "select" || action.type === "scroll");
+  const directlyObservedByExecutor = result.changed === true && (action.type === "type" || action.type === "select" || action.type === "scroll" || action.type === "keypress");
   const effectObserved = changedUrl || changedTitle || changedFingerprint || changedViewport || directlyObservedByExecutor;
   const evidence = [
     ...(changedUrl ? ["url_changed"] : []),

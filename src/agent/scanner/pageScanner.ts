@@ -5,7 +5,7 @@ import { compactText, summarizePageText } from "./text.js";
 import { isElementVisible } from "./visibility.js";
 
 const interactiveSelector = [
-  "a[href]", "button", "input", "textarea", "select", "[role=button]", "[role=link]",
+  "a[href]", "button", "input", "textarea", "select", "summary", "[role=button]", "[role=link]",
   "[role=textbox]", "[role=checkbox]", "[role=radio]", "[role=switch]", "[role=tab]", "[role=option]",
   "[role=combobox]", "[role=menuitem]", "[role=menuitemcheckbox]", "[role=menuitemradio]", "[role=treeitem]",
   "[contenteditable=true]", "[tabindex]:not([tabindex='-1'])",

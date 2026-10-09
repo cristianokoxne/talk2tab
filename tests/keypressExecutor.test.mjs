@@ -24,3 +24,25 @@ test("Enter submits the focused search form when available", () => {
   assert.equal(executeKeyPress("k3", dom.window.document, "ENTER").ok, true);
   assert.equal(submits, 1);
 });
+
+test("Enter does not submit again when a key handler already submits", () => {
+  const dom = new JSDOM(`<form><input type="search"></form>`);
+  const input = dom.window.document.querySelector("input");
+  let submits = 0;
+  input.form.requestSubmit = () => { submits += 1; };
+  input.addEventListener("keydown", () => input.form.requestSubmit());
+  input.focus();
+  executeKeyPress("k4", dom.window.document, "ENTER");
+  assert.equal(submits, 1);
+});
+
+test("Enter respects a prevented keydown", () => {
+  const dom = new JSDOM(`<form><input type="search"></form>`);
+  const input = dom.window.document.querySelector("input");
+  let submits = 0;
+  input.form.requestSubmit = () => { submits += 1; };
+  input.addEventListener("keydown", (event) => event.preventDefault());
+  input.focus();
+  executeKeyPress("k5", dom.window.document, "ENTER");
+  assert.equal(submits, 0);
+});
