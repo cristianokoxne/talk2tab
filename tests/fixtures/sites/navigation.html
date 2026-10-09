@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Talk2Tab E2E</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body>
+  <main>
+    <h1>Pesquisa de catálogo</h1>
+    <label for="query">Buscar no catálogo</label>
+    <input id="query" type="search" placeholder="Digite sua busca">
+    <button id="search">Pesquisar</button>
+    <button id="no-op">Controle sem efeito</button>
+    <p id="status" role="status">Pronto</p>
+    <button id="open-dialog" aria-haspopup="dialog">Filtros</button>
+    <dialog id="filters" aria-label="Filtros">
+      <label><input type="checkbox" id="available"> Disponível</label>
+      <button id="close-dialog">Fechar filtros</button>
+    </dialog>
+    <section aria-label="Resultados">
+      <h2>Resultados</h2>
+      <article><a href="/result-one">Teclado sem fio modelo A</a><p>Resultado orgânico</p></article>
+      <article><a href="/result-two">Teclado sem fio modelo B</a><p>Resultado patrocinado</p></article>
+    </section>
+    <div id="scroll-panel" aria-label="Mensagens" style="height:100px;overflow:auto;border:1px solid">
+      <p>Mensagem 1</p><p>Mensagem 2</p><p>Mensagem 3</p><p>Mensagem 4</p><p>Mensagem 5</p>
+    </div>
+    <iframe title="Frame de pesquisa" src="__FRAME_ORIGIN__frame.html"></iframe>
+  </main>
+  <script>
+    document.querySelector('#search').addEventListener('click', () => {
+      const q = document.querySelector('#query').value;
+      document.querySelector('#status').textContent = q ? `Resultados para ${q}` : 'Digite uma pesquisa';
+    });
+    document.querySelector('#open-dialog').addEventListener('click', () => document.querySelector('#filters').showModal());
+    document.querySelector('#close-dialog').addEventListener('click', () => document.querySelector('#filters').close());
+  </script>
+</body>
+</html>

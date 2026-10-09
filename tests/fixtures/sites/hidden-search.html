@@ -1,0 +1,9 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Busca recolhida</title></head>
+<body><main><button id="show-search" aria-expanded="false">Abrir busca</button>
+<label for="hidden-query">Buscar produtos</label><input id="hidden-query" type="search" hidden>
+<button id="hidden-submit" hidden>Pesquisar</button><script>
+document.querySelector('#show-search').addEventListener('click', () => {
+  document.querySelector('#hidden-query').hidden = false;
+  document.querySelector('#hidden-submit').hidden = false;
+});
+</script></main></body></html>

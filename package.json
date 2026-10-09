@@ -8,6 +8,9 @@
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "lint": "eslint src --ext .ts",
     "test": "npm run build && node --test tests/**/*.test.mjs",
+    "test:e2e": "npm run build && node --test tests/e2e/*.test.mjs",
+    "bench:replay": "node scripts/run-benchmark.mjs",
+    "bench:jev": "node scripts/run-benchmark.mjs --provider jev",
     "test:watch": "node --test --watch tests/**/*.test.mjs"
   },
   "keywords": [
@@ -25,6 +28,7 @@
     "esbuild": "^0.25.0",
     "eslint": "^8.0.0",
     "jsdom": "^30.0.1",
+    "playwright": "^1.64.0",
     "typescript": "^5.4.0",
     "vitest": "^1.0.0"
   },
