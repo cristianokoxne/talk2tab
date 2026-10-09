@@ -13,7 +13,8 @@ export interface SwitchTabAction { type: "switch_tab"; tabId: number; }
 export interface CloseTabAction { type: "close_tab"; tabId: number; }
 export type BrowserAction = ClickAction | TypeAction | SelectAction | ScrollAction | KeyPressAction | NavigateAction | SearchWebAction | OpenTabAction | OpenWindowAction | SwitchTabAction | CloseTabAction;
 export interface FinishAction { type: "finish"; status: "success" | "failed"; message: string; }
-export type AgentAction = BrowserAction | FinishAction;
+export interface ExpandCandidatesAction { type: "expand_candidates"; nextOffset: number; remaining: number; }
+export type AgentAction = BrowserAction | FinishAction | ExpandCandidatesAction;
 
 export interface ActionRequest { id: string; action: BrowserAction; }
 

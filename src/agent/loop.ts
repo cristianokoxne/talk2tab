@@ -63,6 +63,11 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     const result = await driver.execute(decision.action, `agent_step_${step}`);
     trace.result = result;
     if (!result.ok) return { status: "failed", steps, message: result.error ?? "A ação falhou." };
+    if (decision.action.type === "expand_candidates") {
+      previousOptionId = undefined;
+      stalledSteps = 0;
+      continue;
+    }
 
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     const nextPage = await driver.observe();

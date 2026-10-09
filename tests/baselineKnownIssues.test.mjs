@@ -17,7 +17,8 @@ const page = {
 
 test("baseline: compound search is marked complete before opening its result", () => {
   const { options } = buildJevCommandMap("pesquise por teclado e abra o primeiro resultado", page, [], ["navigate", "type", "keypress"]);
-  assert.deepEqual(options.map(({ id }) => id), ["finish_success"]);
+  assert.equal(options.length, 1);
+  assert.equal(options[0].action.type, "finish");
 });
 
 test("baseline: hidden search has no reveal action in the restricted candidate set", () => {

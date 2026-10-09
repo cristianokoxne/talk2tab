@@ -305,6 +305,7 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
   const provider = new JevProvider(config);
   const currentTabId = { value: tabId };
   const completedActions = new Set<string>();
+  let candidateOffset = 0;
   let observationStep = 0;
   let latestPage: PageState | undefined;
   return runAgentLoop({
@@ -316,10 +317,14 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       return page;
     },
     decide: async (page, decisionSignal) => {
-      const { map, options } = buildJevCommandMap(message.goal, page, await listTabs(chromeApi), [...completedActions]);
+      const { map, options } = buildJevCommandMap(message.goal, page, await listTabs(chromeApi), [...completedActions], candidateOffset);
       return provider.chooseNextAction(map, options, decisionSignal);
     },
     execute: async (action, actionId) => {
+      if (action.type === "expand_candidates") {
+        candidateOffset = action.nextOffset;
+        return { ok: true, actionId, status: "success", changed: true };
+      }
       if (latestPage && requiresActionConfirmation(action, latestPage, message.goal)) {
         const approved = await requestActionConfirmation(chromeApi, message.requestId, action, latestPage, signal);
         if (!approved && signal.aborted) return { ok: true, actionId, changed: false, status: "success" };

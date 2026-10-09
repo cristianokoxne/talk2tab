@@ -16,13 +16,14 @@ test("scripted Jev drives a complete search journey without network access", asy
     ],
   };
   const state = { page: structuredClone(page), query: "", submitted: false, calls: 0 };
+  let currentOptions = [];
   const provider = new JevProvider({ id: "jev", endpoint: "https://scripted-jev.invalid/", apiKey: "test-only", model: "scripted" }, async (_url, request) => {
     state.calls += 1;
     const payload = JSON.parse(request.body);
     const choices = Object.keys(payload.questions.next_action.criteria);
-    let selected = choices.find((id) => id.startsWith("type_"));
-    if (!selected && state.query && !state.submitted) selected = choices.find((id) => id.startsWith("click_"));
-    selected ??= choices.find((id) => id.startsWith("finish_"));
+    let selected = currentOptions.find((option) => option.action.type === "type")?.id;
+    if (!selected && state.query && !state.submitted) selected = currentOptions.find((option) => option.action.type === "click")?.id;
+    selected ??= currentOptions.find((option) => option.action.type === "finish")?.id;
     assert.ok(selected, "scripted provider must choose from the supplied closed action set");
     return { ok: true, status: 200, json: async () => ({ answers: { next_action: { choice: selected } } }) };
   });
@@ -31,6 +32,7 @@ test("scripted Jev drives a complete search journey without network access", asy
     observe: async () => ({ ...state.page, fingerprint: `${state.query}:${state.submitted}` }),
     decide: async (observed) => {
       const { map, options } = buildJevCommandMap(goal, observed, [], state.completed ?? []);
+      currentOptions = options;
       return provider.chooseNextAction(map, options);
     },
     execute: async (action) => {

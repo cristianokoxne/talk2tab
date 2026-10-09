@@ -16,7 +16,11 @@ export interface JevCommandMap {
   state: {
     goal: string;
     page: PageState;
-    browser: { tabs: BrowserTabSummary[]; completedActions: string[] };
+    browser: {
+      tabs: BrowserTabSummary[];
+      completedActions: string[];
+      coverage: { truncated: boolean; omittedCandidates: number; omittedOptions: number; omittedTabs: number; candidateOffset: number; totalOptions: number; hasMoreOptions: boolean; payloadBytes: number };
+    };
   };
   questions: {
     next_action: {
@@ -32,6 +36,9 @@ export interface CommandOption {
   action: AgentAction;
 }
 
+const MAX_OPTIONS = 60;
+const MAX_CONTEXT_BYTES = 64 * 1024;
+
 function requestedUrl(goal: string): string | undefined {
   const explicit = goal.match(/https?:\/\/[^\s]+/i)?.[0]?.replace(/[),.!?]+$/, "");
   if (explicit) return explicit;
@@ -44,7 +51,51 @@ function requestedUrl(goal: string): string | undefined {
 
 function elementDescription(element: ElementRef): string {
   const label = element.name ?? element.text ?? element.placeholder ?? element.role ?? element.tag;
-  return `${element.role ?? element.tag} “${label}” (${element.ref})`;
+  const context = element.context ? `, ${element.context}` : "";
+  const description = element.description ? `, ajuda: ${element.description}` : "";
+  return `${element.role ?? element.tag} “${label}”${context}${description}`;
+}
+
+function normalizeForMatching(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function targetRef(action: AgentAction): string | undefined {
+  return "target" in action ? action.target?.ref : undefined;
+}
+
+function scoreOption(option: CommandOption, goal: string, page: PageState, tabs: BrowserTabSummary[], textToType?: string): number {
+  const action = option.action;
+  if (action.type === "finish") return -100;
+  if (action.type === "navigate" || action.type === "open_tab" || action.type === "open_window") return 30;
+  if (action.type === "search_web") return 24;
+  if (action.type === "switch_tab") return tabs.find((tab) => tab.id === action.tabId)?.active ? 40 : 0;
+  if (action.type === "close_tab") return 4;
+  if (action.type === "keypress") return 12;
+  if (action.type === "scroll") return -5;
+  if (action.type === "expand_candidates") return -20;
+  const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
+  if (!element) return 0;
+  const evidence = normalizeForMatching([element.name, element.text, element.placeholder, element.context, element.description, element.href].filter(Boolean).join(" "));
+  const normalizedGoal = normalizeForMatching(goal);
+  const terms = normalizedGoal.split(/[^\p{L}\p{N}]+/u).filter((term) => term.length >= 3);
+  let score = terms.reduce((total, term) => total + (evidence.includes(term) ? 3 : 0), 0);
+  if (element.context && page.activeDialog && normalizeForMatching(element.context).includes(normalizeForMatching(page.activeDialog))) score += 18;
+  if (page.focusedElement === element.ref) score += 8;
+  if (action.type === "type") {
+    score += 10;
+    if (textToType) score += evidence.includes("search") || evidence.includes("busca") || evidence.includes("pesquis") ? 16 : 0;
+  }
+  if (action.type === "select") {
+    const option = element.options?.find((candidate) => candidate.value === action.value);
+    if (option && terms.some((term) => normalizeForMatching(option.label).includes(term))) score += 18;
+  }
+  if (action.type === "click" && element.role === "link") score += 2;
+  return score;
+}
+
+function compactOptionLabel(element: ElementRef | undefined, value: string): string {
+  return element?.options?.find((option) => option.value === value)?.label ?? "opção disponível";
 }
 
 function isSearchSubmitControl(element: ElementRef): boolean {
@@ -73,7 +124,7 @@ function requestedText(goal: string): string | undefined {
 }
 
 /** Builds Jev's closed action space. Jev chooses an existing option; it never invents a selector or code. */
-export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserTabSummary[] = [], completedActions: string[] = []): { map: JevCommandMap; options: CommandOption[] } {
+export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserTabSummary[] = [], completedActions: string[] = [], candidateOffset = 0): { map: JevCommandMap; options: CommandOption[] } {
   const textToType = requestedText(goal);
   const options: CommandOption[] = [
     { id: "finish_success", action: { type: "finish", status: "success", message: "Objetivo concluído." } },
@@ -95,7 +146,8 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   if (genericNavigation && !completedActions.includes("search_web")) {
     options.push({ id: "search_web", action: { type: "search_web", query: navigationQuery(goal) } });
   }
-  for (const tab of tabs) {
+  const selectedTabs = [...tabs].sort((a, b) => Number(b.active) - Number(a.active)).slice(0, 20);
+  for (const tab of selectedTabs) {
     if (!tab.url || tab.url.startsWith("chrome://")) continue;
     options.push({ id: `switch_tab_${tab.id}`, action: { type: "switch_tab", tabId: tab.id } });
   }
@@ -172,19 +224,53 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     options.splice(1);
   }
 
+  const rankedOptions = options.map((option, order) => ({ option, order, score: scoreOption(option, goal, page, tabs, textToType) }))
+    .sort((a, b) => b.score - a.score || a.order - b.order);
+  const startOffset = Math.min(Math.max(0, candidateOffset), rankedOptions.length);
+  let visibleRankedOptions = rankedOptions.slice(startOffset, startOffset + MAX_OPTIONS);
+  const hasMoreOptions = startOffset + visibleRankedOptions.length < rankedOptions.length;
+  if (hasMoreOptions) visibleRankedOptions = visibleRankedOptions.slice(0, MAX_OPTIONS - 1);
+  const chosenRawOptions = visibleRankedOptions.map(({ option }) => option);
+  const nextOffset = startOffset + chosenRawOptions.length;
+  if (hasMoreOptions) {
+    chosenRawOptions.push({ id: "expand_candidates", action: { type: "expand_candidates", nextOffset, remaining: rankedOptions.length - nextOffset } });
+  }
+  const selectedRefs = new Set(chosenRawOptions.map(({ action }) => targetRef(action)).filter((ref): ref is string => Boolean(ref)));
+  const selectedElements = page.elements.filter((element) => selectedRefs.has(element.ref));
+  const compactPage: PageState = {
+    ...page,
+    pageTextSummary: page.pageTextSummary.slice(0, 1600),
+    regions: page.regions?.slice(0, 20),
+    elements: selectedElements.map((element) => ({
+      ...element,
+      options: element.options?.map((option, index) => ({ value: `option_${index + 1}`, label: option.label })),
+    })),
+    scrollContainers: page.scrollContainers?.slice(0, 12),
+  };
+  const omittedCandidates = Math.max(0, page.elements.length - selectedElements.length);
+  const omittedTabs = Math.max(0, tabs.length - selectedTabs.length);
   const criteria: Record<string, JevChoiceCriterion> = {};
-  for (const option of options) {
+  const makeMap = (finalOptions: CommandOption[]): JevCommandMap => {
+    const mappedOptions = finalOptions.map((option, index) => ({ ...option, id: `choice_${String(index + 1).padStart(3, "0")}` }));
+    const currentHasMoreOptions = finalOptions.some((option) => option.action.type === "expand_candidates");
+    const currentActionCount = finalOptions.filter((option) => option.action.type !== "expand_candidates").length;
+    const currentOmittedOptions = Math.max(0, rankedOptions.length - currentActionCount);
+    const refsInOptions = new Set(finalOptions.map(({ action }) => targetRef(action)).filter((ref): ref is string => Boolean(ref)));
+    const pageForOptions = { ...compactPage, elements: compactPage.elements.filter((element) => refsInOptions.has(element.ref)) };
+    for (const option of mappedOptions) {
     const action = option.action;
     if (action.type === "click") {
       const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
-      criteria[option.id] = { description: `Clique em ${element ? elementDescription(element) : action.target.ref}.` };
+      criteria[option.id] = { description: `Clique em ${element ? elementDescription(element) : "o controle indicado"}.` };
     } else if (action.type === "type") {
       const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
-      criteria[option.id] = { description: `Digite o próximo texto solicitado em ${element ? elementDescription(element) : action.target.ref}.` };
+      criteria[option.id] = { description: `Digite “${action.text.slice(0, 240)}” em ${element ? elementDescription(element) : "o campo indicado"}.` };
     } else if (action.type === "select") {
-      criteria[option.id] = { description: `Selecione a opção correta no controle ${action.target.ref}.` };
+      const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
+      criteria[option.id] = { description: `Selecione “${compactOptionLabel(element, action.value)}” em ${element ? elementDescription(element) : "o controle indicado"}.` };
     } else if (action.type === "scroll") {
-      criteria[option.id] = { description: `Role ${action.direction === "down" ? "para baixo" : "para cima"} para encontrar elementos relevantes.` };
+      const container = page.scrollContainers?.find((candidate) => candidate.ref === action.target?.ref);
+      criteria[option.id] = { description: `Role ${action.direction === "down" ? "para baixo" : "para cima"}${container ? ` em ${container.label}` : " na página"} para revelar conteúdo relevante.` };
     } else if (action.type === "open_tab") {
       criteria[option.id] = { description: `Abra ${action.url} em uma nova aba e aguarde o carregamento.` };
     } else if (action.type === "open_window") {
@@ -199,23 +285,72 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     } else if (action.type === "close_tab") {
       criteria[option.id] = { description: "Feche a aba atual solicitada e continue na aba ativa restante." };
     } else if (action.type === "keypress") {
-      criteria[option.id] = { description: "Envie o formulário ou a pesquisa pressionando Enter no campo preenchido." };
+      const focused = page.elements.find((element) => element.ref === page.focusedElement);
+      criteria[option.id] = { description: `Pressione ${action.key}${focused ? ` no campo ${elementDescription(focused)}` : " no controle com foco"}.` };
+    } else if (action.type === "expand_candidates") {
+      criteria[option.id] = { description: `Nenhum candidato visível corresponde com clareza. Inspecione o próximo lote de ${Math.min(59, action.remaining)} ações disponíveis.` };
     } else {
       criteria[option.id] = { description: "O objetivo do usuário já foi concluído." };
     }
-  }
-
-  return {
-    map: {
-      state: { goal, page, browser: { tabs, completedActions } },
+    }
+    const mappedCriteria = Object.fromEntries(mappedOptions.map((option) => [option.id, criteria[option.id]]));
+    return {
+      state: {
+        goal: goal.slice(0, 4000),
+        page: pageForOptions,
+        browser: {
+          tabs: selectedTabs,
+          completedActions,
+          coverage: {
+            truncated: omittedCandidates > 0 || currentOmittedOptions > 0 || omittedTabs > 0,
+            omittedCandidates,
+            omittedOptions: currentOmittedOptions,
+            omittedTabs,
+            candidateOffset: startOffset,
+            totalOptions: rankedOptions.length,
+            hasMoreOptions: currentHasMoreOptions,
+            payloadBytes: 0,
+          },
+        },
+      },
       questions: {
         next_action: {
           type: "choice",
-          instructions: "Escolha exatamente uma próxima ação segura para avançar o objetivo. O estado browser.completedActions registra ações globais já concluídas: nunca repita uma ação desse conjunto. Se o objetivo já estiver concluído, escolha finish_success.",
-          criteria,
+          instructions: "Escolha a ação que melhor avança a etapa atual. Considere alvo, contexto, estado e cobertura. O histórico registra tipos executados, mas a mesma ação pode ser necessária em outro alvo. Se já concluiu o objetivo inteiro, escolha a opção de conclusão.",
+          criteria: mappedCriteria,
         },
       },
-    },
-    options,
+    };
+  };
+  let finalOptions = chosenRawOptions;
+  let map = makeMap(finalOptions);
+  let payloadBytes = new TextEncoder().encode(JSON.stringify(map)).length;
+  while (payloadBytes > MAX_CONTEXT_BYTES && finalOptions.length > 1) {
+    const expandIndex = finalOptions.findIndex((option) => option.action.type === "expand_candidates");
+    const removeIndex = expandIndex === finalOptions.length - 1 ? finalOptions.length - 2 : finalOptions.length - 1;
+    finalOptions = finalOptions.filter((_option, index) => index !== removeIndex);
+    const expansion = finalOptions.find((option) => option.action.type === "expand_candidates");
+    if (expansion?.action.type === "expand_candidates") {
+      const visibleActions = finalOptions.filter((option) => option.action.type !== "expand_candidates").length;
+      expansion.action.nextOffset = startOffset + visibleActions;
+      expansion.action.remaining = Math.max(0, rankedOptions.length - expansion.action.nextOffset);
+    }
+    map = makeMap(finalOptions);
+    payloadBytes = new TextEncoder().encode(JSON.stringify(map)).length;
+  }
+  if (payloadBytes > MAX_CONTEXT_BYTES) {
+    finalOptions = [{ id: "finish_context_limit", action: { type: "finish", status: "failed", message: "O contexto desta página excede o limite seguro de envio." } }];
+    compactPage.elements = [];
+    compactPage.regions = [];
+    map = makeMap(finalOptions);
+    map.state.goal = goal.slice(0, 1000);
+    payloadBytes = new TextEncoder().encode(JSON.stringify(map)).length;
+  }
+  map.state.browser.coverage.payloadBytes = payloadBytes;
+  map.state.browser.coverage.payloadBytes = new TextEncoder().encode(JSON.stringify(map)).length;
+
+  return {
+    map,
+    options: finalOptions.map((option, index) => ({ ...option, id: `choice_${String(index + 1).padStart(3, "0")}` })),
   };
 }
