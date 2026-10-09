@@ -1,15 +1,17 @@
-import type { ElementBounds, ElementRef, PageState, ScrollContainerRef } from "../types.js";
+import type { ElementBounds, ElementRef, PageRegion, PageState, ScrollContainerRef } from "../types.js";
 import { ElementRegistry } from "../registry/elementRegistry.js";
-import { getAccessibleName, inferRole } from "./accessibility.js";
+import { getAccessibleDescription, getAccessibleName, inferRole } from "./accessibility.js";
 import { compactText, summarizePageText } from "./text.js";
 import { isElementVisible } from "./visibility.js";
 
 const interactiveSelector = [
   "a[href]", "button", "input", "textarea", "select", "[role=button]", "[role=link]",
-  "[role=textbox]", "[role=checkbox]", "[role=radio]", "[role=combobox]", "[role=menuitem]",
+  "[role=textbox]", "[role=checkbox]", "[role=radio]", "[role=switch]", "[role=tab]", "[role=option]",
+  "[role=combobox]", "[role=menuitem]", "[role=menuitemcheckbox]", "[role=menuitemradio]", "[role=treeitem]",
   "[contenteditable=true]", "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 const sensitiveInputTypes = new Set(["password", "hidden"]);
+const semanticRegionSelector = "main,[role=main],nav,[role=navigation],form,[role=form],dialog,[role=dialog],section,article,li,[role=listitem],tr,[role=row],table,[role=table],[role=alert],[role=status]";
 
 function collectInteractiveElements(root: ParentNode): HTMLElement[] {
   const elements: HTMLElement[] = [];
@@ -54,23 +56,100 @@ function isSensitive(element: HTMLElement): boolean {
   return /password|passcode|otp|one-time-code|credit|card|cvv|token|api.?key/.test(hint);
 }
 
+function regionKind(element: HTMLElement): string {
+  if (element.matches("dialog,[role=dialog]")) return "dialog";
+  if (element.matches("form,[role=form]")) return "form";
+  if (element.matches("main,[role=main]")) return "main";
+  if (element.matches("nav,[role=navigation]")) return "navigation";
+  if (element.matches("[role=alert]")) return "alert";
+  if (element.matches("[role=status]")) return "status";
+  if (element.matches("li,[role=listitem]")) return "list item";
+  if (element.matches("tr,[role=row]")) return "row";
+  if (element.matches("article")) return "card";
+  return element.tagName.toLowerCase();
+}
+
+function regionName(element: HTMLElement, document: Document): string | undefined {
+  const heading = element.matches("h1,h2,h3,h4") ? "" : element.querySelector("h1,h2,h3,h4")?.textContent ?? "";
+  const labelledBy = element.hasAttribute("aria-labelledby") ? getAccessibleName(element, document) : "";
+  return compactText(element.getAttribute("aria-label") || labelledBy || element.getAttribute("title") || heading || "", 100) || undefined;
+}
+
+function describeRegion(element: HTMLElement, document: Document): string {
+  const kind = regionKind(element);
+  const name = regionName(element, document);
+  const peers = element.parentElement ? Array.from(element.parentElement.children).filter((candidate) => candidate.matches(semanticRegionSelector)) : [];
+  const index = peers.indexOf(element);
+  const position = index >= 0 && peers.length > 1 ? ` ${index + 1}` : "";
+  const text = compactText(element.innerText || element.textContent || "", 140);
+  return `${kind}${position}${name ? ` “${name}”` : ""}${text ? `: ${text}` : ""}`;
+}
+
+function getElementContext(element: HTMLElement, document: Document): string | undefined {
+  for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    if (ancestor.matches(semanticRegionSelector)) return describeRegion(ancestor, document);
+  }
+  return undefined;
+}
+
+function getDeepActiveElement(document: Document): HTMLElement | undefined {
+  let active = document.activeElement as HTMLElement | null;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
+  return active ?? undefined;
+}
+
+function collectRegions(root: ParentNode, document: Document, window: Window): PageRegion[] {
+  const regions: PageRegion[] = [];
+  for (const element of Array.from(root.querySelectorAll<HTMLElement>(semanticRegionSelector))) {
+    if (!isElementVisible(element, window)) continue;
+    const peers = element.parentElement ? Array.from(element.parentElement.children).filter((candidate) => candidate.matches(semanticRegionSelector)) : [];
+    const index = peers.indexOf(element);
+    regions.push({
+      kind: regionKind(element),
+      name: regionName(element, document),
+      text: compactText(element.innerText || element.textContent || "", 320) || undefined,
+      itemPosition: index >= 0 && peers.length > 1 ? index + 1 : undefined,
+    });
+    if (element.shadowRoot) regions.push(...collectRegions(element.shadowRoot, document, window));
+  }
+  return regions.slice(0, 40);
+}
+
+function getCheckedState(element: HTMLElement, input?: HTMLInputElement): { checked?: boolean; checkedState?: "mixed" } {
+  const ariaChecked = element.getAttribute("aria-checked");
+  if (ariaChecked === "mixed") return { checkedState: "mixed" };
+  if (ariaChecked === "true" || ariaChecked === "false") return { checked: ariaChecked === "true" };
+  return input?.type === "checkbox" || input?.type === "radio" ? { checked: input.checked } : {};
+}
+
 function toElementRef(element: HTMLElement, ref: string, document: Document, window: Window): ElementRef {
   const input = element instanceof HTMLInputElement ? element : undefined;
   const select = element instanceof HTMLSelectElement ? element : undefined;
   const button = element instanceof HTMLButtonElement ? element : undefined;
+  const textarea = element instanceof HTMLTextAreaElement ? element : undefined;
+  const role = inferRole(element);
+  const ariaDisabled = element.getAttribute("aria-disabled") === "true";
+  const invalid = element.getAttribute("aria-invalid") === "true" || element.matches(":invalid");
   return {
     ref,
     frameId: 0,
     tag: element.tagName.toLowerCase(),
-    role: inferRole(element),
+    role,
     name: getAccessibleName(element, document) || undefined,
+    description: getAccessibleDescription(element, document),
+    context: element.matches(semanticRegionSelector) ? undefined : getElementContext(element, document),
     type: input?.type ?? (button?.getAttribute("type")?.toLowerCase() ?? (button?.form ? "submit" : undefined)),
     placeholder: input?.placeholder || (element instanceof HTMLTextAreaElement ? element.placeholder : undefined),
     text: compactText(element.innerText || element.textContent || "", 160) || undefined,
     href: sanitizedHref(element),
     visible: isElementVisible(element, window),
-    enabled: !(element instanceof HTMLButtonElement || element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) || !element.disabled,
-    checked: input?.type === "checkbox" || input?.type === "radio" ? input.checked : undefined,
+    enabled: !ariaDisabled && (!(element instanceof HTMLButtonElement || element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) || !element.disabled),
+    required: input?.required || select?.required || textarea?.required || element.getAttribute("aria-required") === "true" || undefined,
+    readOnly: input?.readOnly || textarea?.readOnly || element.getAttribute("aria-readonly") === "true" || undefined,
+    invalid: invalid || undefined,
+    expanded: element.getAttribute("aria-expanded") === "true" ? true : element.getAttribute("aria-expanded") === "false" ? false : undefined,
+    ...getCheckedState(element, input),
+    selected: element.getAttribute("aria-selected") === "true" ? true : element.getAttribute("aria-selected") === "false" ? false : undefined,
     sensitive: isSensitive(element) || undefined,
     options: select ? Array.from(select.options).slice(0, 100).map((option) => ({ value: option.value, label: compactText(option.text, 120) })) : undefined,
     bounds: getBounds(element),
@@ -87,14 +166,22 @@ function fingerprint(state: Omit<PageState, "fingerprint">): string {
       tag: element.tag,
       role: element.role,
       name: element.name,
+      context: element.context,
+      description: element.description,
       text: element.text,
       href: element.href,
       type: element.type,
       visible: element.visible,
       enabled: element.enabled,
       checked: element.checked,
+      checkedState: element.checkedState,
       selected: element.selected,
+      required: element.required,
+      readOnly: element.readOnly,
+      invalid: element.invalid,
+      expanded: element.expanded,
     })),
+    regions: state.regions,
     scrollContainers: state.scrollContainers?.map((container) => ({
       label: container.label,
       scrollTop: container.scrollTop,
@@ -111,11 +198,13 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
   registry.beginGeneration();
   const limitations: string[] = [];
   const elements: ElementRef[] = [];
+  const elementRefs = new Map<HTMLElement, string>();
   const candidates = collectInteractiveElements(document);
 
   for (const element of candidates) {
     if (!isElementVisible(element, window)) continue;
     const ref = registry.register(element);
+    elementRefs.set(element, ref);
     elements.push(toElementRef(element, ref, document, window));
     if (element.shadowRoot?.mode === "closed") limitations.push("closed_shadow_root_detected_or_suspected");
   }
@@ -139,7 +228,17 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
     title: document.title,
     viewport: { width: window.innerWidth, height: window.innerHeight, scrollY: window.scrollY },
     pageTextSummary: summarizePageText(document),
+    regions: collectRegions(document, document, window),
     elements,
+    focusedElement: (() => {
+      const active = getDeepActiveElement(document);
+      return active ? elementRefs.get(active) : undefined;
+    })(),
+    activeDialog: (() => {
+      const active = Array.from(document.querySelectorAll<HTMLElement>("dialog[open],[role=dialog]"))
+        .find((dialog) => isElementVisible(dialog, window));
+      return active ? regionName(active, document) ?? regionKind(active) : undefined;
+    })(),
     scrollContainers,
     limitations: [...new Set(limitations)],
   };

@@ -70,8 +70,18 @@ export interface PageState {
   pageTextSummary: string;
   fingerprint: string;
   elements: ElementRef[];
+  regions?: PageRegion[];
+  focusedElement?: string;
+  activeDialog?: string;
   scrollContainers?: ScrollContainerRef[];
   limitations: string[];
+}
+
+export interface PageRegion {
+  kind: string;
+  name?: string;
+  text?: string;
+  itemPosition?: number;
 }
 
 export interface ScrollContainerRef {
@@ -89,13 +99,20 @@ export interface ElementRef {
   tag: string;
   role?: string;
   name?: string;
+  description?: string;
+  context?: string;
   type?: string;
   placeholder?: string;
   text?: string;
   href?: string;
   visible: boolean;
   enabled: boolean;
+  required?: boolean;
+  readOnly?: boolean;
+  invalid?: boolean;
+  expanded?: boolean;
   checked?: boolean;
+  checkedState?: "mixed";
   selected?: boolean;
   options?: Array<{ value: string; label: string }>;
   sensitive?: boolean;

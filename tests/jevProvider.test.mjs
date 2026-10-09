@@ -21,6 +21,12 @@ test("Jev command map exposes only safe closed actions", () => {
   assert.equal(map.questions.next_action.type, "choice");
 });
 
+test("command map exposes recognized menu items as click candidates", () => {
+  const menuPage = { ...page, elements: [{ ref: "el_1_9", frameId: 0, tag: "div", role: "menuitem", name: "Account settings", visible: true, enabled: true, context: "navigation menu" }] };
+  const { options } = buildJevCommandMap("continuar", menuPage);
+  assert.ok(options.some((option) => option.id === "click_el_1_9"));
+});
+
 test("Jev provider resolves a typed choice to the mapped action", async () => {
   const { map, options } = buildJevCommandMap("continuar", page);
   let request;

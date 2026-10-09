@@ -32,7 +32,7 @@ export interface CommandOption {
   action: AgentAction;
 }
 
-function requestedUrl(goal: string, page: PageState): string | undefined {
+function requestedUrl(goal: string): string | undefined {
   const explicit = goal.match(/https?:\/\/[^\s]+/i)?.[0]?.replace(/[),.!?]+$/, "");
   if (explicit) return explicit;
   const domain = goal.match(/\b(?:www\.)?[a-z0-9][a-z0-9-]*\.(?:com(?:\.br)?|org|net|io|dev|ai|app|gov(?:\.br)?)(?:\/[^\s]+)?\b/i)?.[0];
@@ -79,7 +79,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     { id: "finish_success", action: { type: "finish", status: "success", message: "Objetivo concluído." } },
   ];
 
-  const url = requestedUrl(goal, page);
+  const url = requestedUrl(goal);
   const hasNavigationIntent = Boolean(url && /\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal));
   const genericNavigation = !url && /\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/i.test(goal) && navigationQuery(goal);
   const hasSearchIntent = Boolean(textToType && /\b(pesquise|pesquisar|busque|buscar|procure|ache)\b/i.test(goal));
@@ -107,7 +107,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   for (const element of page.elements) {
     if (!element.visible || !element.enabled || element.sensitive) continue;
     const description = elementDescription(element);
-    if (["button", "link", "checkbox", "radio", "submit"].includes(element.role ?? element.tag)) {
+    if (["button", "link", "checkbox", "radio", "switch", "tab", "option", "menuitem", "menuitemcheckbox", "menuitemradio", "treeitem", "submit"].includes(element.role ?? element.tag)) {
       options.push({ id: `click_${element.ref}`, action: { type: "click", target: { ref: element.ref } } });
     }
     if (textToType && ["input", "textarea", "textbox", "searchbox", "combobox"].includes(element.role ?? element.tag) && element.type !== "password") {

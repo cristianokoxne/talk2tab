@@ -16,7 +16,6 @@ interface AgentPageStateMessage {
   data: PageState;
 }
 
-interface QueuedAgentGoal { goal: string; source: "manual" | "voice"; }
 interface PendingConfirmation { confirmationId: string; requestId: string; }
 
 function requestId(): string {
@@ -105,17 +104,6 @@ export function initSidePanel(chromeApi: typeof chrome): void {
         if (!activeRequestId) agentResult.textContent = "Confirmação expirou; a ação foi cancelada.";
       }, 60_000);
     }
-  });
-
-  const scanCurrentPage = (): Promise<PageState> => new Promise((resolve, reject) => {
-    chromeApi.runtime.sendMessage({ type: "SCAN_PAGE", requestId: requestId() }, (response: ScanResponse | undefined) => {
-      if (chromeApi.runtime.lastError || !response?.ok || !response.data) {
-        reject(new Error(response?.error ?? "Não foi possível atualizar o pagemap."));
-        return;
-      }
-      renderPageMap(response.data, "Pagemap atualizado para a aba ativa");
-      resolve(response.data);
-    });
   });
 
   const protectedControls = [status, pageState, debugOverlay.parentElement, agentControls, actionDebug, elements].filter((value): value is HTMLElement => value instanceof HTMLElement);
