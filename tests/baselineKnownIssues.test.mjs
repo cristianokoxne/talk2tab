@@ -15,10 +15,10 @@ const page = {
   ],
 };
 
-test("baseline: compound search is marked complete before opening its result", () => {
+test("compound search keeps opening a result pending after the search completes", () => {
   const { options } = buildJevCommandMap("pesquise por teclado e abra o primeiro resultado", page, [], ["navigate", "type", "keypress"]);
-  assert.equal(options.length, 1);
-  assert.equal(options[0].action.type, "finish");
+  assert.equal(options.some((option) => option.action.type === "click" && option.action.target.ref === "el_1_2"), true);
+  assert.equal(options.some((option) => option.action.type === "finish" && option.action.status === "success"), false);
 });
 
 test("baseline: hidden search has no reveal action in the restricted candidate set", () => {

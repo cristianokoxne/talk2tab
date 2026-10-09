@@ -1,4 +1,5 @@
 import type { AgentAction, ElementRef, PageState } from "../types.js";
+import { parseGoal, valueForField, type GoalPlan } from "../intent.js";
 
 export interface BrowserTabSummary {
   id: number;
@@ -15,6 +16,7 @@ export interface JevChoiceCriterion {
 export interface JevCommandMap {
   state: {
     goal: string;
+    goalPlan: GoalPlan;
     page: PageState;
     browser: {
       tabs: BrowserTabSummary[];
@@ -103,6 +105,14 @@ function isSearchSubmitControl(element: ElementRef): boolean {
   return ["pesquisa", "pesquisar", "buscar", "busca", "search", "submit", "go"].some((term) => label.includes(term));
 }
 
+function isProhibitedByGoal(element: ElementRef, plan: GoalPlan): boolean {
+  if (!plan.restrictions.length) return false;
+  const restriction = plan.restrictions.join(" ").toLowerCase();
+  const label = [element.name, element.text, element.role].filter(Boolean).join(" ").toLowerCase();
+  return /envie|enviar|submeta|submit|send|publish/.test(restriction)
+    && /enviar|envie|send|submit|submeter|publicar|publish/.test(label);
+}
+
 function navigationQuery(goal: string): string {
   return goal
     .replace(/\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/gi, "")
@@ -112,20 +122,11 @@ function navigationQuery(goal: string): string {
     .trim();
 }
 
-function requestedText(goal: string): string | undefined {
-  const quoted = goal.match(/["“”'‘’]([^"“”'‘’]{1,240})["“”'‘’]/);
-  if (quoted?.[1]) return quoted[1].trim();
-  const afterVerb = goal.match(/(?:digite|escreva|preencha|coloque|insira|informe|busque\s+por|busque|pesquise\s+sobre|pesquise|pesquisar\s+por|buscar\s+por|procure\s+por|procure|ache)\s+(.*)$/i);
-  if (!afterVerb?.[1]) return undefined;
-  return afterVerb[1]
-    .replace(/\s+(?:no|na|em|dentro do|dentro da)\s+(?:campo|caixa|input|formul[aá]rio|busca|pesquisa)\b.*$/i, "")
-    .trim()
-    .replace(/[.!?]+$/, "") || undefined;
-}
-
 /** Builds Jev's closed action space. Jev chooses an existing option; it never invents a selector or code. */
 export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserTabSummary[] = [], completedActions: string[] = [], candidateOffset = 0): { map: JevCommandMap; options: CommandOption[] } {
-  const textToType = requestedText(goal);
+  const goalPlan = parseGoal(goal);
+  const textToType = goalPlan.stages.find((stage) => stage.kind === "search")?.value
+    ?? goalPlan.stages.find((stage) => stage.kind === "fill_field")?.value;
   const options: CommandOption[] = [
     { id: "finish_success", action: { type: "finish", status: "success", message: "Objetivo concluído." } },
   ];
@@ -133,7 +134,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   const url = requestedUrl(goal);
   const hasNavigationIntent = Boolean(url && /\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal));
   const genericNavigation = !url && /\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/i.test(goal) && navigationQuery(goal);
-  const hasSearchIntent = Boolean(textToType && /\b(pesquise|pesquisar|busque|buscar|procure|ache)\b/i.test(goal));
+  const hasSearchIntent = Boolean(textToType && /\b(pesquise|pesquisar|busque|buscar|procure|ache|busca|buscar)\b/i.test(goal));
   if (url && !completedActions.includes("open_window") && /\b(nova|novo)\s+(janela|window)\b/i.test(goal)) {
     options.push({ id: "open_window", action: { type: "open_window", url } });
   }
@@ -159,11 +160,12 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   for (const element of page.elements) {
     if (!element.visible || !element.enabled || element.sensitive) continue;
     const description = elementDescription(element);
-    if (["button", "link", "checkbox", "radio", "switch", "tab", "option", "menuitem", "menuitemcheckbox", "menuitemradio", "treeitem", "submit"].includes(element.role ?? element.tag)) {
+    if (!isProhibitedByGoal(element, goalPlan) && ["button", "link", "checkbox", "radio", "switch", "tab", "option", "menuitem", "menuitemcheckbox", "menuitemradio", "treeitem", "submit"].includes(element.role ?? element.tag)) {
       options.push({ id: `click_${element.ref}`, action: { type: "click", target: { ref: element.ref } } });
     }
-    if (textToType && ["input", "textarea", "textbox", "searchbox", "combobox"].includes(element.role ?? element.tag) && element.type !== "password") {
-      options.push({ id: `type_${element.ref}`, action: { type: "type", target: { ref: element.ref }, text: textToType, replace: true } });
+    const elementText = valueForField(goal, [element.name, element.placeholder, element.context].filter(Boolean).join(" "));
+    if (elementText && ["input", "textarea", "textbox", "searchbox", "combobox"].includes(element.role ?? element.tag) && element.type !== "password") {
+      options.push({ id: `type_${element.ref}`, action: { type: "type", target: { ref: element.ref }, text: elementText, replace: true } });
     }
     if (["select", "combobox"].includes(element.role ?? element.tag)) {
       for (const option of element.options ?? []) {
@@ -184,7 +186,10 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   }
 
   if (hasSearchIntent) {
-    options.push({ id: "submit_search", action: { type: "keypress", key: "ENTER" } });
+    const prohibitsSending = goalPlan.restrictions.some((restriction) => /envie|enviar|submit|send/i.test(restriction));
+    if (!prohibitsSending) options.push({ id: "submit_search", action: { type: "keypress", key: "ENTER" } });
+    const openResultPending = goalPlan.stages.some((stage) => stage.kind === "open_result");
+    const searchWasSubmitted = completedActions.includes("keypress") || completedActions.includes("click");
     const openOption = options.find((option) => ["navigate", "open_tab", "open_window"].includes(option.action.type));
     if (openOption && !completedActions.includes(openOption.action.type)) {
       options.splice(0, options.length, openOption);
@@ -202,9 +207,25 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       });
       const enterOption: CommandOption = { id: "submit_search", action: { type: "keypress", key: "ENTER" } };
       options.splice(0, options.length, ...(searchSubmitOptions.length > 0 ? searchSubmitOptions : [enterOption]));
+    } else if (openResultPending && searchWasSubmitted) {
+      const resultLinks = options.filter((option) => {
+        if (option.action.type !== "click") return false;
+        const element = page.elements.find((candidate) => candidate.ref === targetRef(option.action));
+        return element?.role === "link";
+      });
+      const scrollOptions = options.filter((option) => option.action.type === "scroll");
+      const noResult: CommandOption = { id: "finish_failed", action: { type: "finish", status: "failed", message: "A pesquisa terminou, mas ainda não encontrei um resultado para abrir." } };
+      options.splice(0, options.length, ...(resultLinks.length ? resultLinks : scrollOptions.length ? scrollOptions : [
+        noResult,
+      ]));
     } else {
       options.splice(0, options.length, { id: "finish_success", action: { type: "finish", status: "success", message: "Pesquisa concluída." } });
     }
+  }
+
+  if (goalPlan.needsClarification) {
+    const clarification: CommandOption = { id: "clarify_goal", action: { type: "finish", status: "failed", message: goalPlan.clarification ?? "Preciso de um detalhe para continuar." } };
+    options.splice(0, options.length, clarification);
   }
 
   if (!hasSearchIntent && (hasNavigationIntent || Boolean(genericNavigation))) {
@@ -297,6 +318,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     return {
       state: {
         goal: goal.slice(0, 4000),
+        goalPlan,
         page: pageForOptions,
         browser: {
           tabs: selectedTabs,
