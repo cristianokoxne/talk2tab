@@ -70,7 +70,7 @@ function targetRef(action: AgentAction): string | undefined {
 function scoreOption(option: CommandOption, goal: string, page: PageState, tabs: BrowserTabSummary[], textToType?: string): number {
   const action = option.action;
   if (action.type === "finish") return -100;
-  if (action.type === "navigate" || action.type === "open_tab" || action.type === "open_window") return 30;
+  if (action.type === "navigate" || action.type === "open_tab" || action.type === "open_window" || action.type === "go_back" || action.type === "go_forward") return 30;
   if (action.type === "search_web") return 24;
   if (action.type === "switch_tab") return tabs.find((tab) => tab.id === action.tabId)?.active ? 40 : 0;
   if (action.type === "close_tab") return 4;
@@ -139,6 +139,8 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   const options: CommandOption[] = [
     { id: "finish_success", action: { type: "finish", status: "success", message: "Objetivo concluído." } },
   ];
+  if (/\b(voltar|volte|retorne|back|go back)\b/i.test(goal)) options.push({ id: "go_back", action: { type: "go_back" } });
+  if (/\b(avance|avançar|avanca|pr[oó]xima p[aá]gina|forward|go forward)\b/i.test(goal)) options.push({ id: "go_forward", action: { type: "go_forward" } });
 
   const url = requestedUrl(goal);
   const hasNavigationIntent = Boolean(url && /\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal));
@@ -259,6 +261,14 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       else options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei “${pendingStage.target}” para continuar.` } });
     }
   }
+  if (pendingStage?.kind === "navigate") {
+    const expectedTypes = pendingStage.value === "back" ? ["go_back"]
+      : pendingStage.value === "forward" ? ["go_forward"]
+        : ["navigate", "search_web", "open_tab", "open_window"];
+    const navigationActions = options.filter((option) => expectedTypes.includes(option.action.type));
+    if (navigationActions.length) options.splice(0, options.length, ...navigationActions);
+    else options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei uma ação de navegação segura para: ${pendingStage.description}.` } });
+  }
   if (progressedPlan.stages.length > 0 && progressedPlan.stages.every((stage) => stage.status === "complete")) {
     options.splice(0, options.length, { id: "finish_success", action: { type: "finish", status: "success", message: "Todas as etapas rastreadas foram concluídas." } });
   } else if (progressedPlan.stages.some((stage) => stage.status === "pending") && !hasSearchIntent && pendingStage?.kind !== "fill_field" && pendingStage?.kind !== "navigate" && pendingStage?.kind !== "click_target") {
@@ -337,6 +347,10 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       criteria[option.id] = { description: `Navegue a aba atual para ${action.url}.` };
     } else if (action.type === "search_web") {
       criteria[option.id] = { description: `Use a busca web para descobrir o destino: ${action.query}.` };
+    } else if (action.type === "go_back") {
+      criteria[option.id] = { description: "Volte uma página no histórico desta aba." };
+    } else if (action.type === "go_forward") {
+      criteria[option.id] = { description: "Avance uma página no histórico desta aba." };
     } else if (action.type === "switch_tab") {
       const tab = tabs.find((candidate) => candidate.id === action.tabId);
       criteria[option.id] = { description: `Mude para a aba ${tab?.title || action.tabId}.` };

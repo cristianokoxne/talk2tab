@@ -11,7 +11,9 @@ export interface OpenTabAction { type: "open_tab"; url: string; }
 export interface OpenWindowAction { type: "open_window"; url: string; }
 export interface SwitchTabAction { type: "switch_tab"; tabId: number; }
 export interface CloseTabAction { type: "close_tab"; tabId: number; }
-export type BrowserAction = ClickAction | TypeAction | SelectAction | ScrollAction | KeyPressAction | NavigateAction | SearchWebAction | OpenTabAction | OpenWindowAction | SwitchTabAction | CloseTabAction;
+export interface GoBackAction { type: "go_back"; }
+export interface GoForwardAction { type: "go_forward"; }
+export type BrowserAction = ClickAction | TypeAction | SelectAction | ScrollAction | KeyPressAction | NavigateAction | SearchWebAction | OpenTabAction | OpenWindowAction | SwitchTabAction | CloseTabAction | GoBackAction | GoForwardAction;
 export interface FinishAction { type: "finish"; status: "success" | "failed"; message: string; }
 export interface ExpandCandidatesAction { type: "expand_candidates"; nextOffset: number; remaining: number; }
 export type AgentAction = BrowserAction | FinishAction | ExpandCandidatesAction;

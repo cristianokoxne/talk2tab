@@ -6,6 +6,7 @@ import { runAgentLoop } from "./loop.js";
 import { verifyAction } from "./verification.js";
 import { parseGoal, updateGoalProgress } from "./intent.js";
 import { waitForPageEffect } from "./waitForEffect.js";
+import { findSpawnedChildTab, isRestrictedDocumentUrl, makeUninspectablePage, validateNavigationUrl } from "./navigation.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
@@ -230,16 +231,9 @@ async function waitForTabLoaded(chromeApi: typeof chrome, tabId: number, signal?
   });
 }
 
-async function syncActiveTab(chromeApi: typeof chrome, currentTabId: { value: number }, signal?: AbortSignal): Promise<void> {
-  const [active] = await chromeApi.tabs.query({ active: true, lastFocusedWindow: true });
-  if (active?.id === undefined || active.id === currentTabId.value) return;
-  currentTabId.value = active.id;
-  await waitForTabLoaded(chromeApi, active.id, signal);
-}
-
-async function executeBrowserAction(chromeApi: typeof chrome, action: import("./types.js").BrowserAction, currentTabId: { value: number }, signal?: AbortSignal): Promise<ActionResult> {
+async function executeBrowserAction(chromeApi: typeof chrome, action: import("./types.js").BrowserAction, currentTabId: { value: number }, signal?: AbortSignal, linkTab?: (tabId: number) => boolean): Promise<ActionResult> {
   if (action.type === "navigate") {
-    await chromeApi.tabs.update(currentTabId.value, { url: action.url, active: true });
+    await chromeApi.tabs.update(currentTabId.value, { url: validateNavigationUrl(action.url), active: true });
     await waitForTabLoaded(chromeApi, currentTabId.value, signal);
     return { ok: true, actionId: "browser", changed: true, status: "success" };
   }
@@ -250,22 +244,25 @@ async function executeBrowserAction(chromeApi: typeof chrome, action: import("./
     return { ok: true, actionId: "browser", changed: true, status: "success" };
   }
   if (action.type === "open_tab") {
-    const tab = await chromeApi.tabs.create({ url: action.url, active: true });
+    const tab = await chromeApi.tabs.create({ url: validateNavigationUrl(action.url), active: true });
     if (tab.id === undefined) throw new Error("Não foi possível criar a nova aba.");
+    if (linkTab && !linkTab(tab.id)) throw new TabRunBusyError("A nova aba já está sendo controlada por outra sessão.");
     currentTabId.value = tab.id;
     await waitForTabLoaded(chromeApi, tab.id, signal);
     return { ok: true, actionId: "browser", changed: true, status: "success" };
   }
   if (action.type === "open_window") {
-    const created = await chromeApi.windows.create({ url: action.url, focused: true, type: "normal" });
+    const created = await chromeApi.windows.create({ url: validateNavigationUrl(action.url), focused: true, type: "normal" });
     if (!created) throw new Error("Não foi possível criar a nova janela.");
     const tabId = created.tabs?.[0]?.id;
     if (tabId === undefined) throw new Error("Não foi possível criar a nova janela.");
+    if (linkTab && !linkTab(tabId)) throw new TabRunBusyError("A nova janela já está sendo controlada por outra sessão.");
     currentTabId.value = tabId;
     await waitForTabLoaded(chromeApi, tabId, signal);
     return { ok: true, actionId: "browser", changed: true, status: "success" };
   }
   if (action.type === "switch_tab") {
+    if (linkTab && !linkTab(action.tabId)) throw new TabRunBusyError("A aba de destino já está sendo controlada por outra sessão.");
     await chromeApi.tabs.update(action.tabId, { active: true });
     const tab = await chromeApi.tabs.get(action.tabId);
     currentTabId.value = action.tabId;
@@ -273,10 +270,18 @@ async function executeBrowserAction(chromeApi: typeof chrome, action: import("./
     await waitForTabLoaded(chromeApi, action.tabId, signal);
     return { ok: true, actionId: "browser", changed: true, status: "success" };
   }
+  if (action.type === "go_back" || action.type === "go_forward") {
+    if (action.type === "go_back") await chromeApi.tabs.goBack(currentTabId.value);
+    else await chromeApi.tabs.goForward(currentTabId.value);
+    await waitForTabLoaded(chromeApi, currentTabId.value, signal);
+    return { ok: true, actionId: "browser", changed: true, status: "success" };
+  }
   if (action.type === "close_tab") {
+    const closingTab = await chromeApi.tabs.get(action.tabId);
     await chromeApi.tabs.remove(action.tabId);
-    const [next] = await chromeApi.tabs.query({ active: true, lastFocusedWindow: true });
+    const [next] = closingTab.windowId === undefined ? [] : await chromeApi.tabs.query({ active: true, windowId: closingTab.windowId });
     if (next?.id === undefined) throw new Error("Não há outra aba ativa disponível.");
+    if (linkTab && !linkTab(next.id)) throw new TabRunBusyError("A aba de destino já está sendo controlada por outra sessão.");
     currentTabId.value = next.id;
     return { ok: true, actionId: "browser", changed: true, status: "success" };
   }
@@ -301,7 +306,7 @@ function publishPageState(chromeApi: typeof chrome, requestId: string, step: num
   }
 }
 
-async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal): Promise<unknown> {
+async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal, linkTab: (tabId: number) => boolean): Promise<unknown> {
   if (isContinuousScrollGoal(message.goal)) return runContinuousScroll(chromeApi, tabId, message, signal);
   const config = await loadProviderConfig(chromeApi);
   const budgetSettings = await chromeApi.storage.local.get("agentBudgets");
@@ -320,7 +325,14 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
   let latestPage: PageState | undefined;
   return runAgentLoop({
     observe: async () => {
-      const page = await scanTab(chromeApi, currentTabId.value, message.requestId);
+      let page: PageState;
+      try {
+        page = await scanTab(chromeApi, currentTabId.value, message.requestId);
+      } catch (error) {
+        const tab = await chromeApi.tabs.get(currentTabId.value);
+        if (!tab.url || !isRestrictedDocumentUrl(tab.url)) throw error;
+        page = makeUninspectablePage(tab.url, tab.title ?? "Página não inspecionável");
+      }
       latestPage = page;
       observationStep += 1;
       publishPageState(chromeApi, message.requestId, observationStep, currentTabId.value, page);
@@ -340,13 +352,27 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
         if (!approved && signal.aborted) return { ok: true, actionId, changed: false, status: "success" };
         if (!approved) return { ok: false, actionId, code: "USER_CONFIRMATION_REQUIRED", error: "A ação foi cancelada ou a confirmação expirou." };
       }
-      if (["navigate", "search_web", "open_tab", "open_window", "switch_tab", "close_tab"].includes(action.type)) {
-        const result = await executeBrowserAction(chromeApi, action as import("./types.js").BrowserAction, currentTabId, signal);
+      if (["navigate", "search_web", "open_tab", "open_window", "switch_tab", "close_tab", "go_back", "go_forward"].includes(action.type)) {
+        const result = await executeBrowserAction(chromeApi, action as import("./types.js").BrowserAction, currentTabId, signal, linkTab);
+        if (result.ok && ["open_tab", "open_window", "switch_tab", "close_tab"].includes(action.type) && !linkTab(currentTabId.value)) {
+          return { ok: false, actionId, code: "TAB_SESSION_BUSY", error: "A aba de destino já está sendo controlada por outra sessão." };
+        }
         result.actionId = actionId;
         return result;
       }
+      const knownTabIds = action.type === "click"
+        ? new Set((await chromeApi.tabs.query({})).flatMap((tab) => tab.id === undefined ? [] : [tab.id]))
+        : undefined;
       const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId, action }) as ActionResult;
-      await syncActiveTab(chromeApi, currentTabId, signal);
+      if (knownTabIds && result.dispatched) {
+        const tabs = await chromeApi.tabs.query({});
+        const childTabId = findSpawnedChildTab(tabs.flatMap((tab) => tab.id === undefined ? [] : [{ id: tab.id, openerTabId: tab.openerTabId }]), knownTabIds, currentTabId.value);
+        if (childTabId !== undefined) {
+          if (!linkTab(childTabId)) return { ok: false, actionId, code: "TAB_SESSION_BUSY", error: "A nova aba aberta já está sendo controlada por outra sessão." };
+          currentTabId.value = childTabId;
+          await waitForTabLoaded(chromeApi, childTabId, signal);
+        }
+      }
       await waitForTabLoaded(chromeApi, currentTabId.value, signal);
       return result;
     },
@@ -425,6 +451,8 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
         }
         const controller = new AbortController();
         activeRuns.set(message.requestId, controller);
+        const linkedTabReleases: Array<() => void> = [];
+        const linkedTabIds = new Set<number>();
         void resolveTabId(chromeApi, sender).then((tabId) => {
           if (tabId === undefined) throw new Error("No active tab is available.");
           if (controller.signal.aborted) throw new Error("Sessão cancelada pelo usuário.");
@@ -434,7 +462,16 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
             throw new TabRunBusyError(`Aba já está sendo controlada pela sessão ${owner ?? "desconhecida"}.`);
           }
           releasesByRequest.set(message.requestId, releaseTab);
-          return runAgent(chromeApi, tabId, message, controller.signal);
+          linkedTabIds.add(tabId);
+          const linkTab = (linkedTabId: number): boolean => {
+            if (linkedTabIds.has(linkedTabId)) return true;
+            const releaseLinked = tabRuns.acquire(linkedTabId, message.requestId);
+            if (!releaseLinked) return false;
+            linkedTabReleases.push(releaseLinked);
+            linkedTabIds.add(linkedTabId);
+            return true;
+          };
+          return runAgent(chromeApi, tabId, message, controller.signal, linkTab);
         }).then((data) => sendResponse({ ok: true, data }))
           .catch((error: unknown) => {
             if (controller.signal.aborted) { sendResponse({ ok: true, data: { status: "cancelled", steps: [], message: "Sessão cancelada pelo usuário." } }); return; }
@@ -445,6 +482,7 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
             sendResponse({ ok: false, code, error: error instanceof Error ? error.message : "Agent run failed." });
           })
           .finally(() => {
+            for (const releaseLinked of linkedTabReleases) releaseLinked();
             releasesByRequest.get(message.requestId)?.();
             releasesByRequest.delete(message.requestId);
             activeRuns.delete(message.requestId);

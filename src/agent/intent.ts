@@ -100,6 +100,11 @@ export function parseGoal(goal: string): GoalPlan {
     const value = quoted ?? goal.match(/(?:digite|escreva|preencha|insira|informe|enter|type)\s+(.+?)(?:\s+(?:no|na|em|into|in)\s+(?:campo|field)\b|[.!?]|$)/i)?.[1];
     if (value) stages.push({ kind: "fill_field", description: "Preencher o campo indicado", value: cleanValue(value), status: "pending" });
   }
+  if (!stages.length && /\b(voltar|volte|retorne|back|go back)\b/i.test(goal)) {
+    stages.push({ kind: "navigate", description: "Voltar à página anterior", value: "back", status: "pending" });
+  } else if (!stages.length && /\b(avance|avançar|avanca|pr[oó]xima p[aá]gina|forward|go forward)\b/i.test(goal)) {
+    stages.push({ kind: "navigate", description: "Avançar à próxima página", value: "forward", status: "pending" });
+  }
   if (!stages.length && hasExplicitDestination && /\b(?:abra|abrir|acesse|acessar|navegue|navegar|open|visit)\b/i.test(goal)) {
     stages.push({ kind: "navigate", description: "Navegar ao destino solicitado", value: goal, status: "pending" });
   } else if (!stages.length && genericDestination) {
@@ -152,7 +157,8 @@ export function updateGoalProgress(plan: GoalPlan, history: GoalHistoryEvent[]):
       return { ...stage, status: complete ? "complete" as const : "pending" as const };
     }
     if (stage.kind === "navigate") {
-      const complete = history.some((entry) => ["navigate", "open_tab", "open_window", "search_web"].includes(entry.type) && entry.progressed);
+      const navigationType = stage.value === "back" ? "go_back" : stage.value === "forward" ? "go_forward" : undefined;
+      const complete = history.some((entry) => (navigationType ? entry.type === navigationType : ["navigate", "open_tab", "open_window", "search_web"].includes(entry.type)) && entry.progressed);
       return { ...stage, status: complete ? "complete" as const : "pending" as const };
     }
     if (stage.kind === "click_target") {
