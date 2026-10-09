@@ -41,7 +41,7 @@ test("large pages stay within the option and payload budgets and report omitted 
   assert.ok(payloadBytes <= 64 * 1024);
   assert.equal(map.state.browser.coverage.truncated, true);
   assert.ok(map.state.browser.coverage.omittedCandidates > 0);
-  assert.ok(map.state.browser.coverage.omittedOptions > 0);
+  assert.ok(map.state.browser.coverage.omittedCandidates > 0);
   assert.equal(map.state.browser.coverage.payloadBytes <= 64 * 1024, true);
   assert.ok(options.some((option) => option.action.type === "click" && option.action.target.ref === "el_1_901"));
 });

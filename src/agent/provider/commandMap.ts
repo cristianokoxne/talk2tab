@@ -1,5 +1,5 @@
 import type { AgentAction, ElementRef, PageState } from "../types.js";
-import { parseGoal, valueForField, type GoalPlan } from "../intent.js";
+import { parseGoal, updateGoalProgress, valueForField, type GoalHistoryEvent, type GoalPlan } from "../intent.js";
 
 export interface BrowserTabSummary {
   id: number;
@@ -21,6 +21,7 @@ export interface JevCommandMap {
     browser: {
       tabs: BrowserTabSummary[];
       completedActions: string[];
+      history: GoalHistoryEvent[];
       coverage: { truncated: boolean; omittedCandidates: number; omittedOptions: number; omittedTabs: number; candidateOffset: number; totalOptions: number; hasMoreOptions: boolean; payloadBytes: number };
     };
   };
@@ -113,6 +114,12 @@ function isProhibitedByGoal(element: ElementRef, plan: GoalPlan): boolean {
     && /enviar|envie|send|submit|submeter|publicar|publish/.test(label);
 }
 
+function matchesTarget(element: ElementRef, target: string): boolean {
+  const tokens = normalizeForMatching(target).split(/[^\p{L}\p{N}]+/u).filter((token) => token.length > 2 && !["the", "and", "para", "com", "menu", "item"].includes(token));
+  const label = normalizeForMatching([element.name, element.text, element.context].filter(Boolean).join(" "));
+  return tokens.length > 0 && tokens.every((token) => label.includes(token));
+}
+
 function navigationQuery(goal: string): string {
   return goal
     .replace(/\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/gi, "")
@@ -123,8 +130,10 @@ function navigationQuery(goal: string): string {
 }
 
 /** Builds Jev's closed action space. Jev chooses an existing option; it never invents a selector or code. */
-export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserTabSummary[] = [], completedActions: string[] = [], candidateOffset = 0): { map: JevCommandMap; options: CommandOption[] } {
+export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserTabSummary[] = [], completedActions: string[] = [], candidateOffset = 0, actionHistory: GoalHistoryEvent[] = []): { map: JevCommandMap; options: CommandOption[] } {
   const goalPlan = parseGoal(goal);
+  const progressedPlan = updateGoalProgress(goalPlan, actionHistory);
+  const pendingStage = progressedPlan.stages.find((stage) => stage.status === "pending");
   const textToType = goalPlan.stages.find((stage) => stage.kind === "search")?.value
     ?? goalPlan.stages.find((stage) => stage.kind === "fill_field")?.value;
   const options: CommandOption[] = [
@@ -134,7 +143,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   const url = requestedUrl(goal);
   const hasNavigationIntent = Boolean(url && /\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal));
   const genericNavigation = !url && /\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/i.test(goal) && navigationQuery(goal);
-  const hasSearchIntent = Boolean(textToType && /\b(pesquise|pesquisar|busque|buscar|procure|ache|busca|buscar)\b/i.test(goal));
+  const hasSearchIntent = Boolean(progressedPlan.stages.some((stage) => stage.status === "pending" && (stage.kind === "search" || stage.kind === "open_result")));
   if (url && !completedActions.includes("open_window") && /\b(nova|novo)\s+(janela|window)\b/i.test(goal)) {
     options.push({ id: "open_window", action: { type: "open_window", url } });
   }
@@ -188,8 +197,9 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   if (hasSearchIntent) {
     const prohibitsSending = goalPlan.restrictions.some((restriction) => /envie|enviar|submit|send/i.test(restriction));
     if (!prohibitsSending) options.push({ id: "submit_search", action: { type: "keypress", key: "ENTER" } });
-    const openResultPending = goalPlan.stages.some((stage) => stage.kind === "open_result");
-    const searchWasSubmitted = completedActions.includes("keypress") || completedActions.includes("click");
+    const openResultPending = progressedPlan.stages.some((stage) => stage.kind === "open_result" && stage.status === "pending");
+    const searchWasSubmitted = progressedPlan.stages.some((stage) => stage.kind === "search" && stage.status === "complete")
+      || completedActions.includes("keypress") || completedActions.includes("click");
     const openOption = options.find((option) => ["navigate", "open_tab", "open_window"].includes(option.action.type));
     if (openOption && !completedActions.includes(openOption.action.type)) {
       options.splice(0, options.length, openOption);
@@ -226,6 +236,33 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   if (goalPlan.needsClarification) {
     const clarification: CommandOption = { id: "clarify_goal", action: { type: "finish", status: "failed", message: goalPlan.clarification ?? "Preciso de um detalhe para continuar." } };
     options.splice(0, options.length, clarification);
+  }
+
+  if (pendingStage?.kind === "fill_field") {
+    const pendingFieldActions = options.filter((option) => {
+      if (option.action.type !== "type") return false;
+      const element = page.elements.find((candidate) => candidate.ref === targetRef(option.action));
+      return element && valueForField(goal, [element.name, element.placeholder, element.context].filter(Boolean).join(" ")) === pendingStage.value;
+    });
+    if (pendingFieldActions.length) options.splice(0, options.length, ...pendingFieldActions);
+  }
+  if (pendingStage?.kind === "click_target") {
+    const targetActions = options.filter((option) => {
+      if (option.action.type !== "click") return false;
+      const element = page.elements.find((candidate) => candidate.ref === targetRef(option.action));
+      return element ? matchesTarget(element, pendingStage.target ?? "") : false;
+    });
+    if (targetActions.length) options.splice(0, options.length, ...targetActions);
+    else {
+      const recoveryActions = options.filter((option) => option.action.type === "scroll" || option.action.type === "expand_candidates");
+      if (recoveryActions.length) options.splice(0, options.length, ...recoveryActions);
+      else options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei “${pendingStage.target}” para continuar.` } });
+    }
+  }
+  if (progressedPlan.stages.length > 0 && progressedPlan.stages.every((stage) => stage.status === "complete")) {
+    options.splice(0, options.length, { id: "finish_success", action: { type: "finish", status: "success", message: "Todas as etapas rastreadas foram concluídas." } });
+  } else if (progressedPlan.stages.some((stage) => stage.status === "pending") && !hasSearchIntent && pendingStage?.kind !== "fill_field" && pendingStage?.kind !== "navigate" && pendingStage?.kind !== "click_target") {
+    options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Ainda falta: ${pendingStage?.description ?? "concluir a próxima etapa"}.` } });
   }
 
   if (!hasSearchIntent && (hasNavigationIntent || Boolean(genericNavigation))) {
@@ -318,11 +355,12 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     return {
       state: {
         goal: goal.slice(0, 4000),
-        goalPlan,
+        goalPlan: progressedPlan,
         page: pageForOptions,
         browser: {
           tabs: selectedTabs,
           completedActions,
+          history: actionHistory.slice(-12).map((entry) => ({ ...entry, targetLabel: entry.targetLabel?.slice(0, 120), evidence: entry.evidence?.slice(0, 8) })),
           coverage: {
             truncated: omittedCandidates > 0 || currentOmittedOptions > 0 || omittedTabs > 0,
             omittedCandidates,

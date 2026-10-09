@@ -40,7 +40,9 @@ test("two labeled form fields receive their own grounded values", () => {
     { ref: "el_1_2", frameId: 0, tag: "input", role: "textbox", name: "E-mail", visible: true, enabled: true, bounds: { x: 0, y: 40, width: 200, height: 30 } },
   ] };
   const { options, map } = buildJevCommandMap(goal, page);
-  assert.deepEqual(options.filter((option) => option.action.type === "type").map((option) => option.action.text), ["Ana Silva", "ana@example.com"]);
+  assert.deepEqual(options.filter((option) => option.action.type === "type").map((option) => option.action.text), ["Ana Silva"]);
+  const nextField = buildJevCommandMap(goal, page, [], ["type"], 0, [{ type: "type", targetLabel: "Nome", valueLength: 9, progressed: true }]);
+  assert.deepEqual(nextField.options.filter((option) => option.action.type === "type").map((option) => option.action.text), ["ana@example.com"]);
   assert.deepEqual(map.state.goalPlan.stages.filter(({ kind }) => kind === "fill_field").map(({ field, value }) => [field, value]), [["nome", "Ana Silva"], ["email", "ana@example.com"]]);
 });
 

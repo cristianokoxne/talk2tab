@@ -4,6 +4,7 @@ import type { BrowserTabSummary } from "./provider/commandMap.js";
 import { JevProvider, JevProviderError } from "./provider/jev.js";
 import { runAgentLoop } from "./loop.js";
 import { verifyAction } from "./verification.js";
+import { parseGoal, updateGoalProgress } from "./intent.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
@@ -302,9 +303,17 @@ function publishPageState(chromeApi: typeof chrome, requestId: string, step: num
 async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal): Promise<unknown> {
   if (isContinuousScrollGoal(message.goal)) return runContinuousScroll(chromeApi, tabId, message, signal);
   const config = await loadProviderConfig(chromeApi);
+  const budgetSettings = await chromeApi.storage.local.get("agentBudgets");
+  const storedBudgets = budgetSettings.agentBudgets as { maxSteps?: unknown; maxDurationMs?: unknown; maxProviderCalls?: unknown } | undefined;
+  const configuredInteger = (value: unknown, fallback: number, minimum: number, maximum: number): number =>
+    typeof value === "number" && Number.isFinite(value) ? Math.min(maximum, Math.max(minimum, Math.floor(value))) : fallback;
+  const budgets = {
+    maxSteps: configuredInteger(storedBudgets?.maxSteps, 8, 1, 50),
+    maxDurationMs: configuredInteger(storedBudgets?.maxDurationMs, 120_000, 1_000, 600_000),
+    maxProviderCalls: configuredInteger(storedBudgets?.maxProviderCalls, 8, 1, 50),
+  };
   const provider = new JevProvider(config);
   const currentTabId = { value: tabId };
-  const completedActions = new Set<string>();
   let candidateOffset = 0;
   let observationStep = 0;
   let latestPage: PageState | undefined;
@@ -316,8 +325,8 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       publishPageState(chromeApi, message.requestId, observationStep, currentTabId.value, page);
       return page;
     },
-    decide: async (page, decisionSignal) => {
-      const { map, options } = buildJevCommandMap(message.goal, page, await listTabs(chromeApi), [...completedActions], candidateOffset);
+    decide: async (page, decisionSignal, history = []) => {
+      const { map, options } = buildJevCommandMap(message.goal, page, await listTabs(chromeApi), history.map((entry) => entry.type), candidateOffset, history);
       return provider.chooseNextAction(map, options, decisionSignal);
     },
     execute: async (action, actionId) => {
@@ -332,18 +341,27 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       }
       if (["navigate", "search_web", "open_tab", "open_window", "switch_tab", "close_tab"].includes(action.type)) {
         const result = await executeBrowserAction(chromeApi, action as import("./types.js").BrowserAction, currentTabId, signal);
-        completedActions.add(action.type);
         result.actionId = actionId;
         return result;
       }
       const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId, action }) as ActionResult;
-      completedActions.add(action.type);
       await syncActiveTab(chromeApi, currentTabId, signal);
       await waitForTabLoaded(chromeApi, currentTabId.value, signal);
       return result;
     },
     verify: verifyAction,
-  }, 8, signal);
+    verifyCompletion: (_page, history) => {
+      const plan = parseGoal(message.goal);
+      if (plan.needsClarification) return { complete: false, reason: plan.clarification ?? "Preciso de mais informações." };
+      const progressed = updateGoalProgress(plan, history);
+      if (progressed.stages.length && progressed.stages.some((stage) => stage.status !== "complete")) {
+        const pending = progressed.stages.find((stage) => stage.status !== "complete");
+        return { complete: false, reason: `Ainda falta: ${pending?.description ?? "concluir uma etapa"}. O progresso parcial foi preservado.` };
+      }
+      if (!history.some((entry) => entry.progressed)) return { complete: false, reason: "Nenhuma mudança que comprove a conclusão foi observada. Preciso de ajuda para continuar." };
+      return { complete: true, reason: "A conclusão foi apoiada por evidência observada." };
+    },
+  }, budgets.maxSteps, signal, budgets);
 }
 
 async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal): Promise<unknown> {
