@@ -10,7 +10,7 @@
     "test": "npm run build && node --test tests/**/*.test.mjs",
     "test:e2e": "npm run build && node --test tests/e2e/*.test.mjs",
     "bench:replay": "node scripts/run-benchmark.mjs",
-    "bench:jev": "node scripts/run-benchmark.mjs --provider jev",
+    "bench:jev": "node scripts/run-jev-evaluation.mjs --run",
     "test:watch": "node --test --watch tests/**/*.test.mjs"
   },
   "keywords": [

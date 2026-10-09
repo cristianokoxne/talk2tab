@@ -37,7 +37,7 @@ export class JevProvider {
   constructor(config: ProviderConfig, fetchImpl: typeof fetch = globalThis.fetch.bind(globalThis)) {
     this.config = {
       ...config,
-      endpoint: config.endpoint || "https://system-one.dev/v1/systemone",
+      endpoint: config.endpoint || "https://api.typesafe.ai/v1/systemone",
       model: config.model || "jev-latest",
     };
     this.fetchImpl = fetchImpl;
