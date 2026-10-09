@@ -26,7 +26,7 @@ export interface ActionVerification {
 
 export interface AgentLoopDriver {
   observe(): Promise<PageState>;
-  decide(page: PageState): Promise<JevDecision>;
+  decide(page: PageState, signal?: AbortSignal): Promise<JevDecision>;
   execute(action: AgentAction, actionId: string): Promise<ActionResult>;
   verify?(before: PageState, after: PageState, action: AgentAction, result: ActionResult): ActionVerification;
 }
@@ -40,7 +40,14 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
   const visitedStates = new Set([page.fingerprint]);
   for (let step = 1; step <= maxSteps; step += 1) {
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
-    const decision = await driver.decide(page);
+    let decision: JevDecision;
+    try {
+      decision = await driver.decide(page, signal);
+    } catch (error) {
+      if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
+      throw error;
+    }
+    if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     const trace: AgentLoopStep = {
       step,
       action: decision.action,

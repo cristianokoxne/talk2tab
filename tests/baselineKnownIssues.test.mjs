@@ -27,7 +27,7 @@ test("baseline: hidden search has no reveal action in the restricted candidate s
   assert.ok(options.every((option) => option.action.type === "scroll" || option.action.type === "finish"), "Known baseline currently falls back to scroll/finish");
 });
 
-test("baseline: a canceled decision can still dispatch its late action", async () => {
+test("late provider decision after cancellation does not dispatch an action", async () => {
   const controller = new AbortController();
   let resolveDecision;
   let dispatched = false;
@@ -40,7 +40,8 @@ test("baseline: a canceled decision can still dispatch its late action", async (
   controller.abort();
   resolveDecision({ optionId: "click_result", action: { type: "click", target: { ref: "el_1_2" } }, probabilities: {} });
   await run;
-  assert.equal(dispatched, true, "Known baseline: cancellation is checked after the action, not before dispatch");
+  assert.equal(dispatched, false, "A provider result arriving after cancellation must be discarded");
+  assert.equal((await run).status, "cancelled");
 });
 
 test("scroll boundary reports no movement", () => {

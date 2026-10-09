@@ -35,6 +35,45 @@ test("Jev provider resolves a typed choice to the mapped action", async () => {
   assert.match(request.init.headers.authorization, /secret/);
 });
 
+test("Jev provider abort signal cancels an in-flight request", async () => {
+  const { map, options } = buildJevCommandMap("continuar", page);
+  const controller = new AbortController();
+  let receivedSignal;
+  const fakeFetch = async (_url, init) => {
+    receivedSignal = init.signal;
+    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true }));
+  };
+  const pending = new JevProvider({ id: "jev", apiKey: "test" }, fakeFetch).chooseNextAction(map, options, controller.signal);
+  controller.abort();
+  const error = await pending.then(() => { throw new Error("Expected provider request to abort."); }, (caught) => caught);
+  assert.match(error.message, /cancelled/i);
+  assert.equal(error.code, "PROVIDER_CANCELLED");
+  assert.equal(receivedSignal.aborted, true);
+});
+
+test("Jev provider times out a stalled response and aborts its fetch", async () => {
+  const { map, options } = buildJevCommandMap("continuar", page);
+  let receivedSignal;
+  const fakeFetch = async (_url, init) => {
+    receivedSignal = init.signal;
+    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true }));
+  };
+  const pending = new JevProvider({ id: "jev", apiKey: "test", timeoutMs: 1000 }, fakeFetch).chooseNextAction(map, options);
+  const error = await pending.then(() => { throw new Error("Expected provider request to time out."); }, (caught) => caught);
+  assert.match(error.message, /timed out after 1000ms/);
+  assert.equal(error.code, "PROVIDER_TIMEOUT");
+  assert.equal(receivedSignal.aborted, true);
+});
+
+test("Jev provider preserves HTTP failures as a distinct error code", async () => {
+  const { map, options } = buildJevCommandMap("continuar", page);
+  const error = await new JevProvider({ id: "jev", apiKey: "test" }, async () => ({
+    ok: false, status: 429, text: async () => "rate limited",
+  })).chooseNextAction(map, options).then(() => { throw new Error("Expected HTTP failure."); }, (caught) => caught);
+  assert.equal(error.code, "PROVIDER_HTTP_ERROR");
+  assert.match(error.message, /429/);
+});
+
 test("command map removes a completed open-window action from an open-only goal", () => {
   const { options, map } = buildJevCommandMap("abra o Google em uma nova janela", page, [], ["open_window"]);
   assert.deepEqual(options.map((option) => option.id), ["finish_success"]);
