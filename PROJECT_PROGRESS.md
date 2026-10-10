@@ -199,4 +199,5 @@ Status: NOT_STARTED
 - E19a enviada em `a6b18ce`; Jev real acertou 90/90 escolhas em cada uma das duas condições do holdout sintético.
 - E19b mediu 23/96 jornadas públicas em 12 domínios e 6 famílias (23,96%). O gate de release não passou; o relatório mantém erros e holdout no denominador.
 - E19c tornou a conclusão de busca dependente de evidência observada e evitou repetir o mesmo botão após falha; regressões incluídas. No replay de desenvolvimento, o resultado permaneceu em 15/63 (23,81%), sem ganho de taxa; o gate segue reprovado. Evidências em `docs/validation/E19c.md`.
+- E19d remove controles de busca do conjunto após despacho, mesmo sem progresso visível, e libera fallback para Enter; 130 testes passam. A nova medição continua em 15/63 (23,81%), portanto o problema principal permanece e E19 segue reprovado. Evidências em `docs/validation/E19d.md`.
 - E19 continua em execução. Os 120 cenários do corpus ainda são catalogados, não uma suíte integral executável; jornadas compostas e reteste após melhorias permanecem pendentes.

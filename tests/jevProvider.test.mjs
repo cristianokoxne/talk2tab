@@ -174,7 +174,7 @@ test("a search control click without observed query falls back to Enter instead 
   ] };
   const history = [
     { type: "type", targetLabel: "Search", dispatched: true, progressed: true },
-    { type: "click", targetLabel: "Search", targetRole: "button", dispatched: true, progressed: true },
+    { type: "click", targetLabel: "Search", targetRole: "button", dispatched: true, progressed: false },
   ];
   const { options } = buildJevCommandMap('search for "accessibility"', searchPage, [], ["type", "click"], 0, history);
   assert.deepEqual(options.map((option) => option.action.type), ["keypress"]);

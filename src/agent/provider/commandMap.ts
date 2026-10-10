@@ -291,7 +291,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       const searchSubmitOptions = options.filter((option) => {
         if (option.action.type !== "click") return false;
         const element = page.elements.find((candidate) => candidate.ref === targetRef(option.action));
-        const alreadyTried = actionHistory.some((entry) => entry.type === "click" && entry.progressed && /search|busca|pesquis|submit/i.test(entry.targetLabel ?? ""));
+        const alreadyTried = actionHistory.some((entry) => entry.type === "click" && entry.dispatched && /search|busca|pesquis|submit/i.test(entry.targetLabel ?? ""));
         return Boolean(element && isSearchSubmitControl(element) && !alreadyTried);
       });
       const enterAlreadyAttempted = actionHistory.some((entry) => entry.type === "keypress");
