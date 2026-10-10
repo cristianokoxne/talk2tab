@@ -24,6 +24,10 @@ test("debug overlay renders interactive refs and scroll-container refs", () => {
 
   showDebugOverlay(document, registry, [], [{ ref: scrollRef }]);
   assert.equal(document.querySelectorAll("#voice-browser-agent-debug-overlay [data-ref]").length, 1);
+  const frameMarkerCount = showDebugOverlay(document, registry, [], [{ ref: scrollRef }], "fr0__");
+  const frameMarker = document.querySelector("#voice-browser-agent-debug-overlay [data-kind='scroll']");
+  assert.equal(frameMarkerCount, 1);
+  assert.equal(frameMarker.dataset.ref, `fr0__${scrollRef}`);
   removeDebugOverlay(document);
   assert.equal(document.querySelector("#voice-browser-agent-debug-overlay"), null);
 });

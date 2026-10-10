@@ -7,15 +7,15 @@ export function removeDebugOverlay(document: Document): void {
   document.getElementById(overlayId)?.remove();
 }
 
-export function showDebugOverlay(document: Document, registry: ElementRegistry, elements: ElementRef[], scrollContainers: ScrollContainerRef[] = []): void {
+export function showDebugOverlay(document: Document, registry: ElementRegistry, elements: ElementRef[], scrollContainers: ScrollContainerRef[] = [], refPrefix = ""): number {
   removeDebugOverlay(document);
   const root = document.createElement("div");
   root.id = overlayId;
   root.setAttribute("aria-hidden", "true");
   root.style.cssText = "position:fixed;inset:0;z-index:2147483647;pointer-events:none";
   const markers = [
-    ...elements.map((item) => ({ ref: item.ref, node: registry.get(item.ref), kind: "element" as const })),
-    ...scrollContainers.map((item) => ({ ref: item.ref, node: registry.get(item.ref), kind: "scroll" as const })),
+    ...elements.map((item) => ({ ref: `${refPrefix}${item.ref}`, node: registry.get(item.ref), kind: "element" as const })),
+    ...scrollContainers.map((item) => ({ ref: `${refPrefix}${item.ref}`, node: registry.get(item.ref), kind: "scroll" as const })),
   ];
   for (const item of markers) {
     if (!item.node) continue;
@@ -30,4 +30,5 @@ export function showDebugOverlay(document: Document, registry: ElementRegistry, 
     root.append(marker);
   }
   document.documentElement.append(root);
+  return root.querySelectorAll("[data-ref]").length;
 }

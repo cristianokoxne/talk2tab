@@ -12,7 +12,7 @@ interface ScanRequest {
   requestId: string;
 }
 
-interface OverlayRequest { type: "SCANNER_OVERLAY"; enabled: boolean; }
+interface OverlayRequest { type: "SCANNER_OVERLAY"; enabled: boolean; frameId?: number; }
 type ExecuteActionRequest =
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "type"; target: { ref: string }; text: string; replace?: boolean } }
@@ -31,21 +31,24 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
   const registry = new ElementRegistry(documentPrefix);
   let latestState: ReturnType<typeof scanPage> | undefined;
   let overlayEnabled = false;
+  let overlayRefPrefix = "";
   chromeApi.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
     if (isScanRequest(message)) {
       latestState = scanPage(document, window, registry);
-      if (overlayEnabled) showDebugOverlay(document, registry, latestState.elements, latestState.scrollContainers);
+      if (overlayEnabled) showDebugOverlay(document, registry, latestState.elements, latestState.scrollContainers, overlayRefPrefix);
       sendResponse({ ok: true, requestId: message.requestId, data: latestState });
       return;
     }
     if (typeof message === "object" && message !== null && (message as OverlayRequest).type === "SCANNER_OVERLAY") {
       const request = message as OverlayRequest;
       overlayEnabled = request.enabled;
+      overlayRefPrefix = Number.isInteger(request.frameId) ? `fr${request.frameId}__` : "";
       if (overlayEnabled) {
         latestState ??= scanPage(document, window, registry);
-        showDebugOverlay(document, registry, latestState.elements, latestState.scrollContainers);
+        const markerCount = showDebugOverlay(document, registry, latestState.elements, latestState.scrollContainers, overlayRefPrefix);
+        sendResponse({ ok: true, markerCount });
       } else removeDebugOverlay(document);
-      sendResponse({ ok: true });
+      if (!overlayEnabled) sendResponse({ ok: true, markerCount: 0 });
       return;
     }
     if (typeof message === "object" && message !== null && (message as ExecuteActionRequest).type === "EXECUTE_ACTION") {

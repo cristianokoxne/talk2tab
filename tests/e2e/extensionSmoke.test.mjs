@@ -118,9 +118,10 @@ test("debug overlay shows interactive and scroll refs and refreshes after a page
   assert.ok(firstControl?.ref);
   assert.ok(scrollContainer?.ref);
 
-  await worker.evaluate(async (targetTabId) => chrome.tabs.sendMessage(targetTabId, { type: "SCANNER_OVERLAY", enabled: true }, { frameId: 0 }), tabId);
-  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${firstControl.ref}"]`).waitFor();
-  assert.equal(await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${scrollContainer.ref}"]`).getAttribute("data-kind"), "scroll");
+  const overlayResponse = await worker.evaluate(async (targetTabId) => chrome.tabs.sendMessage(targetTabId, { type: "SCANNER_OVERLAY", enabled: true, frameId: 0 }, { frameId: 0 }), tabId);
+  assert.ok(overlayResponse.markerCount >= 2);
+  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="fr0__${firstControl.ref}"]`).waitFor();
+  assert.equal(await page.locator(`#voice-browser-agent-debug-overlay [data-ref="fr0__${scrollContainer.ref}"]`).getAttribute("data-kind"), "scroll");
 
   await page.evaluate(() => {
     const button = document.createElement("button");
@@ -130,7 +131,7 @@ test("debug overlay shows interactive and scroll refs and refreshes after a page
   const updated = await pageScan(worker, page);
   const lateControl = updated.data.elements.find((element) => element.name === "Late control");
   assert.ok(lateControl?.ref);
-  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${lateControl.ref}"]`).waitFor();
+  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="fr0__${lateControl.ref}"]`).waitFor();
 
   await worker.evaluate(async (targetTabId) => chrome.tabs.sendMessage(targetTabId, { type: "SCANNER_OVERLAY", enabled: false }, { frameId: 0 }), tabId);
   await page.locator("#voice-browser-agent-debug-overlay").waitFor({ state: "detached" });

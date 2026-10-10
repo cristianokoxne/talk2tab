@@ -170,12 +170,15 @@ function isScannerOverlayMessage(value: unknown): value is ScannerOverlayMessage
   return message.type === "SCANNER_OVERLAY" && typeof message.enabled === "boolean" && Number.isInteger(message.tabId);
 }
 
-async function setScannerOverlay(chromeApi: typeof chrome, tabId: number, enabled: boolean): Promise<void> {
+async function setScannerOverlay(chromeApi: typeof chrome, tabId: number, enabled: boolean): Promise<number> {
   const frames = await chromeApi.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => true });
-  const results = await Promise.allSettled(frames.map((frame) => chromeApi.tabs.sendMessage(tabId, { type: "SCANNER_OVERLAY", enabled }, { frameId: frame.frameId })));
-  if (!results.some((result, index) => result.status === "fulfilled" && frames[index]?.frameId === 0)) {
+  const results = await Promise.allSettled(frames.map((frame) => chromeApi.tabs.sendMessage(tabId, { type: "SCANNER_OVERLAY", enabled, frameId: frame.frameId }, { frameId: frame.frameId })));
+  const mainFrameIndex = frames.findIndex((frame) => frame.frameId === 0);
+  const mainFrameResult = results[mainFrameIndex];
+  if (mainFrameIndex < 0 || mainFrameResult?.status !== "fulfilled" || !(mainFrameResult.value as { ok?: boolean } | undefined)?.ok) {
     throw new Error("Could not update the reference overlay in the main frame.");
   }
+  return results.reduce((total, result) => total + (result.status === "fulfilled" ? Number((result.value as { markerCount?: number } | undefined)?.markerCount ?? 0) : 0), 0);
 }
 
 function isRunAgentMessage(value: unknown): value is RunAgentMessage {
@@ -561,7 +564,7 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
           return;
         }
         void setScannerOverlay(chromeApi, message.tabId, message.enabled)
-          .then(() => sendResponse({ ok: true }))
+          .then((markerCount) => sendResponse({ ok: true, markerCount }))
           .catch(() => sendResponse({ ok: false, code: "OVERLAY_UNAVAILABLE", error: "NÃ£o foi possÃ­vel atualizar as refs nesta aba." }));
         return;
       }
