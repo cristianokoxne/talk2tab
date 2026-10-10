@@ -8,6 +8,7 @@ import { parseGoal, updateGoalProgress } from "./intent.js";
 import { waitForPageEffect } from "./waitForEffect.js";
 import { findSpawnedChildTab, isRestrictedDocumentUrl, makeUninspectablePage, validateNavigationUrl } from "./navigation.js";
 import { aggregateFrameObservations, parseFrameScopedRef } from "./frames.js";
+import { classifyActionRisk, rebindConfirmedAction } from "./actionSafety.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
@@ -35,45 +36,16 @@ function isResolveActionConfirmationMessage(value: unknown): value is ResolveAct
     && typeof message.approved === "boolean";
 }
 
-function normalizeRiskText(value: string): string {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-function isExplicitSearchGoal(goal: string): boolean {
-  return /\b(pesquise|pesquisar|busque|buscar|procure|procurar|ache|search)\b/i.test(goal);
-}
-
-const criticalActionWords = /\b(comprar|compra|pagar|pagamento|finalizar pedido|finalizar compra|enviar|mandar|publicar|excluir|apagar|deletar|remover|transferir|reservar|cancelar|assinar|confirmar|aceitar|aprovar|salvar|atualizar|criar|aplicar|buy|purchase|checkout|pay|send|post|delete|remove|transfer|book|subscribe|confirm|accept|approve|save|update|create|submit|place order)\b/;
-
-function requiresActionConfirmation(action: AgentAction, page: PageState, goal: string): boolean {
-  const normalizedGoal = normalizeRiskText(goal);
-  const explicitCriticalIntent = criticalActionWords.test(normalizedGoal);
-  if (action.type === "close_tab") return true;
-  if (action.type === "keypress" && action.key.toUpperCase() === "ENTER") return !isExplicitSearchGoal(goal);
-  const targetRef = action.type === "click" || action.type === "select" || action.type === "type" ? action.target.ref : undefined;
-  if (!targetRef) return false;
-  const element = page.elements.find((candidate) => candidate.ref === targetRef);
-  const label = normalizeRiskText([element?.name, element?.text, element?.placeholder, element?.role, element?.type].filter(Boolean).join(" "));
-  if (action.type === "select") {
-    const option = element?.options?.find((candidate) => candidate.value === action.value);
-    return explicitCriticalIntent || criticalActionWords.test(normalizeRiskText(`${option?.label ?? ""} ${action.value}`));
-  }
-  if (action.type === "type") return false;
-  const isUnlabelledControl = !element?.name?.trim() && !element?.text?.trim() && ["button", "submit", "link"].includes(element?.role ?? element?.tag ?? "");
-  const criticalControl = element?.type === "submit"
-    || element?.type === "reset"
-    || element?.role === "submit"
-    || isUnlabelledControl
-    || criticalActionWords.test(label);
-  if (isExplicitSearchGoal(goal) && /\b(busca|buscar|pesquisa|pesquisar|search|go)\b/.test(label)) return false;
-  return criticalControl || explicitCriticalIntent;
-}
-
 function describeActionForConfirmation(action: AgentAction, page: PageState): string {
   if (action.type === "click") {
     const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
     const label = element?.name ?? element?.text ?? element?.role ?? "controle sem rótulo";
     return `O Jev quer clicar em “${label}”.`;
+  }
+  if (action.type === "select") {
+    const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
+    const option = element?.options?.find((candidate) => candidate.value === action.value);
+    return `O Jev quer selecionar “${option?.label ?? "opção desconhecida"}” em “${element?.name ?? element?.role ?? "controle sem rótulo"}”.`;
   }
   if (action.type === "keypress") return `O Jev quer pressionar ${action.key}.`;
   if (action.type === "close_tab") return "O Jev quer fechar uma aba do navegador.";
@@ -392,23 +364,37 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
         candidateOffset = action.nextOffset;
         return { ok: true, actionId, status: "success", changed: true };
       }
-      if (latestPage && requiresActionConfirmation(action, latestPage, message.goal)) {
-        const approved = await requestActionConfirmation(chromeApi, message.requestId, action, latestPage, signal);
+      let executableAction: AgentAction = action;
+      if (latestPage) {
+        const risk = classifyActionRisk(action, latestPage, message.goal);
+        if (risk === "blocked") return { ok: false, actionId, code: "ACTION_NOT_AUTHORIZED", error: "Essa ação de alto impacto não corresponde ao objetivo informado pelo usuário." };
+        if (risk === "confirmation") {
+          const confirmedPage = latestPage;
+          const confirmedTabId = currentTabId.value;
+          const approved = await requestActionConfirmation(chromeApi, message.requestId, action, confirmedPage, signal);
+          if (approved) {
+            const currentPage = await scanTab(chromeApi, currentTabId.value, message.requestId);
+            const rebound = rebindConfirmedAction(action, confirmedPage, currentPage, confirmedTabId, currentTabId.value);
+            if (!rebound) return { ok: false, actionId, code: "CONFIRMATION_CONTEXT_CHANGED", error: "A página, aba ou alvo mudou durante a confirmação; a ação foi cancelada." };
+            executableAction = rebound;
+            latestPage = currentPage;
+          }
         if (!approved && signal.aborted) return { ok: true, actionId, changed: false, status: "success" };
         if (!approved) return { ok: false, actionId, code: "USER_CONFIRMATION_REQUIRED", error: "A ação foi cancelada ou a confirmação expirou." };
+        }
       }
-      if (["navigate", "search_web", "open_tab", "open_window", "switch_tab", "close_tab", "go_back", "go_forward"].includes(action.type)) {
-        const result = await executeBrowserAction(chromeApi, action as import("./types.js").BrowserAction, currentTabId, signal, linkTab);
-        if (result.ok && ["open_tab", "open_window", "switch_tab", "close_tab"].includes(action.type) && !linkTab(currentTabId.value)) {
+      if (["navigate", "search_web", "open_tab", "open_window", "switch_tab", "close_tab", "go_back", "go_forward"].includes(executableAction.type)) {
+        const result = await executeBrowserAction(chromeApi, executableAction as import("./types.js").BrowserAction, currentTabId, signal, linkTab);
+        if (result.ok && ["open_tab", "open_window", "switch_tab", "close_tab"].includes(executableAction.type) && !linkTab(currentTabId.value)) {
           return { ok: false, actionId, code: "TAB_SESSION_BUSY", error: "A aba de destino já está sendo controlada por outra sessão." };
         }
         result.actionId = actionId;
         return result;
       }
-      const knownTabIds = action.type === "click"
+      const knownTabIds = executableAction.type === "click"
         ? new Set((await chromeApi.tabs.query({})).flatMap((tab) => tab.id === undefined ? [] : [tab.id]))
         : undefined;
-      const routed = routeFrameAction(action as import("./types.js").BrowserAction, latestPage ?? await scanTab(chromeApi, currentTabId.value, message.requestId));
+      const routed = routeFrameAction(executableAction as import("./types.js").BrowserAction, latestPage ?? await scanTab(chromeApi, currentTabId.value, message.requestId));
       const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId, action: routed.action }, { frameId: routed.frameId }) as ActionResult;
       if (knownTabIds && result.dispatched) {
         const tabs = await chromeApi.tabs.query({});
