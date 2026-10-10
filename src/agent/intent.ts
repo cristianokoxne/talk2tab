@@ -76,14 +76,46 @@ function searchTerm(goal: string): string | undefined {
   return afterSearch?.[1] ? cleanValue(afterSearch[1]) : undefined;
 }
 
+function youtubeVideoQuery(goal: string): string | undefined {
+  const quoted = goal.match(/["']([^"']{1,240})["']/)?.[1];
+  if (quoted) return cleanValue(quoted);
+  const patterns = [
+    /\b(?:v[ií]deo|video)\s+(?:chamado|intitulado|sobre|de|do|da)\s+(.+?)(?=\s+(?:no|do)\s+youtube\b|[,.!?]|$)/i,
+    /\b(?:assista|assistir|veja|ver|watch|play)\s+(?:a\s+|ao\s+)?(?:um\s+|o\s+|a\s+)?(?:v[ií]deo|video)\s+(.+?)(?=\s+(?:no|do)\s+youtube\b|[,.!?]|$)/i,
+    /\b(?:assista|assistir|veja|ver|watch|play)\s+(.+?)\s+(?:no|do)\s+youtube\b/i,
+  ];
+  for (const pattern of patterns) {
+    const value = goal.match(pattern)?.[1] ? cleanValue(goal.match(pattern)![1]) : undefined;
+    if (value && !/^(?:um|uma|o|a)?\s*(?:v[ií]deo|video)$/i.test(value)) return value;
+  }
+  return undefined;
+}
+
+function isGenericYoutubeVideoQuery(query: string | undefined): boolean {
+  if (!query) return true;
+  const normalized = normalize(query)
+    .replace(/\b(?:no|do)\s+youtube\b/gi, " ")
+    .replace(/\b(?:um|uma|o|a)\b/gi, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+  return normalized === "video" || normalized === "youtube" || normalized === "video youtube";
+}
+
 export function parseGoal(goal: string): GoalPlan {
   const stages: GoalStage[] = [];
   const fields = extractFieldValues(goal);
-  const query = searchTerm(goal);
+  const youtubeVideoIntent = /\b(?:youtube|youtu\.be)\b/i.test(goal) && /\b(?:v[ií]deo|video|assista|assistir|veja|ver|watch|play)\b/i.test(goal);
+  const videoQuery = youtubeVideoIntent ? youtubeVideoQuery(goal) : undefined;
+  const fallbackQuery = searchTerm(goal);
+  const query = youtubeVideoIntent
+    ? !isGenericYoutubeVideoQuery(videoQuery) ? videoQuery : !isGenericYoutubeVideoQuery(fallbackQuery) ? fallbackQuery : undefined
+    : fallbackQuery;
+  const missingVideoQuery = youtubeVideoIntent && !query;
+  if (youtubeVideoIntent && query) stages.push({ kind: "navigate", description: "Abrir o YouTube", value: "https://www.youtube.com/", status: "pending" });
   const selection = goal.match(/\b(?:selecione|selecionar|escolha|escolher|select|choose)(?:\s+(?:a\s+)?(?:op[cç][aã]o|option))?\s+[“"'‘]?(.+?)[”"'’]?(?=\s+(?:no|na|em|in)\s+(?:campo|lista|list|combobox)\b|[,.!?;]|$)/i);
   const genericDestination = /\b(?:abra|abrir|acesse|acessar|navegue|navegar|open|visit)\b.{0,80}\b(?:site|p[aá]gina|portal|reposit[oó]rio|repo|git)\b/i.test(goal);
   if (query) stages.push({ kind: "search", description: `Pesquisar por “${query}”`, value: query, status: "pending" });
-  if (/\b(?:e\s+(?:depois\s+)?|depois\s+|then\s+)(?:abra|acesse|clique|entre|open|click)\b/i.test(goal) && query) {
+  if ((youtubeVideoIntent || /\b(?:e\s+(?:depois\s+)?|depois\s+|then\s+)(?:abra|acesse|clique|entre|open|click)\b/i.test(goal)) && query) {
     stages.push({ kind: "open_result", description: "Abrir o resultado solicitado", value: /primeir[oa]|first/i.test(goal) ? "first" : undefined, status: "pending" });
   }
   const hasExplicitDestination = /https?:\/\/|\b(?:www\.)?[a-z0-9-]+\.(?:com|com\.br|org|net|io|dev|ai|app|gov)(?:\/[^\s]*)?\b|\b(?:google|youtube)\b/i.test(goal);
@@ -109,9 +141,9 @@ export function parseGoal(goal: string): GoalPlan {
   } else if (!stages.length && /\b(avance|avançar|avanca|pr[oó]xima p[aá]gina|forward|go forward)\b/i.test(goal)) {
     stages.push({ kind: "navigate", description: "Avançar à próxima página", value: "forward", status: "pending" });
   }
-  if (!stages.length && hasExplicitDestination && /\b(?:abra|abrir|acesse|acessar|navegue|navegar|open|visit)\b/i.test(goal)) {
+  if (!stages.length && !missingVideoQuery && hasExplicitDestination && /\b(?:abra|abrir|acesse|acessar|navegue|navegar|open|visit)\b/i.test(goal)) {
     stages.push({ kind: "navigate", description: "Navegar ao destino solicitado", value: goal, status: "pending" });
-  } else if (!stages.length && hasExplicitDestination && /\b(?:entre|entrar|visite|visitar)\b/i.test(goal)) {
+  } else if (!stages.length && !missingVideoQuery && hasExplicitDestination && /\b(?:entre|entrar|visite|visitar)\b/i.test(goal)) {
     stages.push({ kind: "navigate", description: "Navegar ao destino solicitado", value: goal, status: "pending" });
   } else if (!stages.length && genericDestination) {
     stages.push({ kind: "navigate", description: "Descobrir e abrir o destino solicitado", value: goal, status: "pending" });
@@ -122,8 +154,8 @@ export function parseGoal(goal: string): GoalPlan {
     original: goal,
     stages,
     restrictions,
-    needsClarification: recipientAmbiguity,
-    clarification: recipientAmbiguity ? "Para qual destinatário devo enviar?" : undefined,
+    needsClarification: recipientAmbiguity || missingVideoQuery,
+    clarification: recipientAmbiguity ? "Para qual destinatário devo enviar?" : missingVideoQuery ? "Qual título ou tema devo procurar no YouTube?" : undefined,
   };
 }
 

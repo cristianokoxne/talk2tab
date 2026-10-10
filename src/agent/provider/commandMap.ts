@@ -184,6 +184,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   const url = requestedUrl(goal);
   const hasNavigationIntent = Boolean(url && (/\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal) || /\b(entre|entrar|visite|visitar)\b/i.test(goal)));
   const genericNavigation = !url && /\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/i.test(goal) && navigationQuery(goal);
+  const youtubeVideoNavigation = Boolean(url && /\b(?:youtube|youtu\.be)\b/i.test(goal) && /\b(?:v[ií]deo|video|assista|assistir|veja|ver|watch|play)\b/i.test(goal));
   const hasSearchIntent = Boolean(progressedPlan.stages.some((stage) => stage.status === "pending" && (stage.kind === "search" || stage.kind === "open_result")));
   if (url && !completedActions.includes("open_window") && /\b(nova|novo)\s+(janela|window)\b/i.test(goal)) {
     options.push({ id: "open_window", action: { type: "open_window", url } });
@@ -196,6 +197,9 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   }
   if (url && !completedActions.includes("navigate") && !/\b(nova|novo)\s+(aba|guia|tab|janela|window)\b/i.test(goal) && /\b(entre|entrar|visite|visitar)\b/i.test(goal)) {
     options.push({ id: "navigate", action: { type: "navigate", url } });
+  }
+  if (youtubeVideoNavigation && pendingStage?.kind === "navigate" && !options.some((option) => option.action.type === "navigate")) {
+    options.push({ id: "navigate_youtube", action: { type: "navigate", url: "https://www.youtube.com/" } });
   }
   if (genericNavigation && !completedActions.includes("search_web")) {
     options.push({ id: "search_web", action: { type: "search_web", query: navigationQuery(goal) } });
@@ -399,7 +403,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Ainda falta: ${pendingStage?.description ?? "concluir a próxima etapa"}.` } });
   }
 
-  if (!hasSearchIntent && (hasNavigationIntent || Boolean(genericNavigation))) {
+  if (!hasSearchIntent && (hasNavigationIntent || youtubeVideoNavigation || Boolean(genericNavigation))) {
     const navigationOption = options.find((option) => ["navigate", "search_web", "open_tab", "open_window"].includes(option.action.type));
     if (navigationOption && !completedActions.includes(navigationOption.action.type)) {
       options.splice(0, options.length, navigationOption);
@@ -414,6 +418,11 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     && !/\b(e|depois|ent[aã]o|para|com)\b.*\b(digite|pesquise|clique|procure|navegue)\b/i.test(goal);
   if (openOnlyGoal && (completedActions.includes("open_window") || completedActions.includes("open_tab"))) {
     options.splice(1);
+  }
+
+  if (goalPlan.needsClarification) {
+    const clarification: CommandOption = { id: "clarify_goal", action: { type: "finish", status: "failed", message: goalPlan.clarification ?? "Preciso de um detalhe para continuar." } };
+    options.splice(0, options.length, clarification);
   }
 
   const rankedOptions = options.map((option, order) => ({ option, order, score: scoreOption(option, goal, page, tabs, textToType) }))
