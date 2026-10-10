@@ -98,7 +98,8 @@ function scoreOption(option: CommandOption, goal: string, page: PageState, tabs:
 }
 
 function compactOptionLabel(element: ElementRef | undefined, value: string): string {
-  return element?.options?.find((option) => option.value === value)?.label ?? "opção disponível";
+  const option = element?.options?.find((candidate) => candidate.value === value);
+  return option ? [option.group, option.label].filter(Boolean).join(" › ") : "opção disponível";
 }
 
 function isSearchSubmitControl(element: ElementRef): boolean {
@@ -132,10 +133,17 @@ function navigationQuery(goal: string): string {
 /** Builds Jev's closed action space. Jev chooses an existing option; it never invents a selector or code. */
 export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserTabSummary[] = [], completedActions: string[] = [], candidateOffset = 0, actionHistory: GoalHistoryEvent[] = []): { map: JevCommandMap; options: CommandOption[] } {
   const goalPlan = parseGoal(goal);
-  const progressedPlan = updateGoalProgress(goalPlan, actionHistory);
+  const observedSelection = goalPlan.stages.filter((stage) => stage.kind === "select_option").flatMap((stage) => {
+    const target = stage.target?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() ?? "";
+    return page.elements.some((element) => element.selectedOptionLabel?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(target))
+      ? [{ type: "select", selectionLabel: stage.target, progressed: true } satisfies GoalHistoryEvent]
+      : [];
+  });
+  const progressedPlan = updateGoalProgress(goalPlan, [...actionHistory, ...observedSelection]);
   const pendingStage = progressedPlan.stages.find((stage) => stage.status === "pending");
   const textToType = goalPlan.stages.find((stage) => stage.kind === "search")?.value
-    ?? goalPlan.stages.find((stage) => stage.kind === "fill_field")?.value;
+    ?? goalPlan.stages.find((stage) => stage.kind === "fill_field")?.value
+    ?? goalPlan.stages.find((stage) => stage.kind === "select_option")?.target;
   const options: CommandOption[] = [
     { id: "finish_success", action: { type: "finish", status: "success", message: "Objetivo concluído." } },
   ];
@@ -174,12 +182,14 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     if (!isProhibitedByGoal(element, goalPlan) && ["button", "link", "checkbox", "radio", "switch", "tab", "option", "menuitem", "menuitemcheckbox", "menuitemradio", "treeitem", "submit"].includes(element.role ?? element.tag)) {
       options.push({ id: `click_${element.ref}`, action: { type: "click", target: { ref: element.ref } } });
     }
-    const elementText = valueForField(goal, [element.name, element.placeholder, element.context].filter(Boolean).join(" "));
+    const elementText = valueForField(goal, [element.name, element.placeholder, element.context].filter(Boolean).join(" "))
+      ?? (element.role === "combobox" || element.ariaAutocomplete ? goalPlan.stages.find((stage) => stage.kind === "select_option")?.target : undefined);
     if (elementText && ["input", "textarea", "textbox", "searchbox", "combobox"].includes(element.role ?? element.tag) && element.type !== "password") {
       options.push({ id: `type_${element.ref}`, action: { type: "type", target: { ref: element.ref }, text: elementText, replace: true } });
     }
     if (["select", "combobox"].includes(element.role ?? element.tag)) {
       for (const option of element.options ?? []) {
+        if (option.disabled) continue;
         options.push({ id: `select_${element.ref}_${option.value}`, action: { type: "select", target: { ref: element.ref }, value: option.value } });
       }
     }
@@ -261,6 +271,41 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       else options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei “${pendingStage.target}” para continuar.` } });
     }
   }
+  if (pendingStage?.kind === "select_option") {
+    const target = pendingStage.target ?? "";
+    const normalizedTarget = target.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const matchingSelects = options.filter((option) => {
+      if (option.action.type !== "select") return false;
+      const action = option.action;
+      const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
+      const selected = element?.options?.find((candidate) => candidate.value === action.value);
+      return Boolean(selected && [selected.group, selected.label].filter(Boolean).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(normalizedTarget));
+    });
+    const matchingOptions = options.filter((option) => {
+      if (option.action.type !== "click") return false;
+      const action = option.action;
+      const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
+      return Boolean(element && ["option", "menuitem", "menuitemradio", "menuitemcheckbox"].includes(element.role ?? "")
+        && (element.name ?? element.text ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(normalizedTarget));
+    });
+    const filterFields = options.filter((option) => {
+      if (option.action.type !== "type") return false;
+      const action = option.action;
+      const element = page.elements.find((candidate) => candidate.ref === action.target.ref);
+      return Boolean(element && (element.role === "combobox" || element.ariaAutocomplete) && action.text === target);
+    });
+    const allScroll = options.filter((option) => option.action.type === "scroll");
+    const relatedLists = new Set(page.elements.filter((element) => element.role === "combobox" || element.ariaAutocomplete)
+      .flatMap((element) => (element.controls ?? "").split(/\s+/).filter(Boolean)));
+    const relatedScroll = allScroll.filter((option) => {
+      if (option.action.type !== "scroll") return false;
+      const action = option.action;
+      return page.scrollContainers?.some((container) => container.ref === action.target?.ref && relatedLists.has(container.label)) ?? false;
+    });
+    const scroll = relatedScroll.length ? relatedScroll : allScroll;
+    options.splice(0, options.length, ...matchingSelects, ...matchingOptions, ...filterFields, ...scroll);
+    if (!options.length) options.push({ id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei a opção “${target}” para selecionar.` } });
+  }
   if (pendingStage?.kind === "navigate") {
     const expectedTypes = pendingStage.value === "back" ? ["go_back"]
       : pendingStage.value === "forward" ? ["go_forward"]
@@ -271,7 +316,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   }
   if (progressedPlan.stages.length > 0 && progressedPlan.stages.every((stage) => stage.status === "complete")) {
     options.splice(0, options.length, { id: "finish_success", action: { type: "finish", status: "success", message: "Todas as etapas rastreadas foram concluídas." } });
-  } else if (progressedPlan.stages.some((stage) => stage.status === "pending") && !hasSearchIntent && pendingStage?.kind !== "fill_field" && pendingStage?.kind !== "navigate" && pendingStage?.kind !== "click_target") {
+  } else if (progressedPlan.stages.some((stage) => stage.status === "pending") && !hasSearchIntent && pendingStage?.kind !== "fill_field" && pendingStage?.kind !== "navigate" && pendingStage?.kind !== "click_target" && pendingStage?.kind !== "select_option") {
     options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Ainda falta: ${pendingStage?.description ?? "concluir a próxima etapa"}.` } });
   }
 
@@ -311,7 +356,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     regions: page.regions?.slice(0, 20),
     elements: selectedElements.map((element) => ({
       ...element,
-      options: element.options?.map((option, index) => ({ value: `option_${index + 1}`, label: option.label })),
+      options: element.options?.map((option, index) => ({ value: `option_${index + 1}`, label: option.label, group: option.group, disabled: option.disabled })),
     })),
     scrollContainers: page.scrollContainers?.slice(0, 12),
   };

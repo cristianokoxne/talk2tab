@@ -49,6 +49,7 @@ function actionHistoryEntry(before: PageState, after: PageState, action: AgentAc
     type: action.type,
     actionKey,
     targetLabel,
+    targetRole: target?.role,
     dispatched: result.dispatched === true,
     progressed: verification.progressed,
     beforeUrl: before.url.split(/[?#]/, 1)[0],
@@ -57,6 +58,7 @@ function actionHistoryEntry(before: PageState, after: PageState, action: AgentAc
   };
   if (action.type === "type") event.valueLength = action.text.length;
   if (action.type === "select") event.valueLength = action.value.length;
+  if (action.type === "select") event.selectionLabel = result.selectionLabel;
   if (!result.ok) event.progressed = false;
   if (!result.ok) event.errorCode = result.code ?? "ACTION_FAILED";
   return event;

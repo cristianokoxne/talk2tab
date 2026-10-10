@@ -70,3 +70,34 @@ test("select values stay local while Jev receives a distinct human-readable opti
   assert.match(map.questions.next_action.criteria[choice.id].description, /Premium annual/);
   assert.equal(JSON.stringify(map).includes(sensitiveValue), false);
 });
+
+test("grouped select choices retain group labels and omit disabled options", () => {
+  const page = {
+    url: "https://forms.test", title: "Forms", viewport: { width: 800, height: 600, scrollY: 0 }, pageTextSummary: "", fingerprint: "groups", limitations: [],
+    elements: [{ ref: "el_1_1", frameId: 0, tag: "select", role: "combobox", name: "Language", visible: true, enabled: true, options: [
+      { value: "us", label: "English", group: "United States" }, { value: "uk", label: "English", group: "United Kingdom" }, { value: "disabled", label: "Unavailable", group: "Other", disabled: true },
+    ], bounds: { x: 0, y: 0, width: 200, height: 30 } }],
+  };
+  const { options } = buildJevCommandMap("choose English", page);
+  assert.equal(options.filter((option) => option.action.type === "select").length, 2);
+  const grouped = buildJevCommandMap("select English", page);
+  assert.ok(grouped.options.some((option) => option.action.type === "select"));
+  assert.equal(grouped.options.some((option) => option.action.type === "select" && option.action.value === "disabled"), false);
+  const selected = grouped.options.find((option) => option.action.type === "select" && option.action.value === "us");
+  assert.match(grouped.map.questions.next_action.criteria[selected.id].description, /United States.*English/);
+});
+
+test("selection goal prefers scrolling the listbox linked to its combobox", () => {
+  const page = {
+    url: "https://forms.test", title: "Forms", viewport: { width: 800, height: 600, scrollY: 0 }, pageTextSummary: "", fingerprint: "listbox", limitations: [],
+    elements: [{ ref: "el_1_1", frameId: 0, tag: "input", role: "combobox", name: "Country", controls: "country-list", ariaAutocomplete: "list", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 200, height: 30 } }],
+    scrollContainers: [
+      { ref: "scroll_1", label: "unrelated-list", scrollTop: 0, clientHeight: 40, scrollHeight: 200, bounds: { x: 0, y: 40, width: 200, height: 40 } },
+      { ref: "scroll_2", label: "country-list", scrollTop: 0, clientHeight: 40, scrollHeight: 200, bounds: { x: 0, y: 100, width: 200, height: 40 } },
+    ],
+  };
+  const { options } = buildJevCommandMap("select Canada", page);
+  const scrollTargets = options.filter((option) => option.action.type === "scroll").map((option) => option.action.target.ref);
+  assert.equal(scrollTargets.length, 2, "Both directions should be available for the linked listbox");
+  assert.ok(scrollTargets.every((ref) => ref === "scroll_2"));
+});

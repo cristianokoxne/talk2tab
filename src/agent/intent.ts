@@ -1,5 +1,5 @@
 export interface GoalStage {
-  kind: "navigate" | "search" | "open_result" | "fill_field" | "filter" | "click_target";
+  kind: "navigate" | "search" | "open_result" | "fill_field" | "filter" | "click_target" | "select_option";
   description: string;
   value?: string;
   field?: string;
@@ -12,12 +12,14 @@ export interface GoalHistoryEvent {
   actionKey?: string;
   dispatched?: boolean;
   targetLabel?: string;
+  targetRole?: string;
   valueLength?: number;
   progressed: boolean;
   beforeUrl?: string;
   afterUrl?: string;
   evidence?: string[];
   errorCode?: string;
+  selectionLabel?: string;
 }
 
 export interface GoalPlan {
@@ -78,6 +80,7 @@ export function parseGoal(goal: string): GoalPlan {
   const stages: GoalStage[] = [];
   const fields = extractFieldValues(goal);
   const query = searchTerm(goal);
+  const selection = goal.match(/\b(?:selecione|selecionar|escolha|escolher|select|choose)(?:\s+(?:a\s+)?(?:op[cç][aã]o|option))?\s+[“"'‘]?(.+?)[”"'’]?(?=\s+(?:no|na|em|in)\s+(?:campo|lista|list|combobox)\b|[,.!?;]|$)/i);
   const genericDestination = /\b(?:abra|abrir|acesse|acessar|navegue|navegar|open|visit)\b.{0,80}\b(?:site|p[aá]gina|portal|reposit[oó]rio|repo|git)\b/i.test(goal);
   if (query) stages.push({ kind: "search", description: `Pesquisar por “${query}”`, value: query, status: "pending" });
   if (/\b(?:e\s+(?:depois\s+)?|depois\s+|then\s+)(?:abra|acesse|clique|entre|open|click)\b/i.test(goal) && query) {
@@ -100,6 +103,7 @@ export function parseGoal(goal: string): GoalPlan {
     const value = quoted ?? goal.match(/(?:digite|escreva|preencha|insira|informe|enter|type)\s+(.+?)(?:\s+(?:no|na|em|into|in)\s+(?:campo|field)\b|[.!?]|$)/i)?.[1];
     if (value) stages.push({ kind: "fill_field", description: "Preencher o campo indicado", value: cleanValue(value), status: "pending" });
   }
+  if (selection?.[1]) stages.push({ kind: "select_option", description: `Selecionar “${cleanValue(selection[1])}”`, target: cleanValue(selection[1]), status: "pending" });
   if (!stages.length && /\b(voltar|volte|retorne|back|go back)\b/i.test(goal)) {
     stages.push({ kind: "navigate", description: "Voltar à página anterior", value: "back", status: "pending" });
   } else if (!stages.length && /\b(avance|avançar|avanca|pr[oó]xima p[aá]gina|forward|go forward)\b/i.test(goal)) {
@@ -163,6 +167,13 @@ export function updateGoalProgress(plan: GoalPlan, history: GoalHistoryEvent[]):
     }
     if (stage.kind === "click_target") {
       return { ...stage, status: targetWasClicked(history, stage.target ?? "") ? "complete" as const : "pending" as const };
+    }
+    if (stage.kind === "select_option") {
+      const target = stage.target ?? "";
+      const tokens = normalize(target).split(/[^\p{L}\p{N}]+/u).filter((token) => token.length > 1);
+      const selected = history.some((entry) => entry.progressed && ((entry.type === "select" && normalize(entry.selectionLabel ?? "").includes(normalize(target)))
+        || (entry.type === "click" && /option|menuitem/.test(entry.targetRole ?? "") && tokens.length > 0 && tokens.every((token) => normalize(entry.targetLabel ?? "").includes(token)))));
+      return { ...stage, status: selected ? "complete" as const : "pending" as const };
     }
     return { ...stage, status: priorStages.every((prior) => prior.status === "complete") ? "pending" as const : "pending" as const };
   });

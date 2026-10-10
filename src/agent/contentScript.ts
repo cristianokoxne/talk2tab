@@ -59,8 +59,10 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
           sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid select action." });
           return;
         }
-        sendResponse(executeSelect(request.actionId, registry, request.action.target.ref, request.action.value));
-        return;
+        void executeSelect(request.actionId, registry, request.action.target.ref, request.action.value)
+          .then(sendResponse)
+          .catch(() => sendResponse({ ok: false, actionId: request.actionId, status: "failed", code: "SELECTION_FAILED", error: "Unable to verify the selected option." }));
+        return true;
       }
       if (request.action?.type === "scroll") {
         if (typeof request.actionId !== "string" || !["up", "down"].includes(request.action.direction) || (request.action.amount !== "viewport" && typeof request.action.amount !== "number")) {

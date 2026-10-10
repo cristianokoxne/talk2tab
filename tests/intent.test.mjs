@@ -58,3 +58,26 @@ test("negative send constraints block submit options and ambiguous recipients as
   assert.equal(ambiguous.options.length, 1);
   assert.match(ambiguous.options[0].action.message, /qual destinatário/i);
 });
+
+test("selection goals cannot finish after typing; they need a matching option selection", () => {
+  const goal = "selecione Canada na lista";
+  const page = { url: "https://forms.test", title: "Forms", viewport: { width: 800, height: 600, scrollY: 0 }, pageTextSummary: "", fingerprint: "combo", limitations: [], elements: [
+    { ref: "el_1_1", frameId: 0, tag: "input", role: "combobox", name: "País", ariaAutocomplete: "list", expanded: true, visible: true, enabled: true, bounds: { x: 0, y: 0, width: 200, height: 30 } },
+    { ref: "el_1_2", frameId: 0, tag: "div", role: "option", name: "Canada", selected: false, visible: true, enabled: true, bounds: { x: 0, y: 40, width: 200, height: 30 } },
+    { ref: "el_1_3", frameId: 0, tag: "div", role: "option", name: "Cameroon", selected: false, visible: true, enabled: true, bounds: { x: 0, y: 80, width: 200, height: 30 } },
+  ] };
+  const initial = buildJevCommandMap(goal, page);
+  assert.equal(initial.options.some((option) => option.action.type === "finish" && option.action.status === "success"), false);
+  assert.ok(initial.options.some((option) => option.action.type === "type" && option.action.text === "Canada"));
+  assert.ok(initial.options.some((option) => option.action.type === "click" && option.action.target.ref === "el_1_2"));
+
+  const typedOnly = buildJevCommandMap(goal, page, [], ["type"], 0, [{ type: "type", targetLabel: "País", progressed: true }]);
+  assert.equal(typedOnly.options.some((option) => option.action.type === "finish" && option.action.status === "success"), false);
+  assert.ok(typedOnly.options.some((option) => option.action.type === "click" && option.action.target.ref === "el_1_2"));
+
+  const selected = buildJevCommandMap(goal, page, [], ["type", "click"], 0, [
+    { type: "type", targetLabel: "País", progressed: true },
+    { type: "click", targetLabel: "Canada", targetRole: "option", progressed: true },
+  ]);
+  assert.ok(selected.options.some((option) => option.action.type === "finish" && option.action.status === "success"));
+});

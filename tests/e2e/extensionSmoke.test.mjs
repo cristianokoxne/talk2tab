@@ -288,6 +288,62 @@ test("native date and time inputs keep canonical values in Chromium", async () =
   await page.close();
 });
 
+test("autocomplete selects a portal option and plain editor preserves existing text", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    document.body.insertAdjacentHTML("beforeend", `<label for="country">País</label><input id="country" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="portal-options"><div id="portal-options" role="listbox" hidden><div role="option">Canada</div><div role="option">Cameroon</div></div><label for="plain-editor">Editor simples</label><div id="plain-editor" contenteditable="true">nota anterior</div><label for="rich-editor">Editor rico</label><div id="rich-editor" contenteditable="true"><strong>preservar HTML</strong></div>`);
+    const input = document.querySelector("#country");
+    const list = document.querySelector("#portal-options");
+    input.addEventListener("input", () => { list.hidden = false; input.setAttribute("aria-expanded", "true"); });
+    list.querySelectorAll("[role=option]").forEach((option) => option.addEventListener("click", () => {
+      input.value = option.textContent;
+      option.setAttribute("aria-selected", "true");
+      input.setAttribute("aria-expanded", "false");
+      list.hidden = true;
+    }));
+  });
+  let observation = await pageScan(worker, page);
+  const country = observation.data.elements.find((element) => element.name === "País");
+  await execute(worker, page, { type: "type", target: { ref: country.ref }, text: "Canada", replace: true });
+  assert.equal(await page.locator("#country").getAttribute("aria-expanded"), "true", "Typing opens suggestions without selecting one");
+  assert.equal(await page.locator("#portal-options [role=option][aria-selected=true]").count(), 0);
+  observation = await pageScan(worker, page);
+  const canada = observation.data.elements.find((element) => element.role === "option" && element.name === "Canada");
+  assert.ok(canada, "Portal suggestion should be discoverable");
+  await execute(worker, page, { type: "click", target: { ref: canada.ref } });
+  assert.equal(await page.locator("#country").inputValue(), "Canada");
+  assert.equal(await page.locator("#country").getAttribute("aria-expanded"), "false");
+  assert.equal(await page.locator("#portal-options [aria-selected=true]").textContent(), "Canada");
+
+  observation = await pageScan(worker, page);
+  const editor = observation.data.elements.find((element) => element.name === "Editor simples");
+  const rich = observation.data.elements.find((element) => element.name === "Editor rico");
+  assert.equal((await execute(worker, page, { type: "type", target: { ref: editor.ref }, text: " adicionada", replace: false })).ok, true);
+  assert.equal(await page.locator("#plain-editor").textContent(), "nota anterior adicionada");
+  const richHtml = await page.locator("#rich-editor").innerHTML();
+  assert.equal((await execute(worker, page, { type: "type", target: { ref: rich.ref }, text: "destruir" })).code, "UNSUPPORTED_CONTROL");
+  assert.equal(await page.locator("#rich-editor").innerHTML(), richHtml);
+  await page.close();
+});
+
+test("autocomplete scrolls its linked listbox to an offscreen option", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    document.body.insertAdjacentHTML("beforeend", `<label for="country-scroll">Country</label><input id="country-scroll" role="combobox" aria-autocomplete="list" aria-controls="country-scroll-list"><div id="country-scroll-list" role="listbox" style="height:40px;overflow-y:auto;width:240px"><div role="option" style="height:40px">Albania</div><div role="option" style="height:40px">Algeria</div><div role="option" style="height:40px">Andorra</div><div role="option" style="height:40px">Canada</div></div>`);
+  });
+  let observation = await pageScan(worker, page);
+  assert.equal(observation.data.elements.some((element) => element.name === "Canada" && element.role === "option"), false);
+  const list = observation.data.scrollContainers.find((container) => container.label === "country-scroll-list");
+  assert.ok(list);
+  await execute(worker, page, { type: "scroll", direction: "down", amount: 120, target: { ref: list.ref } });
+  observation = await pageScan(worker, page);
+  const canada = observation.data.elements.find((element) => element.name === "Canada" && element.role === "option");
+  assert.ok(canada, "The option should appear after scrolling its own listbox");
+  await page.close();
+});
+
 test("extension submits an empty search without claiming results exist", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);

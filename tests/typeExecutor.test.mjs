@@ -106,3 +106,42 @@ test("controlled re-render acceptance is verified and reverted input is rejected
   assert.equal(rejected.code, "INPUT_REVERTED");
   assert.equal(rollback.value, "old");
 });
+
+test("plain contenteditable preserves append text and rich editors are refused intact", async () => {
+  const dom = new JSDOM(`<div id="plain" contenteditable="true">before</div><div id="rich" contenteditable="true"><strong>formatted</strong><a href="#">linked</a></div>`);
+  const { document } = dom.window;
+  Object.assign(globalThis, { HTMLInputElement: dom.window.HTMLInputElement, HTMLTextAreaElement: dom.window.HTMLTextAreaElement });
+  const plain = document.querySelector("#plain");
+  const rich = document.querySelector("#rich");
+  Object.defineProperty(plain, "isContentEditable", { value: true });
+  Object.defineProperty(rich, "isContentEditable", { value: true });
+  for (const element of [plain, rich]) {
+    element.getBoundingClientRect = () => ({ x: 0, y: 0, width: 100, height: 30, top: 0, right: 100, bottom: 30, left: 0, toJSON: () => ({}) });
+    element.scrollIntoView = () => {};
+  }
+  const registry = new ElementRegistry(); registry.beginGeneration();
+  const plainRef = registry.register(plain);
+  const richRef = registry.register(rich);
+  const appended = await executeType("editor-1", registry, plainRef, " after", false);
+  assert.equal(appended.ok, true);
+  assert.equal(plain.textContent, "before after");
+  const originalHtml = rich.innerHTML;
+  const rejected = await executeType("editor-2", registry, richRef, "replacement");
+  assert.equal(rejected.code, "UNSUPPORTED_CONTROL");
+  assert.equal(rich.innerHTML, originalHtml);
+});
+
+test("contenteditable can reject beforeinput without changing its contents", async () => {
+  const dom = new JSDOM(`<div contenteditable="true">keep</div>`);
+  const { document } = dom.window;
+  Object.assign(globalThis, { HTMLInputElement: dom.window.HTMLInputElement, HTMLTextAreaElement: dom.window.HTMLTextAreaElement });
+  const editor = document.querySelector("div");
+  Object.defineProperty(editor, "isContentEditable", { value: true });
+  editor.getBoundingClientRect = () => ({ x: 0, y: 0, width: 100, height: 30, top: 0, right: 100, bottom: 30, left: 0, toJSON: () => ({}) });
+  editor.scrollIntoView = () => {};
+  editor.addEventListener("beforeinput", (event) => event.preventDefault());
+  const registry = new ElementRegistry(); registry.beginGeneration();
+  const result = await executeType("editor-3", registry, registry.register(editor), "destroy");
+  assert.equal(result.code, "EDITOR_REJECTED");
+  assert.equal(editor.textContent, "keep");
+});

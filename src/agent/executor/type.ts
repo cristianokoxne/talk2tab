@@ -36,6 +36,20 @@ async function waitForStableValue(element: HTMLInputElement | HTMLTextAreaElemen
   return element.value;
 }
 
+async function waitForStableEditor(element: HTMLElement): Promise<string> {
+  const started = Date.now();
+  let latest = element.textContent ?? "";
+  let stableSince = Date.now();
+  while (Date.now() - started < 800) {
+    await wait(25);
+    if (!element.isConnected) return latest;
+    const value = element.textContent ?? "";
+    if (value !== latest) { latest = value; stableSince = Date.now(); }
+    else if (Date.now() - stableSince >= 100) return value;
+  }
+  return element.textContent ?? "";
+}
+
 export async function executeType(actionId: string, registry: ElementRegistry, ref: string, text: string, replace = true): Promise<ActionResult> {
   const element = registry.get(ref);
   if (!element) return { ok: false, actionId, status: "failed", code: "STALE_ELEMENT", error: "Element ref is stale or unknown." };
@@ -43,13 +57,15 @@ export async function executeType(actionId: string, registry: ElementRegistry, r
   if (isSensitive(element)) return { ok: false, actionId, status: "failed", code: "SENSITIVE_FIELD", error: "Sensitive fields require an explicit safety flow." };
   const view = element.ownerDocument.defaultView;
   if (!view) return { ok: false, actionId, status: "failed", code: "FRAME_UNAVAILABLE", error: "Element document is unavailable." };
-  if (!(element instanceof view.HTMLInputElement || element instanceof view.HTMLTextAreaElement)) {
-    return { ok: false, actionId, status: "failed", code: "UNSUPPORTED_CONTROL", error: "Text entry supports native input and textarea controls." };
+  const nativeField = element instanceof view.HTMLInputElement || element instanceof view.HTMLTextAreaElement;
+  const plainEditor = element.isContentEditable && !element.querySelector("img,table,video,iframe,svg,canvas,ul,ol,li,blockquote,pre,h1,h2,h3,strong,b,em,i,a,[contenteditable='false']") && !Array.from(element.children).some((child) => !["BR"].includes(child.tagName));
+  if (!nativeField && !plainEditor) {
+    return { ok: false, actionId, status: "failed", code: "UNSUPPORTED_CONTROL", error: "Text entry supports native fields and plain contenteditable areas; rich editors need a specialized interaction." };
   }
   if (element instanceof view.HTMLInputElement && !supportedInputTypes.has(element.type)) {
     return { ok: false, actionId, status: "failed", code: "UNSUPPORTED_CONTROL", error: "This input type requires a specialized interaction." };
   }
-  if (element.readOnly || element.getAttribute("aria-readonly") === "true") {
+  if ((nativeField && (element as HTMLInputElement | HTMLTextAreaElement).readOnly) || element.getAttribute("aria-readonly") === "true") {
     return { ok: false, actionId, status: "failed", code: "ELEMENT_READONLY", error: "Element is read-only." };
   }
   if (element.matches(":disabled") || element.getAttribute("aria-disabled") === "true") {
@@ -66,30 +82,46 @@ export async function executeType(actionId: string, registry: ElementRegistry, r
     return { ok: false, actionId, status: "failed", code: "ELEMENT_NOT_VISIBLE", error: "Element is not visible." };
   }
 
-  const previous = element.value;
+  const field = nativeField ? element as HTMLInputElement | HTMLTextAreaElement : undefined;
+  const previous = field?.value ?? element.textContent ?? "";
   const requested = replace ? text : `${previous}${text}`;
-  if (element.maxLength >= 0 && requested.length > element.maxLength) {
+  if (field && field.maxLength >= 0 && requested.length > field.maxLength) {
     return { ok: false, actionId, status: "failed", code: "VALUE_TOO_LONG", error: "Text exceeds the field's maximum length." };
   }
   element.scrollIntoView({ block: "center", inline: "nearest" });
   element.focus({ preventScroll: true });
-  setNativeValue(element, requested);
-  element.dispatchEvent(new view.InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
-  let accepted = await waitForStableValue(element);
+  if (field) {
+    setNativeValue(field, requested);
+    field.dispatchEvent(new view.InputEvent("input", { bubbles: true, inputType: replace ? "insertReplacementText" : "insertText", data: text }));
+  } else {
+    const beforeInput = new view.InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: replace ? "insertReplacementText" : "insertText", data: text });
+    if (!element.dispatchEvent(beforeInput)) return { ok: false, actionId, status: "failed", code: "EDITOR_REJECTED", error: "The editor rejected the text before editing." };
+    const range = element.ownerDocument.createRange();
+    range.selectNodeContents(element);
+    if (!replace) range.collapse(false);
+    range.deleteContents();
+    range.insertNode(element.ownerDocument.createTextNode(text));
+    element.dispatchEvent(new view.InputEvent("input", { bubbles: true, inputType: replace ? "insertReplacementText" : "insertText", data: text }));
+  }
+  let accepted = field ? await waitForStableValue(field) : await waitForStableEditor(element);
+  if (!element.isConnected) return { ok: false, actionId, status: "failed", code: "INPUT_REPLACED", error: "The page replaced the edited control before its value could be confirmed; scan again." };
   if (accepted === previous && requested !== previous) {
     return { ok: false, actionId, status: "failed", code: "INPUT_REVERTED", error: "The page reverted the field value after its update cycle." };
   }
-  element.blur();
-  element.dispatchEvent(new view.Event("change", { bubbles: true }));
-  accepted = await waitForStableValue(element);
+  if (field) {
+    field.blur();
+    field.dispatchEvent(new view.Event("change", { bubbles: true }));
+    accepted = await waitForStableValue(field);
+    if (!element.isConnected) return { ok: false, actionId, status: "failed", code: "INPUT_REPLACED", error: "The page replaced the edited control before its committed value could be confirmed; scan again." };
+  }
   if (accepted === previous && requested !== previous) {
     return { ok: false, actionId, status: "failed", code: "INPUT_REVERTED", error: "The page reverted the field value after blur or change." };
   }
 
-  if (element.validity.badInput || element.validity.typeMismatch || element.validity.rangeOverflow || element.validity.rangeUnderflow || element.validity.stepMismatch || element.validity.tooLong || element.validity.tooShort || element.validity.patternMismatch) {
-    setNativeValue(element, previous);
-    element.dispatchEvent(new view.InputEvent("input", { bubbles: true, inputType: "insertReplacementText", data: null }));
-    element.dispatchEvent(new view.Event("change", { bubbles: true }));
+  if (field && (field.validity.badInput || field.validity.typeMismatch || field.validity.rangeOverflow || field.validity.rangeUnderflow || field.validity.stepMismatch || field.validity.tooLong || field.validity.tooShort || field.validity.patternMismatch)) {
+    setNativeValue(field, previous);
+    field.dispatchEvent(new view.InputEvent("input", { bubbles: true, inputType: "insertReplacementText", data: null }));
+    field.dispatchEvent(new view.Event("change", { bubbles: true }));
     return { ok: false, actionId, status: "failed", code: "INVALID_VALUE", error: "The value violates this field's native constraints." };
   }
   return { ok: true, actionId, status: "success", changed: accepted !== previous };

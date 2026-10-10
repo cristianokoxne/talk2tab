@@ -30,6 +30,7 @@ export interface ActionResult {
   /** True only when the executor directly observed a local state change. */
   changed?: boolean;
   snapshot?: string;
+  selectionLabel?: string;
   status?: "success" | "failed";
 }
 
@@ -117,7 +118,10 @@ export interface ElementRef {
   checked?: boolean;
   checkedState?: "mixed";
   selected?: boolean;
-  options?: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string; group?: string; disabled?: boolean }>;
+  ariaAutocomplete?: string;
+  controls?: string;
+  selectedOptionLabel?: string;
   sensitive?: boolean;
   bounds: ElementBounds;
 }

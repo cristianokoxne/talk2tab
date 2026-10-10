@@ -10,7 +10,7 @@ const interactiveSelector = [
   "[role=combobox]", "[role=menuitem]", "[role=menuitemcheckbox]", "[role=menuitemradio]", "[role=treeitem]",
   "[contenteditable=true]", "[tabindex]:not([tabindex='-1'])",
 ].join(",");
-const sensitiveInputTypes = new Set(["password", "hidden"]);
+const sensitiveInputTypes = new Set(["password", "hidden", "file"]);
 const semanticRegionSelector = "main,[role=main],nav,[role=navigation],form,[role=form],dialog,[role=dialog],section,article,li,[role=listitem],tr,[role=row],table,[role=table],[role=alert],[role=status]";
 
 function collectInteractiveElements(root: ParentNode): HTMLElement[] {
@@ -148,10 +148,18 @@ function toElementRef(element: HTMLElement, ref: string, document: Document, win
     readOnly: input?.readOnly || textarea?.readOnly || element.getAttribute("aria-readonly") === "true" || undefined,
     invalid: invalid || undefined,
     expanded: element.getAttribute("aria-expanded") === "true" ? true : element.getAttribute("aria-expanded") === "false" ? false : undefined,
+    ariaAutocomplete: element.getAttribute("aria-autocomplete") || undefined,
+    controls: (element.getAttribute("aria-controls") ?? "").slice(0, 120) || undefined,
+    selectedOptionLabel: select?.selectedOptions[0] ? compactText(select.selectedOptions[0].text, 120) : undefined,
     ...getCheckedState(element, input),
     selected: element.getAttribute("aria-selected") === "true" ? true : element.getAttribute("aria-selected") === "false" ? false : undefined,
     sensitive: isSensitive(element) || undefined,
-    options: select ? Array.from(select.options).slice(0, 100).map((option) => ({ value: option.value, label: compactText(option.text, 120) })) : undefined,
+    options: select ? Array.from(select.options).slice(0, 100).map((option) => ({
+      value: option.value,
+      label: compactText(option.text, 120),
+      group: option.closest("optgroup")?.label.trim() || undefined,
+      disabled: option.disabled || Boolean(option.closest("optgroup")?.disabled) || undefined,
+    })) : undefined,
     bounds: getBounds(element),
   };
 }
@@ -180,6 +188,8 @@ function fingerprint(state: Omit<PageState, "fingerprint">): string {
       readOnly: element.readOnly,
       invalid: element.invalid,
       expanded: element.expanded,
+      selectedOptionLabel: element.selectedOptionLabel,
+      ariaAutocomplete: element.ariaAutocomplete,
     })),
     regions: state.regions,
     scrollContainers: state.scrollContainers?.map((container) => ({
