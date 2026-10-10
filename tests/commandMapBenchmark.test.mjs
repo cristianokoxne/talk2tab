@@ -101,3 +101,35 @@ test("selection goal prefers scrolling the listbox linked to its combobox", () =
   assert.equal(scrollTargets.length, 2, "Both directions should be available for the linked listbox");
   assert.ok(scrollTargets.every((ref) => ref === "scroll_2"));
 });
+
+test("scroll choices respect boundaries and keep scrolling inside an active dialog", () => {
+  const base = {
+    url: "https://forms.test", title: "Forms", viewport: { width: 800, height: 600, scrollY: 400, scrollHeight: 1000 }, pageTextSummary: "", fingerprint: "dialog", activeDialog: "Preferences", limitations: [],
+    elements: [{ ref: "el_1_1", frameId: 0, tag: "button", role: "button", name: "Target", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 100, height: 30 } }],
+    scrollContainers: [
+      { ref: "scroll_background", label: "Background", scrollTop: 0, clientHeight: 300, scrollHeight: 900, bounds: { x: 0, y: 0, width: 200, height: 300 } },
+      { ref: "scroll_dialog", label: "dialog", context: "dialog “Preferences”: settings", scrollTop: 10, clientHeight: 100, scrollHeight: 500, bounds: { x: 10, y: 10, width: 200, height: 100 } },
+    ],
+  };
+  const dialogOptions = buildJevCommandMap("find the target", base).options;
+  const scrolls = dialogOptions.filter((option) => option.action.type === "scroll");
+  assert.ok(scrolls.length > 0);
+  assert.ok(scrolls.every((option) => option.action.target?.ref === "scroll_dialog"), "No background or window scroll is offered while a modal is open");
+
+  const atBoundary = { ...base, activeDialog: undefined, elements: [], scrollContainers: [{ ...base.scrollContainers[0], scrollTop: 600 }], viewport: { ...base.viewport, scrollY: 400 } };
+  const bottomOptions = buildJevCommandMap("open Target", atBoundary).options;
+  assert.equal(bottomOptions.some((option) => option.action.type === "scroll" && ["down", "bottom", "right"].includes(option.action.direction)), false);
+  assert.ok(bottomOptions.some((option) => option.action.type === "finish" && option.action.status === "failed"));
+
+  const locked = { ...base, activeDialog: undefined, scrollLocked: true, elements: [], scrollContainers: undefined };
+  assert.equal(buildJevCommandMap("continue", locked).options.some((option) => option.action.type === "scroll"), false);
+});
+
+test("missing-result recovery exposes an explicit Load more control", () => {
+  const page = {
+    url: "https://list.test", title: "List", viewport: { width: 800, height: 600, scrollY: 400, scrollHeight: 1000 }, pageTextSummary: "", fingerprint: "page1", limitations: [],
+    elements: [{ ref: "el_1_1", frameId: 0, tag: "button", role: "button", name: "Carregar mais", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 200, height: 30 } }],
+  };
+  const { options } = buildJevCommandMap("open Product 80", page);
+  assert.deepEqual(options.filter((option) => option.action.type === "click").map((option) => option.action.target.ref), ["el_1_1"]);
+});

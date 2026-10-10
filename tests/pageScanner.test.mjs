@@ -58,6 +58,21 @@ test("scans interactive controls inside open shadow roots", () => {
   assert.equal(state.elements[0].placeholder, "Pesquisar");
 });
 
+test("scanner identifies horizontal scroll areas and records measured offsets", () => {
+  const dom = new JSDOM(`<main><div id="table" aria-label="Tabela de preços" style="overflow-x:auto;width:100px"><table><tr><td>wide content</td></tr></table></div></main>`, { url: "https://example.test", pretendToBeVisual: true });
+  const { document, window } = dom.window;
+  Object.defineProperties(window, { innerWidth: { value: 800 }, innerHeight: { value: 600 }, scrollX: { value: 12 } });
+  const table = document.querySelector("#table");
+  Object.defineProperties(table, { clientWidth: { value: 100 }, scrollWidth: { value: 500 }, clientHeight: { value: 80 }, scrollHeight: { value: 80 }, scrollLeft: { value: 30 } });
+  table.getBoundingClientRect = () => ({ x: 10, y: 10, width: 100, height: 80, top: 10, right: 110, bottom: 90, left: 10, toJSON: () => ({}) });
+  const state = scanPage(document, window, new ElementRegistry());
+  assert.equal(state.viewport.scrollX, 12);
+  assert.equal(state.scrollContainers?.[0].label, "Tabela de preços");
+  assert.equal(state.scrollContainers?.[0].scrollLeft, 30);
+  assert.equal(state.scrollContainers?.[0].scrollWidth, 500);
+  assert.equal(state.scrollContainers?.[0].clientWidth, 100);
+});
+
 test("semantic fingerprint ignores fresh refs and debug overlay but tracks checkbox state", () => {
   const dom = new JSDOM(`<main><label><input id="available" type="checkbox"> Available</label></main>`, { url: "https://example.test/items", pretendToBeVisual: true });
   const { document, window } = dom.window;

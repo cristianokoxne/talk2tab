@@ -28,8 +28,10 @@ function collectScrollableElements(root: ParentNode): HTMLElement[] {
     const view = element.ownerDocument.defaultView;
     const style = view?.getComputedStyle(element);
     const rect = element.getBoundingClientRect();
-    const overflow = `${style?.overflowY ?? ""} ${style?.overflow ?? ""}`;
-    if (element.scrollHeight > element.clientHeight + 8 && /auto|scroll/i.test(overflow) && rect.width > 0 && rect.height > 0) elements.push(element);
+    const overflow = `${style?.overflowY ?? ""} ${style?.overflow ?? ""} ${style?.overflowX ?? ""}`;
+    const hasVerticalRange = element.scrollHeight > element.clientHeight + 8 && /auto|scroll/i.test(`${style?.overflowY ?? ""} ${style?.overflow ?? ""}`);
+    const hasHorizontalRange = element.scrollWidth > element.clientWidth + 8 && /auto|scroll/i.test(`${style?.overflowX ?? ""} ${style?.overflow ?? ""}`);
+    if ((hasVerticalRange || hasHorizontalRange || /snap/.test(overflow) && element.scrollHeight > element.clientHeight + 8) && rect.width > 0 && rect.height > 0) elements.push(element);
     if (element.shadowRoot) elements.push(...collectScrollableElements(element.shadowRoot));
   }
   return elements;
@@ -169,7 +171,9 @@ function fingerprint(state: Omit<PageState, "fingerprint">): string {
     url: state.url,
     title: state.title,
     pageTextSummary: state.pageTextSummary,
-    viewport: { scrollY: state.viewport.scrollY },
+    viewport: { scrollY: state.viewport.scrollY, scrollX: state.viewport.scrollX, scrollHeight: state.viewport.scrollHeight, scrollWidth: state.viewport.scrollWidth },
+    activeDialog: state.activeDialog,
+    scrollLocked: state.scrollLocked,
     elements: state.elements.map((element) => ({
       tag: element.tag,
       role: element.role,
@@ -195,8 +199,13 @@ function fingerprint(state: Omit<PageState, "fingerprint">): string {
     scrollContainers: state.scrollContainers?.map((container) => ({
       label: container.label,
       scrollTop: container.scrollTop,
+      scrollLeft: container.scrollLeft,
       clientHeight: container.clientHeight,
+      clientWidth: container.clientWidth,
       scrollHeight: container.scrollHeight,
+      scrollWidth: container.scrollWidth,
+      scrollSnapType: container.scrollSnapType,
+      context: container.context,
     })),
   });
   let hash = 2166136261;
@@ -227,8 +236,13 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
       ref,
       label: element.getAttribute("aria-label") || element.id || element.getAttribute("role") || element.tagName.toLowerCase(),
       scrollTop: element.scrollTop,
+      scrollLeft: element.scrollLeft,
       clientHeight: element.clientHeight,
+      clientWidth: element.clientWidth,
       scrollHeight: element.scrollHeight,
+      scrollWidth: element.scrollWidth,
+      scrollSnapType: window.getComputedStyle(element).scrollSnapType !== "none" ? window.getComputedStyle(element).scrollSnapType : undefined,
+      context: getElementContext(element, document),
       bounds: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
     });
   }
@@ -236,7 +250,14 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
   const stateWithoutFingerprint = {
     url: window.location.href,
     title: document.title,
-    viewport: { width: window.innerWidth, height: window.innerHeight, scrollY: window.scrollY },
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      scrollY: window.scrollY,
+      scrollX: window.scrollX,
+      scrollHeight: document.documentElement.scrollHeight,
+      scrollWidth: document.documentElement.scrollWidth,
+    },
     pageTextSummary: summarizePageText(document),
     regions: collectRegions(document, document, window),
     elements,
@@ -248,6 +269,12 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
       const active = Array.from(document.querySelectorAll<HTMLElement>("dialog[open],[role=dialog]"))
         .find((dialog) => isElementVisible(dialog, window));
       return active ? regionName(active, document) ?? regionKind(active) : undefined;
+    })(),
+    scrollLocked: (() => {
+      const rootStyle = window.getComputedStyle(document.documentElement);
+      const bodyStyle = document.body ? window.getComputedStyle(document.body) : undefined;
+      return [rootStyle.overflowY, rootStyle.overflow, bodyStyle?.overflowY, bodyStyle?.overflow]
+        .some((value) => /hidden|clip/.test(value ?? ""));
     })(),
     scrollContainers,
     limitations: [...new Set(limitations)],

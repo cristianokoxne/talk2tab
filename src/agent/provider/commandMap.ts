@@ -197,13 +197,37 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     if (last) void description;
   }
 
-  options.push(
-    { id: "scroll_down", action: { type: "scroll", direction: "down", amount: "viewport" } },
-    { id: "scroll_up", action: { type: "scroll", direction: "up", amount: "viewport" } },
-  );
+  const canScroll = (current: number | undefined, size: number | undefined, visible: number | undefined, direction: "back" | "forward"): boolean => {
+    if (current === undefined || size === undefined || visible === undefined) return true;
+    return direction === "back" ? current > 1 : current + visible < size - 1;
+  };
+  const hasDialog = Boolean(page.activeDialog);
+  if (!hasDialog && !page.scrollLocked && canScroll(page.viewport.scrollY, page.viewport.scrollHeight, page.viewport.height, "forward")) {
+    options.push({ id: "scroll_down", action: { type: "scroll", direction: "down", amount: "viewport" } });
+    options.push({ id: "scroll_bottom", action: { type: "scroll", direction: "bottom", amount: "viewport" } });
+  }
+  if (!hasDialog && !page.scrollLocked && canScroll(page.viewport.scrollY, page.viewport.scrollHeight, page.viewport.height, "back")) {
+    options.push({ id: "scroll_up", action: { type: "scroll", direction: "up", amount: "viewport" } });
+    options.push({ id: "scroll_top", action: { type: "scroll", direction: "top", amount: "viewport" } });
+  }
   for (const container of page.scrollContainers ?? []) {
-    options.push({ id: `scroll_down_${container.ref}`, action: { type: "scroll", direction: "down", amount: "viewport", target: { ref: container.ref } } });
-    options.push({ id: `scroll_up_${container.ref}`, action: { type: "scroll", direction: "up", amount: "viewport", target: { ref: container.ref } } });
+    if (hasDialog && !`${container.label} ${container.context ?? ""}`.toLowerCase().includes(page.activeDialog!.toLowerCase())) continue;
+    if (canScroll(container.scrollTop, container.scrollHeight, container.clientHeight, "forward")) {
+      options.push({ id: `scroll_down_${container.ref}`, action: { type: "scroll", direction: "down", amount: "viewport", target: { ref: container.ref } } });
+      options.push({ id: `scroll_bottom_${container.ref}`, action: { type: "scroll", direction: "bottom", amount: "viewport", target: { ref: container.ref } } });
+    }
+    if (canScroll(container.scrollTop, container.scrollHeight, container.clientHeight, "back")) {
+      options.push({ id: `scroll_up_${container.ref}`, action: { type: "scroll", direction: "up", amount: "viewport", target: { ref: container.ref } } });
+      options.push({ id: `scroll_top_${container.ref}`, action: { type: "scroll", direction: "top", amount: "viewport", target: { ref: container.ref } } });
+    }
+    if ((container.scrollWidth ?? 0) > (container.clientWidth ?? 0) + 8) {
+      if (canScroll(container.scrollLeft ?? 0, container.scrollWidth, container.clientWidth, "forward")) {
+        options.push({ id: `scroll_right_${container.ref}`, action: { type: "scroll", direction: "right", amount: "viewport", target: { ref: container.ref } } });
+      }
+      if (canScroll(container.scrollLeft ?? 0, container.scrollWidth, container.clientWidth, "back")) {
+        options.push({ id: `scroll_left_${container.ref}`, action: { type: "scroll", direction: "left", amount: "viewport", target: { ref: container.ref } } });
+      }
+    }
   }
 
   if (hasSearchIntent) {
@@ -266,7 +290,19 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     });
     if (targetActions.length) options.splice(0, options.length, ...targetActions);
     else {
-      const recoveryActions = options.filter((option) => option.action.type === "scroll" || option.action.type === "expand_candidates");
+      const recoveryActions = options.filter((option) => {
+        if (option.action.type === "scroll") {
+          const action = option.action;
+          return /\b(cima|up|left|esquerda)\b/i.test(goal)
+            ? ["up", "left", "top"].includes(action.direction)
+            : ["down", "right", "bottom"].includes(action.direction);
+        }
+        if (option.action.type === "expand_candidates") return true;
+        if (option.action.type !== "click") return false;
+        const action = option.action;
+        const targetElement = page.elements.find((candidate) => candidate.ref === action.target.ref);
+        return /load\s*more|carregar mais|pr[oó]xim[oa]|next page|mais resultados/i.test(`${targetElement?.name ?? ""} ${targetElement?.text ?? ""}`);
+      });
       if (recoveryActions.length) options.splice(0, options.length, ...recoveryActions);
       else options.splice(0, options.length, { id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei “${pendingStage.target}” para continuar.` } });
     }
@@ -302,7 +338,14 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       const action = option.action;
       return page.scrollContainers?.some((container) => container.ref === action.target?.ref && relatedLists.has(container.label)) ?? false;
     });
-    const scroll = relatedScroll.length ? relatedScroll : allScroll;
+    const availableScroll = relatedScroll.length ? relatedScroll : allScroll;
+    const scroll = availableScroll.filter((option) => {
+      if (option.action.type !== "scroll") return false;
+      const action = option.action;
+      return /\b(cima|up|left|esquerda)\b/i.test(goal)
+        ? ["up", "left", "top"].includes(action.direction)
+        : ["down", "right", "bottom"].includes(action.direction);
+    });
     options.splice(0, options.length, ...matchingSelects, ...matchingOptions, ...filterFields, ...scroll);
     if (!options.length) options.push({ id: "finish_failed", action: { type: "finish", status: "failed", message: `Não encontrei a opção “${target}” para selecionar.` } });
   }

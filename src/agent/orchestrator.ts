@@ -401,7 +401,9 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
 
 async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal): Promise<unknown> {
   const currentTabId = { value: tabId };
-  const direction = /\b(cima|suba|volte)\b/i.test(message.goal) ? "up" : "down";
+  const direction = /\b(esquerda|left|horizontal)\b/i.test(message.goal) ? "left"
+    : /\b(direita|right)\b/i.test(message.goal) ? "right"
+      : /\b(cima|suba|volte)\b/i.test(message.goal) ? "up" : "down";
   const steps: Array<{ step: number; action: import("./types.js").BrowserAction; result: ActionResult }> = [];
   let step = 0;
   while (!signal.aborted) {
@@ -409,11 +411,17 @@ async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, mess
     if (signal.aborted) return { status: "cancelled", steps, message: "Rolagem contínua interrompida pelo usuário." };
     step += 1;
     publishPageState(chromeApi, message.requestId, step, currentTabId.value, page);
-    const action = { type: "scroll", direction, amount: 180, target: page.scrollContainers?.[0]?.ref ? { ref: page.scrollContainers[0].ref } : undefined } as const;
+    const namedContainer = page.scrollContainers?.find((container) => {
+      const label = `${container.label} ${container.context ?? ""}`.toLowerCase();
+      return message.goal.toLowerCase().split(/\s+/).some((word) => word.length > 3 && label.includes(word));
+    });
+    const action = { type: "scroll", direction, amount: "viewport", target: namedContainer ? { ref: namedContainer.ref } : undefined } as const;
     if (signal.aborted) return { status: "cancelled", steps, message: "Rolagem contínua interrompida pelo usuário." };
     const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId: `continuous_scroll_${step}`, action }) as ActionResult;
     steps.push({ step, action, result });
     if (!result.ok) return { status: "failed", steps, message: result.error ?? "Não foi possível continuar rolando." };
+    if (steps.length > 100) steps.shift();
+    if (result.changed === false) return { status: "stalled", steps, message: "A rolagem chegou ao limite do conteúdo disponível." };
     await waitWithAbort(700, signal);
   }
   return { status: "cancelled", steps, message: "Rolagem contínua interrompida pelo usuário." };

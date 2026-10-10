@@ -344,6 +344,93 @@ test("autocomplete scrolls its linked listbox to an offscreen option", async () 
   await page.close();
 });
 
+test("scroll targets only the selected nested or horizontal container", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    document.body.insertAdjacentHTML("beforeend", `<div id="outer-scroll" aria-label="Outer" style="height:120px;overflow:auto"><div style="height:800px"><div id="middle-scroll" aria-label="Middle" style="height:100px;overflow:auto"><div style="height:600px"><div id="inner-scroll" aria-label="Inner" style="height:80px;overflow:auto"><div style="height:400px">Nested content</div></div></div></div></div></div><div id="horizontal-scroll" aria-label="Wide table" style="width:120px;overflow-x:auto;white-space:nowrap"><div style="width:600px">Wide table data</div></div>`);
+  });
+  let observation = await pageScan(worker, page);
+  const inner = observation.data.scrollContainers.find((container) => container.label === "Inner");
+  assert.ok(inner);
+  await execute(worker, page, { type: "scroll", direction: "down", amount: 40, target: { ref: inner.ref } });
+  assert.equal(await page.locator("#inner-scroll").evaluate((element) => element.scrollTop), 40);
+  assert.equal(await page.locator("#middle-scroll").evaluate((element) => element.scrollTop), 0);
+  assert.equal(await page.locator("#outer-scroll").evaluate((element) => element.scrollTop), 0);
+
+  observation = await pageScan(worker, page);
+  const horizontal = observation.data.scrollContainers.find((container) => container.label === "Wide table");
+  assert.ok(horizontal, "Horizontal overflow should be reported as a scroll container");
+  await execute(worker, page, { type: "scroll", direction: "right", amount: 80, target: { ref: horizontal.ref } });
+  assert.ok(await page.locator("#horizontal-scroll").evaluate((element) => element.scrollLeft > 0));
+  await page.close();
+});
+
+test("virtualized list exposes and opens item 80 after bounded targeted scrolling", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    document.body.insertAdjacentHTML("beforeend", `<div id="virtual-list" aria-label="Virtual items" style="position:relative;height:160px;overflow:auto"><div style="position:relative;height:8000px"><div id="virtual-rows"></div></div></div><output id="virtual-selected"></output>`);
+    const rows = document.querySelector("#virtual-rows");
+    const render = (start) => {
+      rows.replaceChildren(...Array.from({ length: 5 }, (_, offset) => {
+        const index = start + offset;
+        const button = document.createElement("button");
+        button.textContent = `Item ${index}`;
+        Object.assign(button.style, { position: "absolute", top: `${index * 40}px`, height: "36px" });
+        button.addEventListener("click", () => { document.querySelector("#virtual-selected").textContent = button.textContent; });
+        return button;
+      }));
+    };
+    render(1);
+    document.querySelector("#virtual-list").addEventListener("scroll", (event) => render(Math.floor(event.currentTarget.scrollTop / 40) + 1));
+  });
+  let observation = await pageScan(worker, page);
+  assert.equal(observation.data.elements.some((element) => element.name === "Item 80"), false);
+  const list = observation.data.scrollContainers.find((container) => container.label === "Virtual items");
+  assert.ok(list);
+  await execute(worker, page, { type: "scroll", direction: "down", amount: 3160, target: { ref: list.ref } });
+  await page.getByRole("button", { name: "Item 80" }).waitFor();
+  observation = await pageScan(worker, page);
+  const item = observation.data.elements.find((element) => element.name === "Item 80");
+  assert.ok(item);
+  await execute(worker, page, { type: "click", target: { ref: item.ref } });
+  assert.equal(await page.locator("#virtual-selected").textContent(), "Item 80");
+  await page.close();
+});
+
+test("infinite scroll detects newly loaded content and stops at a stable boundary", async () => {
+  const worker = context.serviceWorkers()[0];
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    document.body.insertAdjacentHTML("beforeend", `<div id="infinite-list" aria-label="Feed" style="height:100px;overflow:auto"><div id="feed-content" style="height:200px">Feed start</div></div>`);
+    const list = document.querySelector("#infinite-list");
+    list.addEventListener("scroll", () => {
+      if (list.scrollTop + list.clientHeight >= list.scrollHeight && !list.dataset.loaded) {
+        list.dataset.loaded = "true";
+        const content = document.querySelector("#feed-content");
+        content.style.height = "1000px";
+        content.textContent = "Feed start; new feed content";
+      }
+    });
+  });
+  let observation = await pageScan(worker, page);
+  const feed = observation.data.scrollContainers.find((container) => container.label === "Feed");
+  assert.ok(feed);
+  const beforeHeight = feed.scrollHeight;
+  await execute(worker, page, { type: "scroll", direction: "bottom", amount: "viewport", target: { ref: feed.ref } });
+  await page.waitForFunction((height) => document.querySelector("#infinite-list").scrollHeight > height, beforeHeight);
+  observation = await pageScan(worker, page);
+  const grown = observation.data.scrollContainers.find((container) => container.label === "Feed");
+  assert.ok(grown.scrollHeight > beforeHeight, "New content should extend the feed");
+  await execute(worker, page, { type: "scroll", direction: "bottom", amount: "viewport", target: { ref: grown.ref } });
+  observation = await pageScan(worker, page);
+  const atEnd = observation.data.scrollContainers.find((container) => container.label === "Feed");
+  const exhausted = await execute(worker, page, { type: "scroll", direction: "bottom", amount: "viewport", target: { ref: atEnd.ref } });
+  assert.equal(exhausted.changed, false, "A stable end with no new content reports no progress");
+  await page.close();
+});
+
 test("extension submits an empty search without claiming results exist", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);

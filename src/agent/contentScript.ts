@@ -17,7 +17,7 @@ type ExecuteActionRequest =
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "click"; target: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "type"; target: { ref: string }; text: string; replace?: boolean } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "select"; target: { ref: string }; value: string } }
-  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; target?: { ref: string } } }
+  | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "scroll"; direction: "up" | "down" | "left" | "right" | "top" | "bottom"; amount: "viewport" | number; target?: { ref: string } } }
   | { type: "EXECUTE_ACTION"; actionId: string; action: { type: "keypress"; key: string } };
 
 function isScanRequest(value: unknown): value is ScanRequest {
@@ -65,7 +65,7 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
         return true;
       }
       if (request.action?.type === "scroll") {
-        if (typeof request.actionId !== "string" || !["up", "down"].includes(request.action.direction) || (request.action.amount !== "viewport" && typeof request.action.amount !== "number")) {
+        if (typeof request.actionId !== "string" || !["up", "down", "left", "right", "top", "bottom"].includes(request.action.direction) || (request.action.amount !== "viewport" && typeof request.action.amount !== "number")) {
           sendResponse({ ok: false, code: "INVALID_ACTION", error: "Invalid scroll action." });
           return;
         }

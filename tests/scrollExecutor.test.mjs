@@ -15,3 +15,20 @@ test("scroll executor applies bounded viewport and pixel deltas", () => {
   assert.equal(calls[1].top, -120);
   assert.equal(executeScroll("s3", dom.window, { type: "scroll", direction: "down", amount: 20001 }).code, "INVALID_SCROLL_AMOUNT");
 });
+
+test("scroll executor uses target dimensions and supports horizontal and endpoint movement", () => {
+  const dom = new JSDOM(`<div id="panel"></div>`, { pretendToBeVisual: true });
+  const panel = dom.window.document.querySelector("#panel");
+  Object.defineProperties(panel, {
+    clientHeight: { value: 100 }, scrollHeight: { value: 500, configurable: true },
+    clientWidth: { value: 200 }, scrollWidth: { value: 800, configurable: true },
+  });
+  assert.equal(executeScroll("s4", dom.window, { type: "scroll", direction: "down", amount: "viewport" }, panel).changed, true);
+  assert.equal(panel.scrollTop, 80, "Viewport steps use the selected panel height");
+  assert.equal(executeScroll("s5", dom.window, { type: "scroll", direction: "right", amount: "viewport" }, panel).changed, true);
+  assert.equal(panel.scrollLeft, 160, "Horizontal steps use the selected panel width");
+  assert.equal(executeScroll("s6", dom.window, { type: "scroll", direction: "bottom", amount: "viewport" }, panel).changed, true);
+  assert.equal(panel.scrollTop, 400);
+  assert.equal(executeScroll("s7", dom.window, { type: "scroll", direction: "top", amount: "viewport" }, panel).changed, true);
+  assert.equal(panel.scrollTop, 0);
+});

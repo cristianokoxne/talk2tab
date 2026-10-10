@@ -3,7 +3,7 @@
 export interface ClickAction { type: "click"; target: { ref: string }; }
 export interface TypeAction { type: "type"; target: { ref: string }; text: string; replace?: boolean; }
 export interface SelectAction { type: "select"; target: { ref: string }; value: string; }
-export interface ScrollAction { type: "scroll"; direction: "up" | "down"; amount: "viewport" | number; target?: { ref: string }; }
+export interface ScrollAction { type: "scroll"; direction: "up" | "down" | "left" | "right" | "top" | "bottom"; amount: "viewport" | number; target?: { ref: string }; }
 export interface KeyPressAction { type: "keypress"; key: string; }
 export interface NavigateAction { type: "navigate"; url: string; }
 export interface SearchWebAction { type: "search_web"; query: string; }
@@ -58,6 +58,9 @@ export interface ViewportState {
   width: number;
   height: number;
   scrollY: number;
+  scrollX?: number;
+  scrollHeight?: number;
+  scrollWidth?: number;
 }
 
 export interface ElementBounds {
@@ -77,6 +80,7 @@ export interface PageState {
   regions?: PageRegion[];
   focusedElement?: string;
   activeDialog?: string;
+  scrollLocked?: boolean;
   scrollContainers?: ScrollContainerRef[];
   limitations: string[];
 }
@@ -92,8 +96,13 @@ export interface ScrollContainerRef {
   ref: string;
   label: string;
   scrollTop: number;
+  scrollLeft?: number;
   clientHeight: number;
+  clientWidth?: number;
   scrollHeight: number;
+  scrollWidth?: number;
+  scrollSnapType?: string;
+  context?: string;
   bounds: ElementBounds;
 }
 
