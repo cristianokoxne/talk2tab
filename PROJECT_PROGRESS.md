@@ -190,3 +190,12 @@ Status: NOT_STARTED
 ### Milestone 9 — Polish e documentação final
 
 Status: NOT_STARTED
+
+---
+
+## Plano de confiabilidade de navegação (2026-10-10)
+
+- E18 concluída e enviada ao remoto em `071792f`; trace sanitizado e medição Chromium p95 207,2 ms em fixture de 5.000 nós.
+- E19a enviada em `a6b18ce`; Jev real acertou 90/90 escolhas em cada uma das duas condições do holdout sintético.
+- E19b mediu 23/96 jornadas públicas em 12 domínios e 6 famílias (23,96%). O gate de release não passou; o relatório mantém erros e holdout no denominador.
+- E19 continua em execução. Os 120 cenários do corpus ainda são catalogados, não uma suíte integral executável; jornadas compostas e reteste após melhorias permanecem pendentes.
