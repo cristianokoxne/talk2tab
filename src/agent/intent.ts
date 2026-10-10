@@ -111,6 +111,8 @@ export function parseGoal(goal: string): GoalPlan {
   }
   if (!stages.length && hasExplicitDestination && /\b(?:abra|abrir|acesse|acessar|navegue|navegar|open|visit)\b/i.test(goal)) {
     stages.push({ kind: "navigate", description: "Navegar ao destino solicitado", value: goal, status: "pending" });
+  } else if (!stages.length && hasExplicitDestination && /\b(?:entre|entrar|visite|visitar)\b/i.test(goal)) {
+    stages.push({ kind: "navigate", description: "Navegar ao destino solicitado", value: goal, status: "pending" });
   } else if (!stages.length && genericDestination) {
     stages.push({ kind: "navigate", description: "Descobrir e abrir o destino solicitado", value: goal, status: "pending" });
   }

@@ -73,7 +73,7 @@ function scoreOption(option: CommandOption, goal: string, page: PageState, tabs:
   if (action.type === "finish") return -100;
   if (action.type === "navigate" || action.type === "open_tab" || action.type === "open_window" || action.type === "go_back" || action.type === "go_forward") return 30;
   if (action.type === "search_web") return 24;
-  if (action.type === "switch_tab") return tabs.find((tab) => tab.id === action.tabId)?.active ? 40 : 0;
+  if (action.type === "switch_tab") return tabs.find((tab) => tab.id === action.tabId)?.active ? -100 : 0;
   if (action.type === "close_tab") return 4;
   if (action.type === "keypress") return 12;
   if (action.type === "scroll") return -5;
@@ -182,7 +182,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   if (/\b(avance|avançar|avanca|pr[oó]xima p[aá]gina|forward|go forward)\b/i.test(goal)) options.push({ id: "go_forward", action: { type: "go_forward" } });
 
   const url = requestedUrl(goal);
-  const hasNavigationIntent = Boolean(url && /\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal));
+  const hasNavigationIntent = Boolean(url && (/\b(abra|abrir|acesse|acessar|v[aá]|ir)\b/i.test(goal) || /\b(entre|entrar|visite|visitar)\b/i.test(goal)));
   const genericNavigation = !url && /\b(abra|abrir|acesse|acessar|v[aá]|ir|navegue|navegar)\b/i.test(goal) && navigationQuery(goal);
   const hasSearchIntent = Boolean(progressedPlan.stages.some((stage) => stage.status === "pending" && (stage.kind === "search" || stage.kind === "open_result")));
   if (url && !completedActions.includes("open_window") && /\b(nova|novo)\s+(janela|window)\b/i.test(goal)) {
@@ -194,10 +194,13 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
   if (url && !completedActions.includes("navigate") && !/\b(nova|novo)\s+(aba|guia|tab|janela|window)\b/i.test(goal) && /\b(abra|abrir|acesse|acessar|vá|ir)\b/i.test(goal)) {
     options.push({ id: "navigate", action: { type: "navigate", url } });
   }
+  if (url && !completedActions.includes("navigate") && !/\b(nova|novo)\s+(aba|guia|tab|janela|window)\b/i.test(goal) && /\b(entre|entrar|visite|visitar)\b/i.test(goal)) {
+    options.push({ id: "navigate", action: { type: "navigate", url } });
+  }
   if (genericNavigation && !completedActions.includes("search_web")) {
     options.push({ id: "search_web", action: { type: "search_web", query: navigationQuery(goal) } });
   }
-  const selectedTabs = [...tabs].sort((a, b) => Number(b.active) - Number(a.active)).slice(0, 20);
+  const selectedTabs = tabs.filter((tab) => !tab.active).slice(0, 20);
   for (const tab of selectedTabs) {
     if (!tab.url || tab.url.startsWith("chrome://")) continue;
     options.push({ id: `switch_tab_${tab.id}`, action: { type: "switch_tab", tabId: tab.id } });
