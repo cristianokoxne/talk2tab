@@ -108,6 +108,35 @@ test("extension scans, fills, submits, and opens the intended result", async () 
   await page.close();
 });
 
+test("debug overlay shows interactive and scroll refs and refreshes after a page scan", async () => {
+  const worker = context.serviceWorkers()[0] ?? await context.waitForEvent("serviceworker");
+  const page = await openFixture(worker);
+  const observation = await pageScan(worker, page);
+  const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
+  const firstControl = observation.data.elements.find((element) => element.name === "Pesquisar");
+  const scrollContainer = observation.data.scrollContainers.find((container) => container.label === "Mensagens");
+  assert.ok(firstControl?.ref);
+  assert.ok(scrollContainer?.ref);
+
+  await worker.evaluate(async (targetTabId) => chrome.tabs.sendMessage(targetTabId, { type: "SCANNER_OVERLAY", enabled: true }, { frameId: 0 }), tabId);
+  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${firstControl.ref}"]`).waitFor();
+  assert.equal(await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${scrollContainer.ref}"]`).getAttribute("data-kind"), "scroll");
+
+  await page.evaluate(() => {
+    const button = document.createElement("button");
+    button.textContent = "Late control";
+    document.body.append(button);
+  });
+  const updated = await pageScan(worker, page);
+  const lateControl = updated.data.elements.find((element) => element.name === "Late control");
+  assert.ok(lateControl?.ref);
+  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${lateControl.ref}"]`).waitFor();
+
+  await worker.evaluate(async (targetTabId) => chrome.tabs.sendMessage(targetTabId, { type: "SCANNER_OVERLAY", enabled: false }, { frameId: 0 }), tabId);
+  await page.locator("#voice-browser-agent-debug-overlay").waitFor({ state: "detached" });
+  await page.close();
+});
+
 test("extension operates a dialog and scrolls only the selected nested panel", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);

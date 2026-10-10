@@ -30,16 +30,21 @@ export function initContentScript(chromeApi: typeof chrome, document: Document, 
   const documentPrefix = `doc_${Math.random().toString(36).slice(2, 10)}`;
   const registry = new ElementRegistry(documentPrefix);
   let latestState: ReturnType<typeof scanPage> | undefined;
+  let overlayEnabled = false;
   chromeApi.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
     if (isScanRequest(message)) {
       latestState = scanPage(document, window, registry);
+      if (overlayEnabled) showDebugOverlay(document, registry, latestState.elements, latestState.scrollContainers);
       sendResponse({ ok: true, requestId: message.requestId, data: latestState });
       return;
     }
     if (typeof message === "object" && message !== null && (message as OverlayRequest).type === "SCANNER_OVERLAY") {
       const request = message as OverlayRequest;
-      if (request.enabled && latestState) showDebugOverlay(document, registry, latestState.elements);
-      else removeDebugOverlay(document);
+      overlayEnabled = request.enabled;
+      if (overlayEnabled) {
+        latestState ??= scanPage(document, window, registry);
+        showDebugOverlay(document, registry, latestState.elements, latestState.scrollContainers);
+      } else removeDebugOverlay(document);
       sendResponse({ ok: true });
       return;
     }
