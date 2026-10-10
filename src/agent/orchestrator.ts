@@ -113,6 +113,8 @@ export interface ScanPageMessage {
   requestId: string;
 }
 
+interface ScannerOverlayMessage { type: "SCANNER_OVERLAY"; enabled: boolean; tabId: number; }
+
 export interface RunAgentMessage {
   type: "RUN_AGENT";
   requestId: string;
@@ -160,6 +162,20 @@ function isScanPageMessage(value: unknown): value is ScanPageMessage {
   if (typeof value !== "object" || value === null) return false;
   const message = value as Record<string, unknown>;
   return message.type === "SCAN_PAGE" && typeof message.requestId === "string";
+}
+
+function isScannerOverlayMessage(value: unknown): value is ScannerOverlayMessage {
+  if (typeof value !== "object" || value === null) return false;
+  const message = value as Record<string, unknown>;
+  return message.type === "SCANNER_OVERLAY" && typeof message.enabled === "boolean" && Number.isInteger(message.tabId);
+}
+
+async function setScannerOverlay(chromeApi: typeof chrome, tabId: number, enabled: boolean): Promise<void> {
+  const frames = await chromeApi.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => true });
+  const results = await Promise.allSettled(frames.map((frame) => chromeApi.tabs.sendMessage(tabId, { type: "SCANNER_OVERLAY", enabled }, { frameId: frame.frameId })));
+  if (!results.some((result, index) => result.status === "fulfilled" && frames[index]?.frameId === 0)) {
+    throw new Error("Could not update the reference overlay in the main frame.");
+  }
 }
 
 function isRunAgentMessage(value: unknown): value is RunAgentMessage {
@@ -538,6 +554,17 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
       }));
     },
     handleMessage(message: unknown, sender: chrome.runtime.MessageSender, sendResponse: (response: unknown) => void): void {
+      if (isScannerOverlayMessage(message)) {
+        const expectedUrl = chromeApi.runtime.getURL("sidepanel.html");
+        if (sender.url !== expectedUrl) {
+          sendResponse({ ok: false, code: "UNTRUSTED_OVERLAY", error: "A sobreposiÃ§Ã£o deve ser controlada pelo Side Panel da extensÃ£o." });
+          return;
+        }
+        void setScannerOverlay(chromeApi, message.tabId, message.enabled)
+          .then(() => sendResponse({ ok: true }))
+          .catch(() => sendResponse({ ok: false, code: "OVERLAY_UNAVAILABLE", error: "NÃ£o foi possÃ­vel atualizar as refs nesta aba." }));
+        return;
+      }
       if (isGetAgentSessionMessage(message)) {
         void this.recoverSession().then(async () => {
           const stored = await chromeApi.storage.local.get(SESSION_CHECKPOINT_KEY);
@@ -641,9 +668,9 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
           sendResponse({ ok: false, code: "TAB_UNAVAILABLE", error: "No active tab is available." });
           return;
         }
-        return scanTab(chromeApi, tabId, message.requestId);
+        return scanTab(chromeApi, tabId, message.requestId).then((data) => ({ tabId, data }));
       })
-        .then((data) => sendResponse({ ok: true, data }))
+        .then((result) => sendResponse({ ok: true, ...result }))
         .catch(() => sendResponse({ ok: false, code: "CONTENT_SCRIPT_UNAVAILABLE", error: "Could not inspect this page." }));
     },
   };

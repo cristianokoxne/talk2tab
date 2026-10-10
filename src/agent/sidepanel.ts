@@ -6,6 +6,7 @@ import { createIcons, icons } from "lucide";
 
 interface ScanResponse {
   ok: boolean;
+  tabId?: number;
   data?: PageState;
   error?: string;
 }
@@ -65,6 +66,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   createIcons({ icons });
 
   let traceSteps: SafeTraceStep[] = [];
+  let inspectedTabId: number | undefined;
   let traceStatus = "running";
   let traceRequestId: string | undefined;
   const renderTrace = (): void => {
@@ -533,11 +535,13 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     }
   });
 
-  debugOverlay.addEventListener("change", () => {
-    void chromeApi.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
-      if (tab.id !== undefined) void chromeApi.tabs.sendMessage(tab.id, { type: "SCANNER_OVERLAY", enabled: debugOverlay.checked });
+  const updateDebugOverlay = (): void => {
+    if (inspectedTabId === undefined) return;
+    chromeApi.runtime.sendMessage({ type: "SCANNER_OVERLAY", tabId: inspectedTabId, enabled: debugOverlay.checked }, (response: { ok?: boolean; error?: string } | undefined) => {
+      if (chromeApi.runtime.lastError || !response?.ok) status.textContent = response?.error ?? "Não foi possível atualizar as refs na página.";
     });
-  });
+  };
+  debugOverlay.addEventListener("change", updateDebugOverlay);
 
   status.textContent = "Inspecionando a página ativa…";
   chromeApi.runtime.sendMessage({ type: "SCAN_PAGE", requestId: requestId() }, (response: ScanResponse | undefined) => {
@@ -545,6 +549,8 @@ export function initSidePanel(chromeApi: typeof chrome): void {
       status.textContent = response?.error ?? "Não foi possível inspecionar esta página.";
       return;
     }
+    inspectedTabId = response.tabId;
     renderPageMap(response.data, "Página conectada");
+    if (debugOverlay.checked) updateDebugOverlay();
   });
 }
