@@ -138,6 +138,34 @@ test("debug overlay shows interactive and scroll refs and refreshes after a page
   await page.close();
 });
 
+test("side panel refreshes current page refs before drawing the frame-scoped overlay", async () => {
+  const worker = context.serviceWorkers()[0] ?? await context.waitForEvent("serviceworker");
+  const page = await openFixture(worker);
+  await page.evaluate(() => {
+    document.querySelectorAll("input,button,a").forEach((element) => element.remove());
+    const button = document.createElement("button");
+    button.textContent = "Loaded after initial scan";
+    document.body.append(button);
+  });
+  const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
+  const extensionId = await worker.evaluate(() => chrome.runtime.id);
+  const panel = await context.newPage();
+  await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
+  const response = await panel.evaluate(({ targetTabId, requestId }) => new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({ type: "SCANNER_OVERLAY", enabled: true, tabId: targetTabId, requestId }, (result) => {
+      if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+      else resolve(result);
+    });
+  }), { targetTabId: tabId, requestId: crypto.randomUUID() });
+  assert.equal(response.ok, true);
+  assert.ok(response.data.elements.some((element) => element.name === "Loaded after initial scan"));
+  assert.ok(response.markerCount >= 1);
+  const loaded = response.data.elements.find((element) => element.name === "Loaded after initial scan");
+  await page.locator(`#voice-browser-agent-debug-overlay [data-ref="${loaded.ref}"]`).waitFor();
+  await panel.close();
+  await page.close();
+});
+
 test("extension operates a dialog and scrolls only the selected nested panel", async () => {
   const worker = context.serviceWorkers()[0];
   const page = await openFixture(worker);

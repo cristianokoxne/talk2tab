@@ -537,9 +537,12 @@ export function initSidePanel(chromeApi: typeof chrome): void {
 
   const updateDebugOverlay = (): void => {
     if (inspectedTabId === undefined) return;
-    chromeApi.runtime.sendMessage({ type: "SCANNER_OVERLAY", tabId: inspectedTabId, enabled: debugOverlay.checked }, (response: { ok?: boolean; error?: string; markerCount?: number } | undefined) => {
+    chromeApi.runtime.sendMessage({ type: "SCANNER_OVERLAY", tabId: inspectedTabId, enabled: debugOverlay.checked, requestId: requestId() }, (response: { ok?: boolean; error?: string; markerCount?: number; data?: PageState } | undefined) => {
       if (chromeApi.runtime.lastError || !response?.ok) status.textContent = response?.error ?? "Não foi possível atualizar as refs na página.";
-      else status.textContent = debugOverlay.checked ? `Refs desenhadas na página: ${response.markerCount ?? 0}` : "Refs ocultas na página.";
+      else {
+        if (response.data) renderPageMap(response.data, "Página conectada");
+        status.textContent = debugOverlay.checked ? `Refs desenhadas na página: ${response.markerCount ?? 0}` : "Refs ocultas na página.";
+      }
     });
   };
   debugOverlay.addEventListener("change", updateDebugOverlay);
