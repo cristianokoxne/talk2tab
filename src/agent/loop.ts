@@ -132,6 +132,7 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
   let page = await observeWithRetry(driver, signal);
   let stalledSteps = 0;
   let previousOptionId: string | undefined;
+  let searchCycleRecoveries = 0;
   const visitedStates = new Set([page.fingerprint]);
   const staleRetries = new Map<string, number>();
   for (let step = 1; step <= maxSteps; step += 1) {
@@ -236,7 +237,12 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     if (history.length > 50) history.splice(0, history.length - 50);
     if (!verification.ok) return { status: "failed", steps, message: verification.reason };
     if (verification.progressed && visitedStates.has(nextPage.fingerprint) && nextPage.fingerprint !== page.fingerprint) {
-      return { status: "stalled", steps, message: "A navegação retornou a um estado já observado e entrou em ciclo." };
+      const targetLabel = [targetForAction?.name, targetForAction?.text, targetForAction?.context].filter(Boolean).join(" ");
+      const searchControlCycle = decision.action.type === "click"
+        && /search|busca|pesquis|submit/i.test(targetLabel)
+        && searchCycleRecoveries < 1;
+      if (!searchControlCycle) return { status: "stalled", steps, history, message: "A navegação retornou a um estado já observado e entrou em ciclo." };
+      searchCycleRecoveries += 1;
     }
     visitedStates.add(nextPage.fingerprint);
     if (!verification.progressed && previousOptionId === decision.optionId) stalledSteps += 1;

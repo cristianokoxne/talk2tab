@@ -1,0 +1,6748 @@
+{
+  "generatedAt": "2026-10-10T01:22:48.586Z",
+  "model": "jev-latest",
+  "environment": {
+    "platform": "Windows_NT 10.0.26200",
+    "architecture": "x64",
+    "node": "v24.21.0",
+    "browser": "156.0.8078.4"
+  },
+  "design": {
+    "caseSetHash": "67be6cf3b850c6acdc330ecce524c7864e305cadabc668401983544c746675a3",
+    "tasks": 21,
+    "domains": 9,
+    "repetitions": 3,
+    "holdoutTasks": 0,
+    "families": [
+      "input",
+      "menu",
+      "navigation",
+      "results",
+      "scroll",
+      "search"
+    ]
+  },
+  "summary": {
+    "overall": {
+      "total": 63,
+      "successful": 19,
+      "successRate": 0.30158730158730157,
+      "byStatus": {
+        "failed": 34,
+        "needs_help": 10,
+        "success": 19
+      }
+    },
+    "byFamily": {
+      "input": {
+        "total": 9,
+        "successful": 0,
+        "successRate": 0,
+        "byStatus": {
+          "failed": 7,
+          "needs_help": 2
+        }
+      },
+      "menu": {
+        "total": 3,
+        "successful": 0,
+        "successRate": 0,
+        "byStatus": {
+          "failed": 3
+        }
+      },
+      "navigation": {
+        "total": 3,
+        "successful": 0,
+        "successRate": 0,
+        "byStatus": {
+          "failed": 3
+        }
+      },
+      "results": {
+        "total": 3,
+        "successful": 0,
+        "successRate": 0,
+        "byStatus": {
+          "failed": 3
+        }
+      },
+      "scroll": {
+        "total": 3,
+        "successful": 3,
+        "successRate": 1,
+        "byStatus": {
+          "success": 3
+        }
+      },
+      "search": {
+        "total": 42,
+        "successful": 16,
+        "successRate": 0.38095238095238093,
+        "byStatus": {
+          "failed": 18,
+          "needs_help": 8,
+          "success": 16
+        }
+      }
+    },
+    "bySplit": {
+      "development": {
+        "total": 63,
+        "successful": 19,
+        "successRate": 0.30158730158730157,
+        "byStatus": {
+          "failed": 34,
+          "needs_help": 10,
+          "success": 19
+        }
+      }
+    },
+    "byFamilyAndSplit": {
+      "input": {
+        "development": {
+          "total": 9,
+          "successful": 0,
+          "successRate": 0,
+          "byStatus": {
+            "failed": 7,
+            "needs_help": 2
+          }
+        }
+      },
+      "menu": {
+        "development": {
+          "total": 3,
+          "successful": 0,
+          "successRate": 0,
+          "byStatus": {
+            "failed": 3
+          }
+        }
+      },
+      "navigation": {
+        "development": {
+          "total": 3,
+          "successful": 0,
+          "successRate": 0,
+          "byStatus": {
+            "failed": 3
+          }
+        }
+      },
+      "results": {
+        "development": {
+          "total": 3,
+          "successful": 0,
+          "successRate": 0,
+          "byStatus": {
+            "failed": 3
+          }
+        }
+      },
+      "scroll": {
+        "development": {
+          "total": 3,
+          "successful": 3,
+          "successRate": 1,
+          "byStatus": {
+            "success": 3
+          }
+        }
+      },
+      "search": {
+        "development": {
+          "total": 42,
+          "successful": 16,
+          "successRate": 0.38095238095238093,
+          "byStatus": {
+            "failed": 18,
+            "needs_help": 8,
+            "success": 16
+          }
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "caseId": "wiki-accessibility",
+      "site": "wikipedia",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "success",
+      "elapsedMs": 3934,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1
+      ],
+      "errors": [],
+      "finalHost": "pt.wikipedia.org",
+      "finalPath": "/w/index.php",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.31,
+          "callLatencyMs": 368.03,
+          "serializationMs": 0.02,
+          "payloadBytes": 5882,
+          "optionCount": 1,
+          "waitMs": 230.68,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.92,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.14,
+          "callLatencyMs": 306.65,
+          "serializationMs": 0.01,
+          "payloadBytes": 8588,
+          "optionCount": 3,
+          "waitMs": 1185.37,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.65,
+          "callLatencyMs": 301.81,
+          "serializationMs": 0.03,
+          "payloadBytes": 8012,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-accessibility",
+      "site": "wikipedia",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "success",
+      "elapsedMs": 4547,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1
+      ],
+      "errors": [],
+      "finalHost": "pt.wikipedia.org",
+      "finalPath": "/w/index.php",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 6.64,
+          "callLatencyMs": 372.13,
+          "serializationMs": 0.02,
+          "payloadBytes": 5882,
+          "optionCount": 1,
+          "waitMs": 259.27,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.88,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.15,
+          "callLatencyMs": 283.75,
+          "serializationMs": 0.01,
+          "payloadBytes": 8588,
+          "optionCount": 3,
+          "waitMs": 1800.76,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 4.45,
+          "callLatencyMs": 307.22,
+          "serializationMs": 0.04,
+          "payloadBytes": 7731,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-accessibility",
+      "site": "wikipedia",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 4010,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1
+      ],
+      "errors": [],
+      "finalHost": "pt.wikipedia.org",
+      "finalPath": "/w/index.php",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.06,
+          "callLatencyMs": 276.35,
+          "serializationMs": 0.02,
+          "payloadBytes": 5882,
+          "optionCount": 1,
+          "waitMs": 239.39,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.89,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.84,
+          "callLatencyMs": 272.99,
+          "serializationMs": 0.03,
+          "payloadBytes": 8588,
+          "optionCount": 3,
+          "waitMs": 1578.84,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.94,
+          "callLatencyMs": 293.53,
+          "serializationMs": 0.01,
+          "payloadBytes": 6057,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-semantic-html",
+      "site": "wikipedia",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "success",
+      "elapsedMs": 3998,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1
+      ],
+      "errors": [],
+      "finalHost": "pt.wikipedia.org",
+      "finalPath": "/w/index.php",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.77,
+          "callLatencyMs": 275.74,
+          "serializationMs": 0.02,
+          "payloadBytes": 5862,
+          "optionCount": 1,
+          "waitMs": 233.82,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.83,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.85,
+          "callLatencyMs": 289.11,
+          "serializationMs": 0.02,
+          "payloadBytes": 8572,
+          "optionCount": 3,
+          "waitMs": 1562.99,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.66,
+          "callLatencyMs": 270.47,
+          "serializationMs": 0.01,
+          "payloadBytes": 7761,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-semantic-html",
+      "site": "wikipedia",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "success",
+      "elapsedMs": 4194,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1
+      ],
+      "errors": [],
+      "finalHost": "pt.wikipedia.org",
+      "finalPath": "/w/index.php",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 246.5,
+          "serializationMs": 0.02,
+          "payloadBytes": 5862,
+          "optionCount": 1,
+          "waitMs": 232.71,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.91,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.79,
+          "callLatencyMs": 345.13,
+          "serializationMs": 0.01,
+          "payloadBytes": 8572,
+          "optionCount": 3,
+          "waitMs": 1662.96,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.36,
+          "callLatencyMs": 283.65,
+          "serializationMs": 0.02,
+          "payloadBytes": 7655,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-semantic-html",
+      "site": "wikipedia",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 4259,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1
+      ],
+      "errors": [],
+      "finalHost": "pt.wikipedia.org",
+      "finalPath": "/w/index.php",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.57,
+          "callLatencyMs": 285.92,
+          "serializationMs": 0.01,
+          "payloadBytes": 5862,
+          "optionCount": 1,
+          "waitMs": 230.63,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.86,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.07,
+          "callLatencyMs": 319.72,
+          "serializationMs": 0.03,
+          "payloadBytes": 8572,
+          "optionCount": 3,
+          "waitMs": 1785.92,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.06,
+          "callLatencyMs": 278.53,
+          "serializationMs": 0.02,
+          "payloadBytes": 7655,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "duck-accessibility",
+      "site": "duckduckgo",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 5163,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "duckduckgo.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.7,
+          "callLatencyMs": 286.76,
+          "serializationMs": 0.02,
+          "payloadBytes": 6148,
+          "optionCount": 1,
+          "waitMs": 327.1,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.92,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.74,
+          "callLatencyMs": 374.78,
+          "serializationMs": 0.03,
+          "payloadBytes": 7912,
+          "optionCount": 3,
+          "waitMs": 258.02,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.57,
+          "callLatencyMs": 288.86,
+          "serializationMs": 0.01,
+          "payloadBytes": 6881,
+          "optionCount": 1,
+          "waitMs": 1829.11,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.8,
+          "callLatencyMs": 284.35,
+          "serializationMs": 0.02,
+          "payloadBytes": 7034,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "duck-accessibility",
+      "site": "duckduckgo",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 4969,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "duckduckgo.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.77,
+          "callLatencyMs": 329.99,
+          "serializationMs": 0.01,
+          "payloadBytes": 6148,
+          "optionCount": 1,
+          "waitMs": 331.53,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.91,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.61,
+          "callLatencyMs": 271.53,
+          "serializationMs": 0.01,
+          "payloadBytes": 7912,
+          "optionCount": 3,
+          "waitMs": 268.13,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.51,
+          "callLatencyMs": 270.62,
+          "serializationMs": 0.01,
+          "payloadBytes": 6881,
+          "optionCount": 1,
+          "waitMs": 1833.26,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.46,
+          "callLatencyMs": 293.86,
+          "serializationMs": 0.01,
+          "payloadBytes": 7034,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "duck-accessibility",
+      "site": "duckduckgo",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 5145,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "duckduckgo.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.42,
+          "callLatencyMs": 289.5,
+          "serializationMs": 0.01,
+          "payloadBytes": 6148,
+          "optionCount": 1,
+          "waitMs": 349.27,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.92,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.67,
+          "callLatencyMs": 270.14,
+          "serializationMs": 0.01,
+          "payloadBytes": 7912,
+          "optionCount": 3,
+          "waitMs": 263.38,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.49,
+          "callLatencyMs": 306.72,
+          "serializationMs": 0.01,
+          "payloadBytes": 6881,
+          "optionCount": 1,
+          "waitMs": 1823.58,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 276.77,
+          "serializationMs": 0.02,
+          "payloadBytes": 7034,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "duck-shadow-dom",
+      "site": "duckduckgo",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 5044,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "duckduckgo.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.8,
+          "callLatencyMs": 270.48,
+          "serializationMs": 0.02,
+          "payloadBytes": 6113,
+          "optionCount": 1,
+          "waitMs": 370.1,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.98,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.49,
+          "callLatencyMs": 287.57,
+          "serializationMs": 0.01,
+          "payloadBytes": 7884,
+          "optionCount": 3,
+          "waitMs": 250.36,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.49,
+          "callLatencyMs": 286.32,
+          "serializationMs": 0.02,
+          "payloadBytes": 6853,
+          "optionCount": 1,
+          "waitMs": 1835.39,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 292.7,
+          "serializationMs": 0.02,
+          "payloadBytes": 7006,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "duck-shadow-dom",
+      "site": "duckduckgo",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 5199,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "duckduckgo.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.61,
+          "callLatencyMs": 306.52,
+          "serializationMs": 0.02,
+          "payloadBytes": 6113,
+          "optionCount": 1,
+          "waitMs": 347.78,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.98,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 302.17,
+          "serializationMs": 0.02,
+          "payloadBytes": 7884,
+          "optionCount": 3,
+          "waitMs": 253.2,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.62,
+          "callLatencyMs": 328.8,
+          "serializationMs": 0.02,
+          "payloadBytes": 6853,
+          "optionCount": 1,
+          "waitMs": 1828.77,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.76,
+          "callLatencyMs": 272.59,
+          "serializationMs": 0.02,
+          "payloadBytes": 7006,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "duck-shadow-dom",
+      "site": "duckduckgo",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 5269,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "duckduckgo.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.61,
+          "callLatencyMs": 297.48,
+          "serializationMs": 0.02,
+          "payloadBytes": 6113,
+          "optionCount": 1,
+          "waitMs": 348.09,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.98,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.7,
+          "callLatencyMs": 402.92,
+          "serializationMs": 0.02,
+          "payloadBytes": 7884,
+          "optionCount": 3,
+          "waitMs": 273.73,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.61,
+          "callLatencyMs": 251.47,
+          "serializationMs": 0.02,
+          "payloadBytes": 6853,
+          "optionCount": 1,
+          "waitMs": 1833.06,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.49,
+          "callLatencyMs": 319.07,
+          "serializationMs": 0.01,
+          "payloadBytes": 7006,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "bing-mv3",
+      "site": "bing",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "needs_help",
+      "elapsedMs": 6335,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "click"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        3,
+        3
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.81,
+          "callLatencyMs": 322.64,
+          "serializationMs": 0.03,
+          "payloadBytes": 7503,
+          "optionCount": 1,
+          "waitMs": 496.74,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.56,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.04,
+          "callLatencyMs": 320.92,
+          "serializationMs": 0.03,
+          "payloadBytes": 9943,
+          "optionCount": 3,
+          "waitMs": 389.01,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.72,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.59,
+          "callLatencyMs": 290.34,
+          "serializationMs": 0.03,
+          "payloadBytes": 10468,
+          "optionCount": 3,
+          "waitMs": 215.13,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.72,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.84,
+          "callLatencyMs": 281.49,
+          "serializationMs": 0.04,
+          "payloadBytes": 10987,
+          "optionCount": 3,
+          "waitMs": 1807.7,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        }
+      ]
+    },
+    {
+      "caseId": "bing-mv3",
+      "site": "bing",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "needs_help",
+      "elapsedMs": 6197,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "click"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        3,
+        3
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.75,
+          "callLatencyMs": 302.92,
+          "serializationMs": 0.02,
+          "payloadBytes": 7503,
+          "optionCount": 1,
+          "waitMs": 587.43,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.52,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.45,
+          "callLatencyMs": 275.27,
+          "serializationMs": 0.02,
+          "payloadBytes": 9943,
+          "optionCount": 3,
+          "waitMs": 223,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.73,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.54,
+          "callLatencyMs": 390.66,
+          "serializationMs": 0.03,
+          "payloadBytes": 10468,
+          "optionCount": 3,
+          "waitMs": 300.02,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.67,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.48,
+          "callLatencyMs": 282.3,
+          "serializationMs": 0.03,
+          "payloadBytes": 10987,
+          "optionCount": 3,
+          "waitMs": 1843.81,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        }
+      ]
+    },
+    {
+      "caseId": "bing-aria",
+      "site": "bing",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "needs_help",
+      "elapsedMs": 6581,
+      "stepCount": 5,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "click",
+        "click"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        3,
+        3,
+        3
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.82,
+          "callLatencyMs": 262.36,
+          "serializationMs": 0.02,
+          "payloadBytes": 7498,
+          "optionCount": 1,
+          "waitMs": 246.33,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.58,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.39,
+          "callLatencyMs": 405.06,
+          "serializationMs": 0.03,
+          "payloadBytes": 9939,
+          "optionCount": 3,
+          "waitMs": 244.11,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.67,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.92,
+          "callLatencyMs": 275.46,
+          "serializationMs": 0.02,
+          "payloadBytes": 10459,
+          "optionCount": 3,
+          "waitMs": 305.3,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.64,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.22,
+          "callLatencyMs": 303.83,
+          "serializationMs": 0.02,
+          "payloadBytes": 10983,
+          "optionCount": 3,
+          "waitMs": 362.65,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.64,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.31,
+          "callLatencyMs": 310.17,
+          "serializationMs": 0.02,
+          "payloadBytes": 11502,
+          "optionCount": 3,
+          "waitMs": 1819.01,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        }
+      ]
+    },
+    {
+      "caseId": "bing-mv3",
+      "site": "bing",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "needs_help",
+      "elapsedMs": 7052,
+      "stepCount": 5,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "click",
+        "click"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        3,
+        3,
+        3
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.08,
+          "callLatencyMs": 275.25,
+          "serializationMs": 0.02,
+          "payloadBytes": 7503,
+          "optionCount": 1,
+          "waitMs": 340.55,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.61,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.22,
+          "callLatencyMs": 284.44,
+          "serializationMs": 0.02,
+          "payloadBytes": 9943,
+          "optionCount": 3,
+          "waitMs": 268.48,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.72,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.41,
+          "callLatencyMs": 291.36,
+          "serializationMs": 0.03,
+          "payloadBytes": 10463,
+          "optionCount": 3,
+          "waitMs": 525.07,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.69,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.66,
+          "callLatencyMs": 299.34,
+          "serializationMs": 0.03,
+          "payloadBytes": 10987,
+          "optionCount": 3,
+          "waitMs": 313.74,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.7,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.44,
+          "callLatencyMs": 265.52,
+          "serializationMs": 0.03,
+          "payloadBytes": 11506,
+          "optionCount": 3,
+          "waitMs": 1815.51,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        }
+      ]
+    },
+    {
+      "caseId": "bing-aria",
+      "site": "bing",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "needs_help",
+      "elapsedMs": 5490,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "click"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        3
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.71,
+          "callLatencyMs": 288.96,
+          "serializationMs": 0.02,
+          "payloadBytes": 7498,
+          "optionCount": 1,
+          "waitMs": 569.65,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.58,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.37,
+          "callLatencyMs": 317.64,
+          "serializationMs": 0.05,
+          "payloadBytes": 9939,
+          "optionCount": 3,
+          "waitMs": 204.45,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.74,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.16,
+          "callLatencyMs": 330.3,
+          "serializationMs": 0.02,
+          "payloadBytes": 10464,
+          "optionCount": 3,
+          "waitMs": 1822.32,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        }
+      ]
+    },
+    {
+      "caseId": "bing-aria",
+      "site": "bing",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "needs_help",
+      "elapsedMs": 6153,
+      "stepCount": 4,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "click"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control",
+        "search_control"
+      ],
+      "optionCounts": [
+        1,
+        3,
+        3,
+        3
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.04,
+          "callLatencyMs": 327.39,
+          "serializationMs": 0.01,
+          "payloadBytes": 7450,
+          "optionCount": 1,
+          "waitMs": 343.93,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.58,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.13,
+          "callLatencyMs": 296.02,
+          "serializationMs": 0.02,
+          "payloadBytes": 9891,
+          "optionCount": 3,
+          "waitMs": 382.7,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.66,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.52,
+          "callLatencyMs": 320.84,
+          "serializationMs": 0.04,
+          "payloadBytes": 10411,
+          "optionCount": 3,
+          "waitMs": 229.57,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "click",
+          "targetRole": "menuitem",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_003",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.74,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.2,
+          "callLatencyMs": 319.82,
+          "serializationMs": 0.02,
+          "payloadBytes": 10935,
+          "optionCount": 3,
+          "waitMs": 1835.55,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        }
+      ]
+    },
+    {
+      "caseId": "google-playwright",
+      "site": "google",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "success",
+      "elapsedMs": 5138,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        5,
+        1
+      ],
+      "errors": [],
+      "finalHost": null,
+      "finalPath": null,
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.56,
+          "callLatencyMs": 329.75,
+          "serializationMs": 0.01,
+          "payloadBytes": 2980,
+          "optionCount": 1,
+          "waitMs": 235.03,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.68,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.62,
+          "callLatencyMs": 350.47,
+          "serializationMs": 0.01,
+          "payloadBytes": 6371,
+          "optionCount": 5,
+          "waitMs": 717.85,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.47,
+          "callLatencyMs": 317.62,
+          "serializationMs": 0.01,
+          "payloadBytes": 3214,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "google-playwright",
+      "site": "google",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "needs_help",
+      "elapsedMs": 4545,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        5,
+        1
+      ],
+      "errors": [],
+      "finalHost": "www.google.com",
+      "finalPath": "/sorry/index",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.44,
+          "callLatencyMs": 315.6,
+          "serializationMs": 0.01,
+          "payloadBytes": 2980,
+          "optionCount": 1,
+          "waitMs": 234.41,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.69,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.86,
+          "callLatencyMs": 293.75,
+          "serializationMs": 0.01,
+          "payloadBytes": 6371,
+          "optionCount": 5,
+          "waitMs": 1817.27,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.31,
+          "callLatencyMs": 309.2,
+          "serializationMs": 0.01,
+          "payloadBytes": 3398,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "google-playwright",
+      "site": "google",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 4947,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        5,
+        1
+      ],
+      "errors": [],
+      "finalHost": null,
+      "finalPath": null,
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.46,
+          "callLatencyMs": 262.15,
+          "serializationMs": 0.01,
+          "payloadBytes": 3001,
+          "optionCount": 1,
+          "waitMs": 242.13,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.61,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.69,
+          "callLatencyMs": 338.47,
+          "serializationMs": 0.01,
+          "payloadBytes": 6400,
+          "optionCount": 5,
+          "waitMs": 696.77,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.2,
+          "callLatencyMs": 280.3,
+          "serializationMs": 0.01,
+          "payloadBytes": 3220,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "google-mutation-observer",
+      "site": "google",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "needs_help",
+      "elapsedMs": 4801,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        5,
+        1
+      ],
+      "errors": [],
+      "finalHost": "www.google.com",
+      "finalPath": "/sorry/index",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.61,
+          "callLatencyMs": 247.54,
+          "serializationMs": 0.01,
+          "payloadBytes": 3006,
+          "optionCount": 1,
+          "waitMs": 224.85,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.64,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.22,
+          "callLatencyMs": 247.21,
+          "serializationMs": 0.03,
+          "payloadBytes": 6468,
+          "optionCount": 5,
+          "waitMs": 1844.27,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.35,
+          "callLatencyMs": 272.75,
+          "serializationMs": 0.01,
+          "payloadBytes": 3408,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "google-mutation-observer",
+      "site": "google",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "success",
+      "elapsedMs": 4545,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        5,
+        1
+      ],
+      "errors": [],
+      "finalHost": null,
+      "finalPath": null,
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.38,
+          "callLatencyMs": 255.19,
+          "serializationMs": 0.02,
+          "payloadBytes": 2985,
+          "optionCount": 1,
+          "waitMs": 242.03,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.64,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 290.27,
+          "serializationMs": 0.01,
+          "payloadBytes": 6439,
+          "optionCount": 5,
+          "waitMs": 724.84,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.34,
+          "callLatencyMs": 275.48,
+          "serializationMs": 0.01,
+          "payloadBytes": 3218,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "google-mutation-observer",
+      "site": "google",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 5264,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        5,
+        1
+      ],
+      "errors": [],
+      "finalHost": null,
+      "finalPath": null,
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.71,
+          "callLatencyMs": 327.21,
+          "serializationMs": 0.01,
+          "payloadBytes": 3006,
+          "optionCount": 1,
+          "waitMs": 229.63,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.64,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.23,
+          "callLatencyMs": 293.08,
+          "serializationMs": 0.02,
+          "payloadBytes": 6468,
+          "optionCount": 5,
+          "waitMs": 723.21,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.34,
+          "callLatencyMs": 317.95,
+          "serializationMs": 0.03,
+          "payloadBytes": 3224,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "python-asyncio",
+      "site": "python-docs",
+      "family": "input",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 6176,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "docs.python.org",
+      "finalPath": "/3/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.39,
+          "callLatencyMs": 287.7,
+          "serializationMs": 0.02,
+          "payloadBytes": 9773,
+          "optionCount": 4,
+          "waitMs": 1851,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.22,
+          "callLatencyMs": 294.17,
+          "serializationMs": 0.02,
+          "payloadBytes": 5986,
+          "optionCount": 1,
+          "waitMs": 1827.35,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.95,
+          "callLatencyMs": 276.12,
+          "serializationMs": 0.02,
+          "payloadBytes": 6183,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "python-asyncio",
+      "site": "python-docs",
+      "family": "input",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 7091,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "docs.python.org",
+      "finalPath": "/3/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.37,
+          "callLatencyMs": 284.94,
+          "serializationMs": 0.04,
+          "payloadBytes": 9773,
+          "optionCount": 4,
+          "waitMs": 1832.1,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1,
+          "callLatencyMs": 320.66,
+          "serializationMs": 0.02,
+          "payloadBytes": 5986,
+          "optionCount": 1,
+          "waitMs": 1835.87,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.81,
+          "callLatencyMs": 308.76,
+          "serializationMs": 0.01,
+          "payloadBytes": 6183,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "python-asyncio",
+      "site": "python-docs",
+      "family": "input",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 5779,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "docs.python.org",
+      "finalPath": "/3/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.24,
+          "callLatencyMs": 315.01,
+          "serializationMs": 0.02,
+          "payloadBytes": 9773,
+          "optionCount": 4,
+          "waitMs": 1833.61,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.22,
+          "callLatencyMs": 271.56,
+          "serializationMs": 0.02,
+          "payloadBytes": 5986,
+          "optionCount": 1,
+          "waitMs": 1824.64,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.86,
+          "callLatencyMs": 285.07,
+          "serializationMs": 0.02,
+          "payloadBytes": 6183,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "python-pathlib",
+      "site": "python-docs",
+      "family": "input",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 5801,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "docs.python.org",
+      "finalPath": "/3/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.35,
+          "callLatencyMs": 303.85,
+          "serializationMs": 0.03,
+          "payloadBytes": 9725,
+          "optionCount": 4,
+          "waitMs": 1835.74,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.03,
+          "callLatencyMs": 265.03,
+          "serializationMs": 0.02,
+          "payloadBytes": 5961,
+          "optionCount": 1,
+          "waitMs": 1831.63,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.89,
+          "callLatencyMs": 312.86,
+          "serializationMs": 0.02,
+          "payloadBytes": 6158,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "python-pathlib",
+      "site": "python-docs",
+      "family": "input",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 5738,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "docs.python.org",
+      "finalPath": "/3/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.8,
+          "callLatencyMs": 297.51,
+          "serializationMs": 0.02,
+          "payloadBytes": 9725,
+          "optionCount": 4,
+          "waitMs": 1827.43,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.79,
+          "callLatencyMs": 273.42,
+          "serializationMs": 0.02,
+          "payloadBytes": 5961,
+          "optionCount": 1,
+          "waitMs": 1829.43,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.75,
+          "callLatencyMs": 267.95,
+          "serializationMs": 0.01,
+          "payloadBytes": 6158,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "python-pathlib",
+      "site": "python-docs",
+      "family": "input",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 5717,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "docs.python.org",
+      "finalPath": "/3/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "searchbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.88,
+          "callLatencyMs": 286.04,
+          "serializationMs": 0.04,
+          "payloadBytes": 9725,
+          "optionCount": 4,
+          "waitMs": 1823.42,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.67,
+          "callLatencyMs": 271.3,
+          "serializationMs": 0.01,
+          "payloadBytes": 5961,
+          "optionCount": 1,
+          "waitMs": 1828.36,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.71,
+          "callLatencyMs": 274.74,
+          "serializationMs": 0.01,
+          "payloadBytes": 6158,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-automation",
+      "site": "devto",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "success",
+      "elapsedMs": 5347,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/search",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.06,
+          "callLatencyMs": 255.14,
+          "serializationMs": 0.02,
+          "payloadBytes": 5521,
+          "optionCount": 1,
+          "waitMs": 1842.21,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.9,
+          "callLatencyMs": 277.52,
+          "serializationMs": 0.02,
+          "payloadBytes": 6213,
+          "optionCount": 2,
+          "waitMs": 608.5,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.32,
+          "callLatencyMs": 286.87,
+          "serializationMs": 0.01,
+          "payloadBytes": 3963,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-automation",
+      "site": "devto",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "success",
+      "elapsedMs": 5493,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/search",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.64,
+          "callLatencyMs": 278.06,
+          "serializationMs": 0.01,
+          "payloadBytes": 5521,
+          "optionCount": 1,
+          "waitMs": 1832.52,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.68,
+          "callLatencyMs": 278.25,
+          "serializationMs": 0.01,
+          "payloadBytes": 6213,
+          "optionCount": 2,
+          "waitMs": 759.09,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.51,
+          "callLatencyMs": 256.18,
+          "serializationMs": 0.01,
+          "payloadBytes": 3963,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-automation",
+      "site": "devto",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 5050,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/search",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.96,
+          "callLatencyMs": 253.88,
+          "serializationMs": 0.02,
+          "payloadBytes": 5521,
+          "optionCount": 1,
+          "waitMs": 1836.08,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.75,
+          "callLatencyMs": 281.4,
+          "serializationMs": 0.01,
+          "payloadBytes": 6213,
+          "optionCount": 2,
+          "waitMs": 619.23,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.48,
+          "callLatencyMs": 287.86,
+          "serializationMs": 0.01,
+          "payloadBytes": 3963,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-web-performance",
+      "site": "devto",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "success",
+      "elapsedMs": 5226,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/search",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.03,
+          "callLatencyMs": 315.69,
+          "serializationMs": 0.02,
+          "payloadBytes": 5506,
+          "optionCount": 1,
+          "waitMs": 1848.74,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.66,
+          "callLatencyMs": 297.37,
+          "serializationMs": 0.01,
+          "payloadBytes": 6201,
+          "optionCount": 2,
+          "waitMs": 602.37,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.5,
+          "callLatencyMs": 347.81,
+          "serializationMs": 0.03,
+          "payloadBytes": 3933,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-web-performance",
+      "site": "devto",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "success",
+      "elapsedMs": 5574,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/search",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.7,
+          "callLatencyMs": 290.4,
+          "serializationMs": 0.01,
+          "payloadBytes": 5506,
+          "optionCount": 1,
+          "waitMs": 1843.12,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.41,
+          "callLatencyMs": 273.64,
+          "serializationMs": 0.02,
+          "payloadBytes": 6201,
+          "optionCount": 2,
+          "waitMs": 866.77,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.66,
+          "callLatencyMs": 274.45,
+          "serializationMs": 0.01,
+          "payloadBytes": 3933,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-web-performance",
+      "site": "devto",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 5392,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/search",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.79,
+          "callLatencyMs": 303.89,
+          "serializationMs": 0.02,
+          "payloadBytes": 5506,
+          "optionCount": 1,
+          "waitMs": 1801.24,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.02,
+          "callLatencyMs": 274.27,
+          "serializationMs": 0.01,
+          "payloadBytes": 6201,
+          "optionCount": 2,
+          "waitMs": 628.73,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.54,
+          "callLatencyMs": 321.73,
+          "serializationMs": 0.01,
+          "payloadBytes": 3933,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "w3schools-html-form",
+      "site": "w3schools",
+      "family": "input",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 5246,
+      "stepCount": 5,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ],
+      "errors": [
+        "STALE_ELEMENT"
+      ],
+      "finalHost": "www.w3schools.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.6,
+          "callLatencyMs": 289.47,
+          "serializationMs": 0.01,
+          "payloadBytes": 5368,
+          "optionCount": 1,
+          "waitMs": 278.01,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.52,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.67,
+          "callLatencyMs": 304.73,
+          "serializationMs": 0.01,
+          "payloadBytes": 5933,
+          "optionCount": 2,
+          "actionOk": false,
+          "evidence": [],
+          "errorCode": "STALE_ELEMENT"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 335.06,
+          "serializationMs": 0.01,
+          "payloadBytes": 5950,
+          "optionCount": 1,
+          "waitMs": 218,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.74,
+          "callLatencyMs": 280.07,
+          "serializationMs": 0.02,
+          "payloadBytes": 6132,
+          "optionCount": 1,
+          "waitMs": 664.65,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.8,
+          "callLatencyMs": 382.34,
+          "serializationMs": 0.01,
+          "payloadBytes": 6950,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "w3schools-html-form",
+      "site": "w3schools",
+      "family": "input",
+      "split": "development",
+      "repetition": 1,
+      "status": "needs_help",
+      "elapsedMs": 5760,
+      "stepCount": 5,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ],
+      "errors": [
+        "STALE_ELEMENT"
+      ],
+      "finalHost": "www.w3schools.com",
+      "finalPath": "/",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.71,
+          "callLatencyMs": 383.13,
+          "serializationMs": 0.02,
+          "payloadBytes": 5368,
+          "optionCount": 1,
+          "waitMs": 207.4,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.54,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 328.58,
+          "serializationMs": 0.03,
+          "payloadBytes": 5933,
+          "optionCount": 2,
+          "actionOk": false,
+          "evidence": [],
+          "errorCode": "STALE_ELEMENT"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.54,
+          "callLatencyMs": 327.93,
+          "serializationMs": 0.01,
+          "payloadBytes": 5950,
+          "optionCount": 1,
+          "waitMs": 204.58,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.79,
+          "callLatencyMs": 322.63,
+          "serializationMs": 0.01,
+          "payloadBytes": 6132,
+          "optionCount": 1,
+          "waitMs": 966.06,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.69,
+          "callLatencyMs": 363.14,
+          "serializationMs": 0.02,
+          "payloadBytes": 7154,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "w3schools-html-form",
+      "site": "w3schools",
+      "family": "input",
+      "split": "development",
+      "repetition": 3,
+      "status": "needs_help",
+      "elapsedMs": 3978,
+      "stepCount": 5,
+      "actionTypes": [
+        "type",
+        "click",
+        "click",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        2,
+        1,
+        1,
+        1
+      ],
+      "errors": [
+        "STALE_ELEMENT"
+      ],
+      "finalHost": "www.w3schools.com",
+      "finalPath": "/",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "textbox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.58,
+          "callLatencyMs": 289.82,
+          "serializationMs": 0.02,
+          "payloadBytes": 5368,
+          "optionCount": 1,
+          "waitMs": 265.41,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.58,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.54,
+          "callLatencyMs": 284.03,
+          "serializationMs": 0.01,
+          "payloadBytes": 5933,
+          "optionCount": 2,
+          "actionOk": false,
+          "evidence": [],
+          "errorCode": "STALE_ELEMENT"
+        },
+        {
+          "step": 3,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.06,
+          "callLatencyMs": 276.68,
+          "serializationMs": 0.02,
+          "payloadBytes": 6479,
+          "optionCount": 1,
+          "waitMs": 210.81,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.98,
+          "callLatencyMs": 274.42,
+          "serializationMs": 0.02,
+          "payloadBytes": 6661,
+          "optionCount": 1,
+          "waitMs": 317.31,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.81,
+          "callLatencyMs": 281.08,
+          "serializationMs": 0.04,
+          "payloadBytes": 6971,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-sidepanel",
+      "site": "chrome-developer",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 5235,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.38,
+          "callLatencyMs": 353.31,
+          "serializationMs": 0.01,
+          "payloadBytes": 6007,
+          "optionCount": 1,
+          "waitMs": 265.05,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.51,
+          "callLatencyMs": 322.8,
+          "serializationMs": 0.01,
+          "payloadBytes": 6000,
+          "optionCount": 1,
+          "waitMs": 1827.88,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.69,
+          "callLatencyMs": 314.14,
+          "serializationMs": 0.03,
+          "payloadBytes": 6203,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-sidepanel",
+      "site": "chrome-developer",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 4691,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.74,
+          "callLatencyMs": 259.16,
+          "serializationMs": 0.02,
+          "payloadBytes": 6007,
+          "optionCount": 1,
+          "waitMs": 187.52,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.42,
+          "callLatencyMs": 285.81,
+          "serializationMs": 0.01,
+          "payloadBytes": 6000,
+          "optionCount": 1,
+          "waitMs": 1829.06,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.54,
+          "callLatencyMs": 248.18,
+          "serializationMs": 0.01,
+          "payloadBytes": 6203,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-sidepanel",
+      "site": "chrome-developer",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 6496,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.45,
+          "callLatencyMs": 254.29,
+          "serializationMs": 0.02,
+          "payloadBytes": 6007,
+          "optionCount": 1,
+          "waitMs": 1821.79,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.38,
+          "callLatencyMs": 309.7,
+          "serializationMs": 0.01,
+          "payloadBytes": 5970,
+          "optionCount": 1,
+          "waitMs": 1819.64,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.69,
+          "callLatencyMs": 280.34,
+          "serializationMs": 0.01,
+          "payloadBytes": 6173,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-extension-mv3",
+      "site": "chrome-developer",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 5146,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.55,
+          "callLatencyMs": 265.48,
+          "serializationMs": 0.03,
+          "payloadBytes": 6047,
+          "optionCount": 1,
+          "waitMs": 286.05,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.4,
+          "callLatencyMs": 271.37,
+          "serializationMs": 0.01,
+          "payloadBytes": 6032,
+          "optionCount": 1,
+          "waitMs": 1803.02,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.42,
+          "callLatencyMs": 251.66,
+          "serializationMs": 0.01,
+          "payloadBytes": 6235,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-extension-mv3",
+      "site": "chrome-developer",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 6196,
+      "stepCount": 5,
+      "actionTypes": [
+        "type",
+        "click",
+        "keypress",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "search_control",
+        "no_dom_target",
+        "search_control",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        1,
+        1,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "io.google",
+      "finalPath": "/2026/about",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.63,
+          "callLatencyMs": 299.63,
+          "serializationMs": 0.01,
+          "payloadBytes": 6047,
+          "optionCount": 1,
+          "waitMs": 255.94,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "link",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.55,
+          "callLatencyMs": 263.74,
+          "serializationMs": 0.01,
+          "payloadBytes": 6736,
+          "optionCount": 1,
+          "waitMs": 1772.46,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.2,
+          "callLatencyMs": 275,
+          "serializationMs": 0.01,
+          "payloadBytes": 2677,
+          "optionCount": 1,
+          "waitMs": 248.62,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "click",
+          "targetRole": "link",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 0.78,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.49,
+          "callLatencyMs": 256.28,
+          "serializationMs": 0.02,
+          "payloadBytes": 5166,
+          "optionCount": 2,
+          "waitMs": 597.53,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "title_changed",
+            "semantic_page_state_changed"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.34,
+          "callLatencyMs": 284.44,
+          "serializationMs": 0.02,
+          "payloadBytes": 3687,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "gitlab-ci",
+      "site": "gitlab",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 2082,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "about.gitlab.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.06,
+          "callLatencyMs": 307.84,
+          "serializationMs": 0.02,
+          "payloadBytes": 5473,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "gitlab-ci",
+      "site": "gitlab",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 1799,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "about.gitlab.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.66,
+          "callLatencyMs": 273.84,
+          "serializationMs": 0.02,
+          "payloadBytes": 5473,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-extension-mv3",
+      "site": "chrome-developer",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 6757,
+      "stepCount": 3,
+      "actionTypes": [
+        "type",
+        "keypress",
+        "finish"
+      ],
+      "targetKinds": [
+        "search_control",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "type",
+          "targetRole": "combobox",
+          "targetFrameId": 0,
+          "expectedEffect": "preencher o campo (valor omitido do trace)",
+          "option": "choice_001",
+          "availableActions": [
+            "type"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.46,
+          "callLatencyMs": 299.34,
+          "serializationMs": 0.02,
+          "payloadBytes": 6047,
+          "optionCount": 1,
+          "waitMs": 1823.7,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "keypress",
+          "expectedEffect": "enviar a tecla permitida",
+          "option": "choice_001",
+          "availableActions": [
+            "keypress"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.68,
+          "callLatencyMs": 263.2,
+          "serializationMs": 0.03,
+          "payloadBytes": 6002,
+          "optionCount": 1,
+          "waitMs": 1826.3,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": false,
+          "progressed": false,
+          "evidence": [],
+          "waitOutcome": "ação enviada sem efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.61,
+          "callLatencyMs": 255.64,
+          "serializationMs": 0.02,
+          "payloadBytes": 6205,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "gitlab-ci",
+      "site": "gitlab",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 1868,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "about.gitlab.com",
+      "finalPath": "/",
+      "queryObserved": false,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.7,
+          "callLatencyMs": 285.07,
+          "serializationMs": 0.02,
+          "payloadBytes": 5473,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "gitlab-security",
+      "site": "gitlab",
+      "family": "search",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 1795,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "about.gitlab.com",
+      "finalPath": "/",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 16.77,
+          "callLatencyMs": 302.34,
+          "serializationMs": 0.05,
+          "payloadBytes": 5465,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "gitlab-security",
+      "site": "gitlab",
+      "family": "search",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 1780,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "about.gitlab.com",
+      "finalPath": "/",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.81,
+          "callLatencyMs": 270.8,
+          "serializationMs": 0.02,
+          "payloadBytes": 5465,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "gitlab-security",
+      "site": "gitlab",
+      "family": "search",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 1665,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "about.gitlab.com",
+      "finalPath": "/",
+      "queryObserved": true,
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.82,
+          "callLatencyMs": 261,
+          "serializationMs": 0.1,
+          "payloadBytes": 5465,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-scroll",
+      "site": "wikipedia",
+      "family": "scroll",
+      "split": "development",
+      "repetition": 1,
+      "status": "success",
+      "elapsedMs": 3092,
+      "stepCount": 3,
+      "actionTypes": [
+        "click",
+        "expand_candidates",
+        "finish"
+      ],
+      "targetKinds": [
+        "button",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        23,
+        60,
+        31
+      ],
+      "errors": [],
+      "finalHost": "www.wikipedia.org",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_020",
+          "availableActions": [
+            "click",
+            "finish"
+          ],
+          "confidence": 0.59,
+          "model": "jev-1.13.0",
+          "commandMapMs": 3.14,
+          "callLatencyMs": 308.96,
+          "serializationMs": 0.07,
+          "payloadBytes": 23426,
+          "optionCount": 23,
+          "waitMs": 724.43,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "expand_candidates",
+          "expectedEffect": "mostrar o próximo lote de opções",
+          "option": "choice_060",
+          "availableActions": [
+            "click",
+            "expand_candidates"
+          ],
+          "confidence": 0.71,
+          "model": "jev-1.13.0",
+          "commandMapMs": 3.33,
+          "callLatencyMs": 374.12,
+          "serializationMs": 0.07,
+          "payloadBytes": 36112,
+          "optionCount": 60,
+          "dispatched": false,
+          "actionOk": true,
+          "evidence": [],
+          "waitOutcome": "ação concluída sem mudança semântica observada"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_031",
+          "availableActions": [
+            "click",
+            "finish"
+          ],
+          "confidence": 0.72,
+          "model": "jev-1.13.0",
+          "commandMapMs": 2.49,
+          "callLatencyMs": 318.33,
+          "serializationMs": 0.04,
+          "payloadBytes": 19416,
+          "optionCount": 31,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-scroll",
+      "site": "wikipedia",
+      "family": "scroll",
+      "split": "development",
+      "repetition": 2,
+      "status": "success",
+      "elapsedMs": 2100,
+      "stepCount": 2,
+      "actionTypes": [
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "button",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        23,
+        28
+      ],
+      "errors": [],
+      "finalHost": "www.wikipedia.org",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_020",
+          "availableActions": [
+            "click",
+            "finish"
+          ],
+          "confidence": 0.58,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.08,
+          "callLatencyMs": 413.18,
+          "serializationMs": 0.04,
+          "payloadBytes": 23426,
+          "optionCount": 23,
+          "waitMs": 206.67,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_028",
+          "availableActions": [
+            "click",
+            "finish"
+          ],
+          "confidence": 0.73,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.63,
+          "callLatencyMs": 305.33,
+          "serializationMs": 0.06,
+          "payloadBytes": 27886,
+          "optionCount": 28,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "wiki-scroll",
+      "site": "wikipedia",
+      "family": "scroll",
+      "split": "development",
+      "repetition": 3,
+      "status": "success",
+      "elapsedMs": 2839,
+      "stepCount": 3,
+      "actionTypes": [
+        "click",
+        "expand_candidates",
+        "finish"
+      ],
+      "targetKinds": [
+        "button",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        23,
+        60,
+        31
+      ],
+      "errors": [],
+      "finalHost": "www.wikipedia.org",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "click",
+          "targetRole": "button",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_020",
+          "availableActions": [
+            "click",
+            "finish"
+          ],
+          "confidence": 0.57,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.56,
+          "callLatencyMs": 316.4,
+          "serializationMs": 0.06,
+          "payloadBytes": 23426,
+          "optionCount": 23,
+          "waitMs": 700.84,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "expand_candidates",
+          "expectedEffect": "mostrar o próximo lote de opções",
+          "option": "choice_060",
+          "availableActions": [
+            "click",
+            "expand_candidates"
+          ],
+          "confidence": 0.72,
+          "model": "jev-1.13.0",
+          "commandMapMs": 3.17,
+          "callLatencyMs": 349.38,
+          "serializationMs": 0.11,
+          "payloadBytes": 36112,
+          "optionCount": 60,
+          "dispatched": false,
+          "actionOk": true,
+          "evidence": [],
+          "waitOutcome": "ação concluída sem mudança semântica observada"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_031",
+          "availableActions": [
+            "click",
+            "finish"
+          ],
+          "confidence": 0.69,
+          "model": "jev-1.13.0",
+          "commandMapMs": 2.81,
+          "callLatencyMs": 315.81,
+          "serializationMs": 0.06,
+          "payloadBytes": 19416,
+          "optionCount": 31,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "bing-results",
+      "site": "bing",
+      "family": "results",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 5507,
+      "stepCount": 6,
+      "actionTypes": [
+        "scroll",
+        "click",
+        "scroll",
+        "scroll",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target",
+        "link",
+        "no_dom_target",
+        "no_dom_target",
+        "link",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        5,
+        4,
+        5,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/search",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_001",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.37,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.95,
+          "callLatencyMs": 282.12,
+          "serializationMs": 0.01,
+          "payloadBytes": 3612,
+          "optionCount": 4,
+          "waitMs": 14.72,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "link",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click",
+            "scroll"
+          ],
+          "confidence": 0.12,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.29,
+          "callLatencyMs": 267.19,
+          "serializationMs": 0.02,
+          "payloadBytes": 7011,
+          "optionCount": 5,
+          "waitMs": 1194.12,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_001",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.24,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.22,
+          "callLatencyMs": 536.19,
+          "serializationMs": 0.02,
+          "payloadBytes": 7305,
+          "optionCount": 4,
+          "waitMs": 15.44,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_004",
+          "availableActions": [
+            "click",
+            "scroll"
+          ],
+          "confidence": 0.06,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.37,
+          "callLatencyMs": 351.34,
+          "serializationMs": 0.03,
+          "payloadBytes": 7656,
+          "optionCount": 5,
+          "waitMs": 13.61,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "click",
+          "targetRole": "link",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.02,
+          "callLatencyMs": 382.03,
+          "serializationMs": 0.03,
+          "payloadBytes": 7317,
+          "optionCount": 1,
+          "waitMs": 457.7,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 6,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.47,
+          "callLatencyMs": 301.62,
+          "serializationMs": 0.01,
+          "payloadBytes": 3920,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "bing-results",
+      "site": "bing",
+      "family": "results",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 1975,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/search",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.2,
+          "callLatencyMs": 339.67,
+          "serializationMs": 0.01,
+          "payloadBytes": 1767,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "bing-results",
+      "site": "bing",
+      "family": "results",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 5108,
+      "stepCount": 6,
+      "actionTypes": [
+        "scroll",
+        "click",
+        "scroll",
+        "scroll",
+        "click",
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target",
+        "link",
+        "no_dom_target",
+        "no_dom_target",
+        "link",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        4,
+        5,
+        4,
+        5,
+        1,
+        1
+      ],
+      "errors": [],
+      "finalHost": "www.bing.com",
+      "finalPath": "/search",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_001",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.31,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.73,
+          "callLatencyMs": 265.03,
+          "serializationMs": 0.02,
+          "payloadBytes": 3603,
+          "optionCount": 4,
+          "waitMs": 21.36,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "click",
+          "targetRole": "link",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click",
+            "scroll"
+          ],
+          "confidence": 0.14,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.15,
+          "callLatencyMs": 413.15,
+          "serializationMs": 0.02,
+          "payloadBytes": 6565,
+          "optionCount": 5,
+          "waitMs": 1033.77,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_001",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.25,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.49,
+          "callLatencyMs": 284.01,
+          "serializationMs": 0.03,
+          "payloadBytes": 7305,
+          "optionCount": 4,
+          "waitMs": 19.24,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 4,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_004",
+          "availableActions": [
+            "click",
+            "scroll"
+          ],
+          "confidence": 0.09,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.56,
+          "callLatencyMs": 289.35,
+          "serializationMs": 0.01,
+          "payloadBytes": 7659,
+          "optionCount": 5,
+          "waitMs": 16.25,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 5,
+          "actionType": "click",
+          "targetRole": "link",
+          "targetFrameId": 0,
+          "expectedEffect": "ativar o controle e observar o efeito",
+          "option": "choice_001",
+          "availableActions": [
+            "click"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.79,
+          "callLatencyMs": 329.84,
+          "serializationMs": 0.02,
+          "payloadBytes": 8046,
+          "optionCount": 1,
+          "waitMs": 531.98,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "url_changed",
+            "semantic_page_state_changed",
+            "viewport_scrolled"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 6,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.43,
+          "callLatencyMs": 269.44,
+          "serializationMs": 0.01,
+          "payloadBytes": 3920,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-navigation",
+      "site": "devto",
+      "family": "navigation",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 2831,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1,
+          "callLatencyMs": 358.34,
+          "serializationMs": 0.02,
+          "payloadBytes": 5201,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-navigation",
+      "site": "devto",
+      "family": "navigation",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 2808,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1,
+          "callLatencyMs": 401.51,
+          "serializationMs": 0.02,
+          "payloadBytes": 5201,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "devto-navigation",
+      "site": "devto",
+      "family": "navigation",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 1977,
+      "stepCount": 1,
+      "actionTypes": [
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        1
+      ],
+      "errors": [],
+      "finalHost": "dev.to",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.64,
+          "callLatencyMs": 374.34,
+          "serializationMs": 0.01,
+          "payloadBytes": 5201,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-menu",
+      "site": "chrome-developer",
+      "family": "menu",
+      "split": "development",
+      "repetition": 1,
+      "status": "failed",
+      "elapsedMs": 2715,
+      "stepCount": 3,
+      "actionTypes": [
+        "scroll",
+        "scroll",
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        2,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_001",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.65,
+          "callLatencyMs": 265.04,
+          "serializationMs": 0.01,
+          "payloadBytes": 5748,
+          "optionCount": 2,
+          "waitMs": 23.73,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_002",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.78,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.97,
+          "callLatencyMs": 338.08,
+          "serializationMs": 0.02,
+          "payloadBytes": 6259,
+          "optionCount": 2,
+          "waitMs": 21.67,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.74,
+          "callLatencyMs": 293.39,
+          "serializationMs": 0.01,
+          "payloadBytes": 7160,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-menu",
+      "site": "chrome-developer",
+      "family": "menu",
+      "split": "development",
+      "repetition": 2,
+      "status": "failed",
+      "elapsedMs": 3302,
+      "stepCount": 2,
+      "actionTypes": [
+        "scroll",
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_002",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.08,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.55,
+          "callLatencyMs": 308.92,
+          "serializationMs": 0.02,
+          "payloadBytes": 5748,
+          "optionCount": 2,
+          "waitMs": 24.17,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.9,
+          "callLatencyMs": 403.09,
+          "serializationMs": 0.01,
+          "payloadBytes": 6893,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "caseId": "chrome-menu",
+      "site": "chrome-developer",
+      "family": "menu",
+      "split": "development",
+      "repetition": 3,
+      "status": "failed",
+      "elapsedMs": 3136,
+      "stepCount": 3,
+      "actionTypes": [
+        "scroll",
+        "scroll",
+        "finish"
+      ],
+      "targetKinds": [
+        "no_dom_target",
+        "no_dom_target",
+        "no_dom_target"
+      ],
+      "optionCounts": [
+        2,
+        2,
+        1
+      ],
+      "errors": [],
+      "finalHost": "developer.chrome.com",
+      "finalPath": "/",
+      "trace": [
+        {
+          "step": 1,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_001",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.12,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.56,
+          "callLatencyMs": 279.95,
+          "serializationMs": 0.01,
+          "payloadBytes": 5748,
+          "optionCount": 2,
+          "waitMs": 17.61,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 2,
+          "actionType": "scroll",
+          "expectedEffect": "rolar o contêiner observado",
+          "option": "choice_002",
+          "availableActions": [
+            "scroll"
+          ],
+          "confidence": 0.82,
+          "model": "jev-1.13.0",
+          "commandMapMs": 0.58,
+          "callLatencyMs": 286.62,
+          "serializationMs": 0.01,
+          "payloadBytes": 6259,
+          "optionCount": 2,
+          "waitMs": 19.23,
+          "dispatched": true,
+          "actionOk": true,
+          "effectObserved": true,
+          "progressed": true,
+          "evidence": [
+            "semantic_page_state_changed",
+            "viewport_scrolled",
+            "executor_observed_local_change"
+          ],
+          "waitOutcome": "efeito observado"
+        },
+        {
+          "step": 3,
+          "actionType": "finish",
+          "expectedEffect": "encerrar a sessão",
+          "option": "choice_001",
+          "availableActions": [
+            "finish"
+          ],
+          "confidence": 1,
+          "model": "jev-1.13.0",
+          "commandMapMs": 1.01,
+          "callLatencyMs": 283.9,
+          "serializationMs": 0.02,
+          "payloadBytes": 7160,
+          "optionCount": 1,
+          "evidence": []
+        }
+      ]
+    }
+  ]
+}

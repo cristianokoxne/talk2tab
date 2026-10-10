@@ -57,6 +57,30 @@ test("agent loop stops when progress returns to an already observed page state",
   assert.equal(result.steps.length, 2);
 });
 
+test("search-control cycle gets one strategy recovery before the loop stalls", async () => {
+  const states = ["before-type", "typed", "before-type", "submitted"];
+  let observation = 0;
+  let decisions = 0;
+  const actions = [
+    { optionId: "type", action: { type: "type", target: { ref: "el_1_2" }, text: "accessibility" } },
+    { optionId: "search-button", action: { type: "click", target: { ref: "el_1_3" } } },
+    { optionId: "enter", action: { type: "keypress", key: "ENTER" } },
+    { optionId: "finish", action: { type: "finish", status: "success", message: "pesquisa observada" } },
+  ];
+  const searchPage = { ...page, elements: [
+    { ref: "el_1_2", frameId: 0, tag: "input", role: "searchbox", name: "Search", type: "search", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 300, height: 30 } },
+    { ref: "el_1_3", frameId: 0, tag: "button", role: "button", name: "Search", visible: true, enabled: true, bounds: { x: 0, y: 40, width: 120, height: 30 } },
+  ] };
+  const result = await runAgentLoop({
+    observe: async () => ({ ...searchPage, fingerprint: states[Math.min(observation++, states.length - 1)] }),
+    decide: async () => { decisions += 1; return actions[decisions - 1]; },
+    execute: async (action, actionId) => ({ ok: true, actionId, dispatched: action.type !== "finish", changed: action.type !== "finish" }),
+    verify: (before, after) => ({ ok: true, progressed: before.fingerprint !== after.fingerprint, reason: "state changed" }),
+  }, 6);
+  assert.equal(result.status, "success");
+  assert.deepEqual(result.steps.map((step) => step.action.type), ["type", "click", "keypress", "finish"]);
+});
+
 test("agent loop shares bounded sanitized action history and permits distinct actions", async () => {
   const observedHistory = [];
   const result = await runAgentLoop({
