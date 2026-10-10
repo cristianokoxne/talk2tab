@@ -1,6 +1,7 @@
 import type { PageState } from "./types.js";
 import { startChromeSpeechRecognition, type SpeechRecognitionRecorder } from "./voice/chromeSpeechRecognition.js";
 import { classifyVoiceCommand, isDuplicateVoiceSegment, VoiceGoalQueue, type AgentSessionCheckpoint } from "./sessionLifecycle.js";
+import { makeSafeTraceFromSteps, sanitizeSafeTraceStep, type SafeTraceStep } from "./trace.js";
 import { createIcons, icons } from "lucide";
 
 interface ScanResponse {
@@ -44,6 +45,11 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const voiceModeStatus = document.querySelector<HTMLElement>("#voice-mode-status");
   const voiceModeExit = document.querySelector<HTMLButtonElement>("#voice-mode-exit");
   const agentResult = document.querySelector<HTMLOutputElement>("#agent-result");
+  const agentTracePanel = document.querySelector<HTMLDetailsElement>("#agent-trace-panel");
+  const agentTraceCount = document.querySelector<HTMLElement>("#agent-trace-count");
+  const agentTraceExport = document.querySelector<HTMLButtonElement>("#agent-trace-export");
+  const agentTraceList = document.querySelector<HTMLOListElement>("#agent-trace");
+  const agentTraceMetrics = document.querySelector<HTMLOutputElement>("#agent-trace-metrics");
   const confirmationModal = document.querySelector<HTMLElement>("#agent-confirmation");
   const confirmationSummary = document.querySelector<HTMLElement>("#agent-confirmation-summary");
   const confirmationApprove = document.querySelector<HTMLButtonElement>("#agent-confirmation-approve");
@@ -55,8 +61,48 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const saveKeyButton = document.querySelector<HTMLButtonElement>("#jev-save-key");
   const onboardingStatus = document.querySelector<HTMLOutputElement>("#jev-onboarding-status");
   const editKeyButton = document.querySelector<HTMLButtonElement>("#jev-edit-key");
-  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStatus || !voiceMode || !voiceModeStatus || !voiceModeExit || !agentResult || !confirmationModal || !confirmationSummary || !confirmationApprove || !confirmationReject || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
+  if (!status || !pageState || !elements || !debugOverlay || !actionRef || !actionText || !actionResult || !actionDebug || !clickButton || !typeButton || !agentGoal || !agentControls || !agentRun || !agentCancel || !voiceStart || !voiceStatus || !voiceMode || !voiceModeStatus || !voiceModeExit || !agentResult || !agentTracePanel || !agentTraceCount || !agentTraceExport || !agentTraceList || !agentTraceMetrics || !confirmationModal || !confirmationSummary || !confirmationApprove || !confirmationReject || !onboarding || !apiKeyInput || !saveKeyButton || !onboardingStatus || !editKeyButton) return;
   createIcons({ icons });
+
+  let traceSteps: SafeTraceStep[] = [];
+  let traceStatus = "running";
+  let traceRequestId: string | undefined;
+  const renderTrace = (): void => {
+    agentTraceList.replaceChildren(...traceSteps.map((step) => {
+      const item = document.createElement("li");
+      const title = document.createElement("strong");
+      title.textContent = `Etapa ${step.step} · ${step.actionType}${step.targetRole ? ` · ${step.targetRole}` : ""}${step.targetFrameId ? ` · frame ${step.targetFrameId}` : ""}`;
+      const expected = document.createElement("div");
+      expected.textContent = `Esperado: ${step.expectedEffect}`;
+      const outcome = document.createElement("div");
+      outcome.textContent = step.actionOk === false ? `Ação recusada${step.errorCode ? ` (${step.errorCode})` : ""}`
+        : step.waitOutcome ?? (step.effectObserved ? "Efeito observado" : step.dispatched ? "Ação enviada; efeito ainda não observado" : "Aguardando execução");
+      const evidence = document.createElement("div");
+      evidence.textContent = step.evidence.length ? `Evidência: ${step.evidence.join(", ")}` : "Evidência: nenhuma registrada";
+      const choices = document.createElement("div");
+      choices.textContent = step.availableActions.length ? `Ações disponíveis: ${step.availableActions.join(", ")}${step.optionCount === undefined ? "" : ` (${step.optionCount} opções)`}` : "Ações disponíveis: não registradas";
+      const metrics = document.createElement("div");
+      metrics.textContent = [step.observationMs === undefined ? "" : `scan ${Math.round(step.observationMs)} ms`, step.commandMapMs === undefined ? "" : `mapa ${Math.round(step.commandMapMs)} ms`, step.callLatencyMs === undefined ? "" : `Jev ${Math.round(step.callLatencyMs)} ms`, step.waitMs === undefined ? "" : `espera ${Math.round(step.waitMs)} ms`, step.payloadBytes === undefined ? "" : `${step.payloadBytes} bytes`, step.optionCount === undefined ? "" : `${step.optionCount} opções`].filter(Boolean).join(" · ");
+      item.append(title, expected, choices, outcome, evidence, metrics);
+      return item;
+    }));
+    agentTraceCount.textContent = `${traceSteps.length} etapa(s)`;
+    const maxBytes = Math.max(0, ...traceSteps.map((step) => step.payloadBytes ?? 0));
+    const traceBytes = new TextEncoder().encode(JSON.stringify(traceSteps)).length;
+    agentTraceMetrics.textContent = `Buffer: ${traceBytes} bytes · payload máximo: ${maxBytes} bytes · limite do trace: 50 etapas`;
+    agentTraceExport.disabled = traceSteps.length === 0;
+    if (traceSteps.length) agentTracePanel.open = true;
+  };
+  agentTraceExport.addEventListener("click", () => {
+    const trace = makeSafeTraceFromSteps(traceStatus, traceSteps);
+    const blob = new Blob([JSON.stringify(trace, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `talk2tab-trace-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  });
 
   const renderPageMap = (data: PageState, label: string): void => {
     status.textContent = label;
@@ -89,6 +135,16 @@ export function initSidePanel(chromeApi: typeof chrome): void {
       const update = message as AgentPageStateMessage;
       if (update.requestId !== activeRequestId) return;
       renderPageMap(update.data, `Pagemap atualizado · passo ${update.step} · ${update.data.elements.length} refs`);
+      return;
+    }
+    if (messageType === "AGENT_TRACE_UPDATE") {
+      const update = message as { requestId?: unknown; step?: unknown };
+      if (update.requestId !== activeRequestId || typeof update.requestId !== "string") return;
+      const safeStep = sanitizeSafeTraceStep(update.step);
+      if (!safeStep) return;
+      traceRequestId = update.requestId;
+      traceSteps = [...traceSteps.filter((step) => step.step !== safeStep.step), safeStep].sort((a, b) => a.step - b.step).slice(-50);
+      renderTrace();
       return;
     }
     if (messageType === "AGENT_ACTION_CONFIRMATION_REQUIRED") {
@@ -183,7 +239,15 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   chromeApi.runtime.onMessage.addListener((message: unknown) => {
     if (typeof message !== "object" || message === null || (message as { type?: unknown }).type !== "AGENT_SESSION_UPDATED") return;
     const checkpoint = (message as { data?: AgentSessionCheckpoint }).data;
-    if (checkpoint && activeRequestId === checkpoint.requestId) acceptSessionCheckpoint(checkpoint);
+    if (!checkpoint) return;
+    if (traceRequestId === checkpoint.requestId) {
+      traceStatus = checkpoint.status === "completed" ? "success"
+        : checkpoint.status === "cancelled" ? "cancelled"
+          : checkpoint.status === "needs_reconciliation" ? "needs_help"
+            : checkpoint.status === "running" || checkpoint.status === "awaiting_confirmation" ? "running" : "failed";
+      renderTrace();
+    }
+    if (activeRequestId === checkpoint.requestId) acceptSessionCheckpoint(checkpoint);
   });
   chromeApi.runtime.sendMessage({ type: "GET_AGENT_SESSION" }, (response: { data?: AgentSessionCheckpoint | null } | undefined) => {
     if (!chromeApi.runtime.lastError) acceptSessionCheckpoint(response?.data);
@@ -217,6 +281,10 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     if (!goal) { agentResult.textContent = "Informe um objetivo."; return; }
     const runRequestId = requestId();
     activeRequestId = runRequestId;
+    traceRequestId = runRequestId;
+    traceSteps = [];
+    traceStatus = "running";
+    renderTrace();
     agentRun.disabled = true;
     agentCancel.disabled = false;
     const cancelLabel = agentCancel.querySelector("span");

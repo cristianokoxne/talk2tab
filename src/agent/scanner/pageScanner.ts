@@ -25,13 +25,19 @@ function collectInteractiveElements(root: ParentNode): HTMLElement[] {
 function collectScrollableElements(root: ParentNode): HTMLElement[] {
   const elements: HTMLElement[] = [];
   for (const element of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
-    const view = element.ownerDocument.defaultView;
-    const style = view?.getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    const overflow = `${style?.overflowY ?? ""} ${style?.overflow ?? ""} ${style?.overflowX ?? ""}`;
-    const hasVerticalRange = element.scrollHeight > element.clientHeight + 8 && /auto|scroll/i.test(`${style?.overflowY ?? ""} ${style?.overflow ?? ""}`);
-    const hasHorizontalRange = element.scrollWidth > element.clientWidth + 8 && /auto|scroll/i.test(`${style?.overflowX ?? ""} ${style?.overflow ?? ""}`);
-    if ((hasVerticalRange || hasHorizontalRange || /snap/.test(overflow) && element.scrollHeight > element.clientHeight + 8) && rect.width > 0 && rect.height > 0) elements.push(element);
+    const verticalRange = element.scrollHeight > element.clientHeight + 8;
+    const horizontalRange = element.scrollWidth > element.clientWidth + 8;
+    if (verticalRange || horizontalRange) {
+      const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+      const overflowY = `${style?.overflowY ?? ""} ${style?.overflow ?? ""}`;
+      const overflowX = `${style?.overflowX ?? ""} ${style?.overflow ?? ""}`;
+      const scrollable = verticalRange && (/auto|scroll/i.test(overflowY) || /snap/.test(overflowY))
+        || horizontalRange && /auto|scroll/i.test(overflowX);
+      if (scrollable) {
+        const rect = element.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) elements.push(element);
+      }
+    }
     if (element.shadowRoot) elements.push(...collectScrollableElements(element.shadowRoot));
   }
   return elements;

@@ -14,6 +14,12 @@ export interface JevDecision {
   confidence?: number;
   probabilities: Record<string, number>;
   model?: string;
+  callLatencyMs?: number;
+  serializationMs?: number;
+  payloadBytes?: number;
+  optionCount?: number;
+  commandMapMs?: number;
+  availableActions?: string[];
 }
 
 interface JevResponse {
@@ -55,11 +61,16 @@ export class JevProvider {
     else signal?.addEventListener("abort", onAbort, { once: true });
     let timedOut = false;
     const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+    const callStartedAt = performance.now();
     try {
+      const serializationStartedAt = performance.now();
+      const body = JSON.stringify({ model: this.config.model, ...commandMap });
+      const serializationMs = performance.now() - serializationStartedAt;
+      const payloadBytes = new TextEncoder().encode(body).length;
       const response = await this.fetchImpl(this.config.endpoint, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${this.config.apiKey}` },
-        body: JSON.stringify({ model: this.config.model, ...commandMap }),
+        body,
         signal: controller.signal,
       });
       if (!response.ok) {
@@ -95,6 +106,11 @@ export class JevProvider {
         confidence: answer.confidence,
         probabilities: answer.probabilities ?? {},
         model: typeof payload.model === "string" ? payload.model : undefined,
+        callLatencyMs: performance.now() - callStartedAt,
+        serializationMs,
+        payloadBytes,
+        optionCount: options.length,
+        availableActions: [...new Set(options.map((option) => option.action.type))],
       };
     } catch (error) {
       if (timedOut) throw new JevProviderError(`Jev request timed out after ${timeoutMs}ms.`, "PROVIDER_TIMEOUT", { cause: error });

@@ -521,8 +521,12 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     map.state.goal = goal.slice(0, 1000);
     payloadBytes = new TextEncoder().encode(JSON.stringify(map)).length;
   }
-  map.state.browser.coverage.payloadBytes = payloadBytes;
-  map.state.browser.coverage.payloadBytes = new TextEncoder().encode(JSON.stringify(map)).length;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    map.state.browser.coverage.payloadBytes = payloadBytes;
+    const serializedBytes = new TextEncoder().encode(JSON.stringify(map)).length;
+    if (serializedBytes === payloadBytes) break;
+    payloadBytes = serializedBytes;
+  }
 
   return {
     map,

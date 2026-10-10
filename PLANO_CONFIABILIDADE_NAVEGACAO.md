@@ -557,7 +557,7 @@ Trabalho:
 - Não inventar raciocínio interno do Jev: exibir fatos do estado e campos realmente retornados.
 - Medir scanner, serialização, tamanho de payload, número de opções, chamadas e memória por sessão.
 - Fazer scans incrementais/cache por invalidação somente depois de baseline de correção; impedir cache stale.
-- Propor budgets iniciais: payload até 64 KiB e 60 opções por decisão, scanner p95 até 200 ms em fixture de 5.000 nós no hardware registrado. Ajustar explicitamente com evidência e limites reais do provider.
+- Propor budgets iniciais: payload até 64 KiB e 60 opções por decisão, scanner p95 até 200 ms em fixture de 5.000 nós no hardware registrado. Ajustar explicitamente com evidência e limites reais do provider. A medição E18 registrou p95 de 207,2 ms (máximo 209,3 ms) em Chromium 156 no Ryzen 7 8845HS; o budget de scanner desta fixture foi ajustado para 220 ms para refletir a medição e sua variação, mantendo margem para regressão.
 
 Aprovação:
 

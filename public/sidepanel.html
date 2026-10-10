@@ -38,6 +38,12 @@
         <p class="voice-note">Clique no microfone para começar a ouvir e clique novamente para encerrar. Comandos reconhecidos são enviados automaticamente ao Jev. A fala fica sujeita ao processamento on-line do Chrome; ações sensíveis pedem confirmação.</p>
         <div class="action-row"><button id="agent-run" class="primary-button compact" type="button"><span>Executar com Jev</span><i data-lucide="arrow-up-right"></i></button><button id="agent-cancel" class="secondary-button" type="button" disabled><i data-lucide="x"></i><span>Cancelar</span></button></div>
         <output id="agent-result" aria-live="polite"></output>
+        <details id="agent-trace-panel" class="trace-panel">
+          <summary>Diagnóstico da sessão <span id="agent-trace-count">0 etapas</span></summary>
+          <button id="agent-trace-export" class="secondary-button trace-export" type="button" disabled>Exportar trace sanitizado</button>
+          <ol id="agent-trace" aria-live="polite"></ol>
+          <output id="agent-trace-metrics"></output>
+        </details>
       </fieldset>
       <label class="toggle-row"><input id="debug-overlay" type="checkbox"><span>Mostrar refs na página</span><span class="toggle-hint">debug</span></label>
       <fieldset id="action-debug" class="panel-card utility-card">

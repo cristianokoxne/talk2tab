@@ -3,6 +3,7 @@ import { buildJevCommandMap } from "./provider/commandMap.js";
 import type { BrowserTabSummary } from "./provider/commandMap.js";
 import { JevProvider, JevProviderError } from "./provider/jev.js";
 import { runAgentLoop } from "./loop.js";
+import type { AgentLoopStep } from "./loop.js";
 import { verifyAction } from "./verification.js";
 import { parseGoal, updateGoalProgress } from "./intent.js";
 import { waitForPageEffect } from "./waitForEffect.js";
@@ -10,6 +11,7 @@ import { findSpawnedChildTab, isRestrictedDocumentUrl, makeUninspectablePage, va
 import { aggregateFrameObservations, parseFrameScopedRef } from "./frames.js";
 import { classifyActionRisk, rebindConfirmedAction } from "./actionSafety.js";
 import { latestSessionForTab, makeSessionCheckpoint, reconcileSessionCheckpoint, type AgentSessionCheckpoint, type SessionPhase, type SessionStatus } from "./sessionLifecycle.js";
+import { safeTraceStep } from "./trace.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
@@ -344,6 +346,10 @@ function publishPageState(chromeApi: typeof chrome, requestId: string, step: num
   }
 }
 
+function publishTraceStep(chromeApi: typeof chrome, requestId: string, step: AgentLoopStep): void {
+  try { void chromeApi.runtime.sendMessage({ type: "AGENT_TRACE_UPDATE", requestId, step: safeTraceStep(step) }).catch(() => undefined); } catch { /* The panel may be closed. */ }
+}
+
 async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal, linkTab: (tabId: number) => boolean): Promise<unknown> {
   const currentTabId = { value: tabId };
   let checkpoint = makeSessionCheckpoint({ requestId: message.requestId, status: "running", phase: "deciding", tabId, step: 0 });
@@ -372,8 +378,10 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
   let candidateOffset = 0;
   let observationStep = 0;
   let latestPage: PageState | undefined;
+  const observationDurations = new WeakMap<PageState, number>();
   const result = await runAgentLoop({
     observe: async () => {
+      const observationStartedAt = performance.now();
       let page: PageState;
       try {
         page = await scanTab(chromeApi, currentTabId.value, message.requestId);
@@ -382,6 +390,7 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
         if (!tab.url || !isRestrictedDocumentUrl(tab.url)) throw error;
         page = makeUninspectablePage(tab.url, tab.title ?? "Página não inspecionável");
       }
+      observationDurations.set(page, performance.now() - observationStartedAt);
       latestPage = page;
       if (checkpoint.phase === "action_dispatched" || checkpoint.phase === "observing") {
         await updateCheckpoint("running", "deciding", checkpoint.step, undefined, page);
@@ -391,9 +400,14 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       return page;
     },
     decide: async (page, decisionSignal, history = []) => {
+      const mapStartedAt = performance.now();
       const { map, options } = buildJevCommandMap(message.goal, page, await listTabs(chromeApi), history.map((entry) => entry.type), candidateOffset, history);
-      return provider.chooseNextAction(map, options, decisionSignal);
+      const commandMapMs = performance.now() - mapStartedAt;
+      const decision = await provider.chooseNextAction(map, options, decisionSignal);
+      return { ...decision, commandMapMs };
     },
+    observationTimeMs: (page) => observationDurations.get(page),
+    onTrace: (step) => publishTraceStep(chromeApi, message.requestId, step),
     execute: async (action, actionId) => {
       if (action.type === "expand_candidates") {
         candidateOffset = action.nextOffset;

@@ -9,6 +9,18 @@ export interface AgentLoopStep {
   confidence?: number;
   result?: ActionResult;
   verification?: ActionVerification;
+  targetRole?: string;
+  targetFrameId?: number;
+  expectedEffect?: string;
+  observationMs?: number;
+  commandMapMs?: number;
+  callLatencyMs?: number;
+  serializationMs?: number;
+  payloadBytes?: number;
+  optionCount?: number;
+  model?: string;
+  availableActions?: string[];
+  waitMs?: number;
 }
 
 export interface AgentLoopResult {
@@ -33,6 +45,8 @@ export interface AgentLoopDriver {
   verify?(before: PageState, after: PageState, action: AgentAction, result: ActionResult): ActionVerification;
   verifyCompletion?(page: PageState, history: GoalHistoryEvent[]): { complete: boolean; reason: string };
   waitForEffect?(before: PageState, action: AgentAction, result: ActionResult, observe: () => Promise<PageState>, signal?: AbortSignal): Promise<PageState | undefined>;
+  observationTimeMs?(page: PageState): number | undefined;
+  onTrace?(step: AgentLoopStep): void;
 }
 
 export interface AgentLoopBudgets { maxDurationMs?: number; maxProviderCalls?: number; }
@@ -89,6 +103,21 @@ function isRetryableProviderError(error: unknown): boolean {
   return value.code === "PROVIDER_NETWORK_ERROR" || (value.code === "PROVIDER_HTTP_ERROR" && [429, 502, 503, 504].includes(Number(value.status)));
 }
 
+function expectedEffect(action: AgentAction): string {
+  if (action.type === "type") return "preencher o campo (valor omitido do trace)";
+  if (action.type === "select") return "alterar a seleção do controle";
+  if (action.type === "click") return "ativar o controle e observar o efeito";
+  if (action.type === "keypress") return `enviar a tecla ${action.key}`;
+  if (action.type === "scroll") return `rolar ${action.direction}`;
+  if (action.type === "navigate" || action.type === "open_tab" || action.type === "open_window") return "navegar para o destino solicitado";
+  if (action.type === "search_web") return "pesquisar na web";
+  if (action.type === "switch_tab") return "mudar para outra aba";
+  if (action.type === "close_tab") return "fechar a aba solicitada";
+  if (action.type === "go_back" || action.type === "go_forward") return "navegar pelo histórico";
+  if (action.type === "expand_candidates") return "mostrar o próximo lote de opções";
+  return action.status === "success" ? "concluir o objetivo" : "encerrar a sessão";
+}
+
 const recoverablePreDispatchCodes = new Set(["STALE_ELEMENT", "STALE_SCROLL_CONTAINER"]);
 
 /** Runs one-action-at-a-time: observe → decide → execute → observe. */
@@ -125,15 +154,26 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     if (!decision) return { status: "failed", steps, history, message: "O provider não retornou uma decisão válida." };
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     if (Date.now() - startedAt >= maxDurationMs) return { status: "max_duration", steps, history, message: `Tempo limite de ${maxDurationMs} ms atingido; decisão não executada e progresso parcial preservado.` };
+    const actionTargetRef = "target" in decision.action ? decision.action.target?.ref : undefined;
+    const targetForAction = actionTargetRef ? page.elements.find((element) => element.ref === actionTargetRef) : undefined;
     const trace: AgentLoopStep = {
       step,
       action: decision.action,
       optionId: decision.optionId,
       confidence: decision.confidence,
+      expectedEffect: expectedEffect(decision.action),
+      observationMs: driver.observationTimeMs?.(page),
+      commandMapMs: decision.commandMapMs,
+      callLatencyMs: decision.callLatencyMs,
+      serializationMs: decision.serializationMs,
+      payloadBytes: decision.payloadBytes,
+      optionCount: decision.optionCount,
+      model: decision.model,
+      availableActions: decision.availableActions,
+      targetRole: targetForAction?.role ?? targetForAction?.tag,
+      targetFrameId: targetForAction?.frameId,
     };
     const repeatedUnknownEffect = history.at(-1);
-    const actionTargetRef = "target" in decision.action ? decision.action.target?.ref : undefined;
-    const targetForAction = actionTargetRef ? page.elements.find((element) => element.ref === actionTargetRef) : undefined;
     const stableTargetLabel = targetForAction?.sensitive ? "sensitive control" : [targetForAction?.name, targetForAction?.context].filter(Boolean).join(" ") || targetForAction?.role;
     const retryKey = decision.action.type === "keypress" ? `${decision.action.type}:${decision.action.key.toLowerCase()}`
       : stableTargetLabel ? `${decision.action.type}:${stableTargetLabel.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`
@@ -143,6 +183,7 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
       return { status: "needs_help", steps, history, message: "A última ação foi enviada, mas seu efeito continua desconhecido. Não vou repeti-la sem reconciliação." };
     }
     steps.push(trace);
+    driver.onTrace?.(trace);
 
     if (decision.action.type === "finish") {
       if (decision.action.status === "success" && driver.verifyCompletion) {
@@ -154,6 +195,7 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
 
     const result = await driver.execute(decision.action, `agent_step_${step}`);
     trace.result = result;
+    driver.onTrace?.(trace);
     if (!result.ok) {
       history.push(actionHistoryEntry(page, page, decision.action, result, { ok: false, progressed: false, reason: result.error ?? "A ação falhou." }));
       const retries = result.code ? staleRetries.get(result.code) ?? 0 : 0;
@@ -176,8 +218,10 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     if (signal?.aborted) return { status: "cancelled", steps, message: "Sessão cancelada pelo usuário." };
     const observe = (): Promise<PageState> => observeWithRetry(driver, signal);
     let nextPage: PageState;
+    const waitStartedAt = performance.now();
     try {
       nextPage = await driver.waitForEffect?.(page, decision.action, result, observe, signal) ?? await observe();
+      trace.waitMs = performance.now() - waitStartedAt;
     } catch (error) {
       if (signal?.aborted) return { status: "cancelled", steps, history, message: "Sessão cancelada depois da ação; o efeito pode ser desconhecido e ela não foi repetida." };
       const uncertain = actionHistoryEntry(page, page, decision.action, result, { ok: false, progressed: false, reason: "A ação foi enviada, mas a página não pôde ser observada depois." });
@@ -187,6 +231,7 @@ export async function runAgentLoop(driver: AgentLoopDriver, maxSteps = 8, signal
     }
     const verification = driver.verify?.(page, nextPage, decision.action, result) ?? { ok: true, progressed: true, reason: "Ação executada." };
     trace.verification = verification;
+    driver.onTrace?.(trace);
     history.push(actionHistoryEntry(page, nextPage, decision.action, result, verification));
     if (history.length > 50) history.splice(0, history.length - 50);
     if (!verification.ok) return { status: "failed", steps, message: verification.reason };
