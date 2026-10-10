@@ -1,6 +1,7 @@
 import { initAgentOrchestrator } from "./orchestrator.js";
 
 const orchestrator = initAgentOrchestrator(chrome);
+void orchestrator.recoverSession().catch(() => undefined);
 
 // A API key é usada pelo service worker, não pelos content scripts.
 // Este nível restringe o storage local aos contextos confiáveis da extensão.

@@ -9,12 +9,33 @@ import { waitForPageEffect } from "./waitForEffect.js";
 import { findSpawnedChildTab, isRestrictedDocumentUrl, makeUninspectablePage, validateNavigationUrl } from "./navigation.js";
 import { aggregateFrameObservations, parseFrameScopedRef } from "./frames.js";
 import { classifyActionRisk, rebindConfirmedAction } from "./actionSafety.js";
+import { latestSessionForTab, makeSessionCheckpoint, reconcileSessionCheckpoint, type AgentSessionCheckpoint, type SessionPhase, type SessionStatus } from "./sessionLifecycle.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
 const tabRuns = new TabRunRegistry();
 const releasesByRequest = new Map<string, () => void>();
 const pendingConfirmations = new Map<string, { requestId: string; finish: (approved: boolean) => void }>();
+const SESSION_CHECKPOINT_KEY = "agentSessionCheckpoints";
+let checkpointWriteQueue = Promise.resolve();
+
+async function saveSessionCheckpoint(chromeApi: typeof chrome, checkpoint: AgentSessionCheckpoint): Promise<void> {
+  checkpointWriteQueue = checkpointWriteQueue.catch(() => undefined).then(async () => {
+    const stored = await chromeApi.storage.local.get(SESSION_CHECKPOINT_KEY);
+    const sessions = stored[SESSION_CHECKPOINT_KEY] && typeof stored[SESSION_CHECKPOINT_KEY] === "object"
+      ? stored[SESSION_CHECKPOINT_KEY] as Record<string, AgentSessionCheckpoint>
+      : {};
+    sessions[checkpoint.requestId] = checkpoint;
+    const recent = Object.entries(sessions).sort((a, b) => b[1].updatedAt - a[1].updatedAt).slice(0, 20);
+    await chromeApi.storage.local.set({ [SESSION_CHECKPOINT_KEY]: Object.fromEntries(recent) });
+  });
+  await checkpointWriteQueue;
+  try { await chromeApi.runtime.sendMessage({ type: "AGENT_SESSION_UPDATED", data: checkpoint }); } catch { /* The panel may be closed. */ }
+}
+
+function isGetAgentSessionMessage(value: unknown): value is { type: "GET_AGENT_SESSION" } {
+  return typeof value === "object" && value !== null && (value as { type?: unknown }).type === "GET_AGENT_SESSION";
+}
 
 class TabRunBusyError extends Error {
   readonly code = "TAB_SESSION_BUSY";
@@ -324,7 +345,19 @@ function publishPageState(chromeApi: typeof chrome, requestId: string, step: num
 }
 
 async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal, linkTab: (tabId: number) => boolean): Promise<unknown> {
-  if (isContinuousScrollGoal(message.goal)) return runContinuousScroll(chromeApi, tabId, message, signal);
+  const currentTabId = { value: tabId };
+  let checkpoint = makeSessionCheckpoint({ requestId: message.requestId, status: "running", phase: "deciding", tabId, step: 0 });
+  await saveSessionCheckpoint(chromeApi, checkpoint);
+  const updateCheckpoint = async (status: SessionStatus, phase: SessionPhase, step: number, actionType?: string, page?: PageState): Promise<void> => {
+    checkpoint = makeSessionCheckpoint({ requestId: message.requestId, status, phase, tabId: currentTabId.value, step, actionType, pageUrl: page?.url, pageFingerprint: page?.fingerprint });
+    await saveSessionCheckpoint(chromeApi, checkpoint);
+  };
+  if (isContinuousScrollGoal(message.goal)) {
+    const result = await runContinuousScroll(chromeApi, tabId, message, signal, updateCheckpoint) as { status: string; steps?: unknown[] };
+    const status: SessionStatus = result.status === "cancelled" ? "cancelled" : result.status === "success" ? "completed" : "failed";
+    await updateCheckpoint(status, checkpoint.phase, result.steps?.length ?? checkpoint.step, undefined);
+    return result;
+  }
   const config = await loadProviderConfig(chromeApi);
   const budgetSettings = await chromeApi.storage.local.get("agentBudgets");
   const storedBudgets = budgetSettings.agentBudgets as { maxSteps?: unknown; maxDurationMs?: unknown; maxProviderCalls?: unknown } | undefined;
@@ -336,11 +369,10 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
     maxProviderCalls: configuredInteger(storedBudgets?.maxProviderCalls, 8, 1, 50),
   };
   const provider = new JevProvider(config);
-  const currentTabId = { value: tabId };
   let candidateOffset = 0;
   let observationStep = 0;
   let latestPage: PageState | undefined;
-  return runAgentLoop({
+  const result = await runAgentLoop({
     observe: async () => {
       let page: PageState;
       try {
@@ -351,6 +383,9 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
         page = makeUninspectablePage(tab.url, tab.title ?? "Página não inspecionável");
       }
       latestPage = page;
+      if (checkpoint.phase === "action_dispatched" || checkpoint.phase === "observing") {
+        await updateCheckpoint("running", "deciding", checkpoint.step, undefined, page);
+      }
       observationStep += 1;
       publishPageState(chromeApi, message.requestId, observationStep, currentTabId.value, page);
       return page;
@@ -371,6 +406,7 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
         if (risk === "confirmation") {
           const confirmedPage = latestPage;
           const confirmedTabId = currentTabId.value;
+          await updateCheckpoint("awaiting_confirmation", "awaiting_confirmation", observationStep, action.type, confirmedPage);
           const approved = await requestActionConfirmation(chromeApi, message.requestId, action, confirmedPage, signal);
           if (approved) {
             const currentPage = await scanTab(chromeApi, currentTabId.value, message.requestId);
@@ -379,12 +415,15 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
             executableAction = rebound;
             latestPage = currentPage;
           }
-        if (!approved && signal.aborted) return { ok: true, actionId, changed: false, status: "success" };
-        if (!approved) return { ok: false, actionId, code: "USER_CONFIRMATION_REQUIRED", error: "A ação foi cancelada ou a confirmação expirou." };
+          if (!approved) await updateCheckpoint("running", "deciding", observationStep, undefined, confirmedPage);
+          if (!approved && signal.aborted) return { ok: true, actionId, changed: false, status: "success" };
+          if (!approved) return { ok: false, actionId, code: "USER_CONFIRMATION_REQUIRED", error: "A ação foi cancelada ou a confirmação expirou." };
         }
       }
       if (["navigate", "search_web", "open_tab", "open_window", "switch_tab", "close_tab", "go_back", "go_forward"].includes(executableAction.type)) {
+        await updateCheckpoint("running", "dispatching", observationStep, executableAction.type, latestPage);
         const result = await executeBrowserAction(chromeApi, executableAction as import("./types.js").BrowserAction, currentTabId, signal, linkTab);
+        await updateCheckpoint("running", result.ok ? "action_dispatched" : "deciding", observationStep, result.ok ? executableAction.type : undefined, latestPage);
         if (result.ok && ["open_tab", "open_window", "switch_tab", "close_tab"].includes(executableAction.type) && !linkTab(currentTabId.value)) {
           return { ok: false, actionId, code: "TAB_SESSION_BUSY", error: "A aba de destino já está sendo controlada por outra sessão." };
         }
@@ -395,7 +434,9 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
         ? new Set((await chromeApi.tabs.query({})).flatMap((tab) => tab.id === undefined ? [] : [tab.id]))
         : undefined;
       const routed = routeFrameAction(executableAction as import("./types.js").BrowserAction, latestPage ?? await scanTab(chromeApi, currentTabId.value, message.requestId));
+      await updateCheckpoint("running", "dispatching", observationStep, executableAction.type, latestPage);
       const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId, action: routed.action }, { frameId: routed.frameId }) as ActionResult;
+      await updateCheckpoint("running", result.dispatched || result.ok ? "action_dispatched" : "deciding", observationStep, result.dispatched || result.ok ? executableAction.type : undefined, latestPage);
       if (knownTabIds && result.dispatched) {
         const tabs = await chromeApi.tabs.query({});
         const childTabId = findSpawnedChildTab(tabs.flatMap((tab) => tab.id === undefined ? [] : [{ id: tab.id, openerTabId: tab.openerTabId }]), knownTabIds, currentTabId.value);
@@ -429,9 +470,16 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       return { complete: true, reason: "A conclusão foi apoiada por evidência observada." };
     },
   }, budgets.maxSteps, signal, budgets);
+  const effectMayBePending = ["action_dispatched", "observing", "dispatching"].includes(checkpoint.phase);
+  const finalStatus: SessionStatus = effectMayBePending && (result.status === "needs_help" || result.status === "cancelled") ? "needs_reconciliation"
+    : result.status === "success" ? "completed"
+      : result.status === "cancelled" ? "cancelled"
+        : "failed";
+  await updateCheckpoint(finalStatus, checkpoint.phase, result.steps.length, finalStatus === "needs_reconciliation" ? checkpoint.actionType : undefined, latestPage);
+  return result;
 }
 
-async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal): Promise<unknown> {
+async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, message: RunAgentMessage, signal: AbortSignal, checkpoint: (status: SessionStatus, phase: SessionPhase, step: number, actionType?: string, page?: PageState) => Promise<void>): Promise<unknown> {
   const currentTabId = { value: tabId };
   const direction = /\b(esquerda|left|horizontal)\b/i.test(message.goal) ? "left"
     : /\b(direita|right)\b/i.test(message.goal) ? "right"
@@ -442,6 +490,7 @@ async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, mess
     const page = await scanTab(chromeApi, currentTabId.value, message.requestId);
     if (signal.aborted) return { status: "cancelled", steps, message: "Rolagem contínua interrompida pelo usuário." };
     step += 1;
+    await checkpoint("running", "deciding", step, undefined, page);
     publishPageState(chromeApi, message.requestId, step, currentTabId.value, page);
     const namedContainer = page.scrollContainers?.find((container) => {
       const label = `${container.label} ${container.context ?? ""}`.toLowerCase();
@@ -450,7 +499,9 @@ async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, mess
     const action = { type: "scroll", direction, amount: "viewport", target: namedContainer ? { ref: namedContainer.ref } : undefined } as const;
     if (signal.aborted) return { status: "cancelled", steps, message: "Rolagem contínua interrompida pelo usuário." };
     const routed = routeFrameAction(action, page);
+    await checkpoint("running", "dispatching", step, "scroll", page);
     const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId: `continuous_scroll_${step}`, action: routed.action }, { frameId: routed.frameId }) as ActionResult;
+    await checkpoint("running", result.ok ? "action_dispatched" : "deciding", step, result.ok ? "scroll" : undefined, page);
     steps.push({ step, action, result });
     if (!result.ok) return { status: "failed", steps, message: result.error ?? "Não foi possível continuar rolando." };
     if (steps.length > 100) steps.shift();
@@ -462,7 +513,27 @@ async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, mess
 
 export function initAgentOrchestrator(chromeApi: typeof chrome) {
   return {
+    async recoverSession(): Promise<void> {
+      const stored = await chromeApi.storage.local.get(SESSION_CHECKPOINT_KEY);
+      const sessions = stored[SESSION_CHECKPOINT_KEY] && typeof stored[SESSION_CHECKPOINT_KEY] === "object"
+        ? stored[SESSION_CHECKPOINT_KEY] as Record<string, AgentSessionCheckpoint>
+        : {};
+      await Promise.all(Object.values(sessions).map(async (checkpoint) => {
+        const recovered = reconcileSessionCheckpoint(checkpoint, activeRuns.has(checkpoint.requestId));
+        if (recovered !== checkpoint) await saveSessionCheckpoint(chromeApi, recovered);
+      }));
+    },
     handleMessage(message: unknown, sender: chrome.runtime.MessageSender, sendResponse: (response: unknown) => void): void {
+      if (isGetAgentSessionMessage(message)) {
+        void this.recoverSession().then(async () => {
+          const stored = await chromeApi.storage.local.get(SESSION_CHECKPOINT_KEY);
+          const sessions = stored[SESSION_CHECKPOINT_KEY] as Record<string, AgentSessionCheckpoint> | undefined;
+          const tabId = await resolveTabId(chromeApi, sender);
+          const checkpoint = latestSessionForTab(Object.values(sessions ?? {}), tabId);
+          sendResponse({ ok: true, data: checkpoint?.tabId === tabId ? checkpoint : null });
+        }).catch(() => sendResponse({ ok: false, code: "SESSION_STATUS_UNAVAILABLE", error: "Não foi possível recuperar o estado da sessão." }));
+        return;
+      }
       if (isResolveActionConfirmationMessage(message)) {
         const expectedUrl = chromeApi.runtime.getURL("sidepanel.html");
         if (sender.url !== expectedUrl) {
@@ -513,9 +584,25 @@ export function initAgentOrchestrator(chromeApi: typeof chrome) {
             return true;
           };
           return runAgent(chromeApi, tabId, message, controller.signal, linkTab);
-        }).then((data) => sendResponse({ ok: true, data }))
-          .catch((error: unknown) => {
+        }).then(async (data) => {
+          const stored = await chromeApi.storage.local.get(SESSION_CHECKPOINT_KEY);
+          const sessions = stored[SESSION_CHECKPOINT_KEY] as Record<string, AgentSessionCheckpoint> | undefined;
+          const checkpoint = sessions?.[message.requestId];
+          if (checkpoint?.requestId === message.requestId && checkpoint.status === "running") {
+            const status: SessionStatus = checkpoint.phase === "dispatching" || checkpoint.phase === "action_dispatched" || checkpoint.phase === "observing" ? "needs_reconciliation" : "failed";
+            await saveSessionCheckpoint(chromeApi, { ...checkpoint, status, updatedAt: Date.now() });
+          }
+          sendResponse({ ok: true, data });
+        })
+          .catch(async (error: unknown) => {
             if (controller.signal.aborted) { sendResponse({ ok: true, data: { status: "cancelled", steps: [], message: "Sessão cancelada pelo usuário." } }); return; }
+            const stored = await chromeApi.storage.local.get(SESSION_CHECKPOINT_KEY);
+            const sessions = stored[SESSION_CHECKPOINT_KEY] as Record<string, AgentSessionCheckpoint> | undefined;
+            const checkpoint = sessions?.[message.requestId];
+            if (checkpoint?.requestId === message.requestId && ["running", "awaiting_confirmation"].includes(checkpoint.status)) {
+              const status: SessionStatus = checkpoint.phase === "dispatching" || checkpoint.phase === "action_dispatched" || checkpoint.phase === "observing" ? "needs_reconciliation" : "failed";
+              await saveSessionCheckpoint(chromeApi, { ...checkpoint, status, updatedAt: Date.now() });
+            }
             const code = error instanceof JevProviderError ? error.code
               : error instanceof TabRunBusyError ? error.code
               : error instanceof Error && error.message.includes("target tab was closed") ? "TAB_UNAVAILABLE"

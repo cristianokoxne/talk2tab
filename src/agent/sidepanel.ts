@@ -1,5 +1,6 @@
 import type { PageState } from "./types.js";
 import { startChromeSpeechRecognition, type SpeechRecognitionRecorder } from "./voice/chromeSpeechRecognition.js";
+import { classifyVoiceCommand, isDuplicateVoiceSegment, VoiceGoalQueue, type AgentSessionCheckpoint } from "./sessionLifecycle.js";
 import { createIcons, icons } from "lucide";
 
 interface ScanResponse {
@@ -86,12 +87,14 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     const messageType = (message as { type?: unknown }).type;
     if (messageType === "AGENT_PAGE_STATE") {
       const update = message as AgentPageStateMessage;
+      if (update.requestId !== activeRequestId) return;
       renderPageMap(update.data, `Pagemap atualizado · passo ${update.step} · ${update.data.elements.length} refs`);
       return;
     }
     if (messageType === "AGENT_ACTION_CONFIRMATION_REQUIRED") {
       const confirmation = message as { confirmationId?: string; requestId?: string; summary?: string };
       if (typeof confirmation.confirmationId !== "string" || typeof confirmation.requestId !== "string") return;
+      if (confirmation.requestId !== activeRequestId) return;
       pendingConfirmation = { confirmationId: confirmation.confirmationId, requestId: confirmation.requestId };
       confirmationSummary.textContent = confirmation.summary ?? "O agente quer executar uma ação que pode alterar ou enviar dados.";
       confirmationModal.hidden = false;
@@ -152,9 +155,42 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   clickButton.addEventListener("click", () => sendAction({ type: "click", target: { ref: actionRef.value.trim() } }));
   typeButton.addEventListener("click", () => sendAction({ type: "type", target: { ref: actionRef.value.trim() }, text: actionText.value, replace: true }));
   let activeRequestId: string | undefined;
-  const queuedVoiceGoals: string[] = [];
+  const queuedVoiceGoals = new VoiceGoalQueue();
+
+  const acceptSessionCheckpoint = (checkpoint: AgentSessionCheckpoint | null | undefined): void => {
+    if (!checkpoint) return;
+    const active = checkpoint.status === "running" || checkpoint.status === "awaiting_confirmation";
+    if (active) {
+      activeRequestId = checkpoint.requestId;
+      agentRun.disabled = true;
+      agentCancel.disabled = false;
+      agentResult.textContent = checkpoint.status === "awaiting_confirmation" ? "Aguardando confirmação…" : `Sessão em andamento · passo ${checkpoint.step}.`;
+      return;
+    }
+    if (activeRequestId === checkpoint.requestId) {
+      activeRequestId = undefined;
+      agentRun.disabled = false;
+      agentCancel.disabled = true;
+      window.setTimeout(dispatchQueuedVoiceGoal, 0);
+    }
+    if (checkpoint.status === "needs_reconciliation") agentResult.textContent = "Uma ação pode ter sido executada antes da interrupção. Confira a página antes de iniciar outra tarefa.";
+    else if (checkpoint.status === "interrupted") agentResult.textContent = "A sessão foi interrompida antes de enviar uma ação. Você pode iniciar um novo comando.";
+    else if (checkpoint.status === "completed") agentResult.textContent = "A última sessão terminou.";
+    else if (checkpoint.status === "cancelled") agentResult.textContent = "A última sessão foi cancelada.";
+    else if (checkpoint.status === "failed") agentResult.textContent = "A última sessão falhou. Confira a página antes de tentar novamente.";
+  };
+
+  chromeApi.runtime.onMessage.addListener((message: unknown) => {
+    if (typeof message !== "object" || message === null || (message as { type?: unknown }).type !== "AGENT_SESSION_UPDATED") return;
+    const checkpoint = (message as { data?: AgentSessionCheckpoint }).data;
+    if (checkpoint && activeRequestId === checkpoint.requestId) acceptSessionCheckpoint(checkpoint);
+  });
+  chromeApi.runtime.sendMessage({ type: "GET_AGENT_SESSION" }, (response: { data?: AgentSessionCheckpoint | null } | undefined) => {
+    if (!chromeApi.runtime.lastError) acceptSessionCheckpoint(response?.data);
+  });
+
   const dispatchQueuedVoiceGoal = (): void => {
-    if (activeRequestId || queuedVoiceGoals.length === 0) return;
+    if (activeRequestId || queuedVoiceGoals.size === 0) return;
     const nextGoal = queuedVoiceGoals.shift();
     if (!nextGoal) return;
     agentGoal.value = nextGoal;
@@ -164,21 +200,30 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   const enqueueVoiceGoal = (goal: string): void => {
     const normalized = goal.trim();
     if (!normalized) return;
+    const queued = queuedVoiceGoals.enqueue(normalized);
+    if (queued.kind === "cancel") {
+      queuedVoiceGoals.clear();
+      if (activeRequestId) agentCancel.click();
+      else agentResult.textContent = "Comandos de voz na fila cancelados.";
+      return;
+    }
+    if (!queued.queued) { voiceModeStatus.textContent = "Trecho repetido ignorado."; return; }
     if (agentGoal.value.trim() === normalized) agentGoal.value = "";
-    queuedVoiceGoals.push(normalized);
-    if (activeRequestId) agentResult.textContent = `Comando de voz na fila (${queuedVoiceGoals.length}).`;
+    if (activeRequestId) agentResult.textContent = `Comando de voz na fila (${queuedVoiceGoals.size}).`;
     dispatchQueuedVoiceGoal();
   };
   agentRun.addEventListener("click", () => {
     const goal = agentGoal.value.trim();
     if (!goal) { agentResult.textContent = "Informe um objetivo."; return; }
-    activeRequestId = requestId();
+    const runRequestId = requestId();
+    activeRequestId = runRequestId;
     agentRun.disabled = true;
     agentCancel.disabled = false;
     const cancelLabel = agentCancel.querySelector("span");
     if (cancelLabel) cancelLabel.textContent = /\b(scrolle|scroll|role|rolar|rolando)\b/i.test(goal) && /\b(devagar|lentamente|continuamente|at[eé]\s+eu\s+mandar\s+parar)\b/i.test(goal) ? "Parar rolagem" : "Cancelar";
     agentResult.textContent = "Consultando Jev…";
-    chromeApi.runtime.sendMessage({ type: "RUN_AGENT", requestId: activeRequestId, goal }, (response: { ok?: boolean; data?: { status?: string; steps?: unknown[]; message?: string }; error?: string } | undefined) => {
+    chromeApi.runtime.sendMessage({ type: "RUN_AGENT", requestId: runRequestId, goal }, (response: { ok?: boolean; data?: { status?: string; steps?: unknown[]; message?: string }; error?: string } | undefined) => {
+      if (activeRequestId !== runRequestId) return;
       agentRun.disabled = false;
       agentCancel.disabled = true;
       activeRequestId = undefined;
@@ -195,7 +240,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
   agentCancel.addEventListener("click", () => {
     if (!activeRequestId) return;
     const requestToCancel = activeRequestId;
-    queuedVoiceGoals.length = 0;
+    queuedVoiceGoals.clear();
     if (pendingConfirmation?.requestId === requestToCancel) resolveActionConfirmation(false);
     agentCancel.disabled = true;
     agentResult.textContent = "Cancelando…";
@@ -312,7 +357,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
     pendingVoiceSegments.length = 0;
     pendingVoiceSince = undefined;
     lastVoiceFinalAt = undefined;
-    if (!activeRequestId && queuedVoiceGoals.length === 0) agentResult.textContent = "Trecho curto ignorado; fale um comando mais completo.";
+    if (!activeRequestId && queuedVoiceGoals.size === 0) agentResult.textContent = "Trecho curto ignorado; fale um comando mais completo.";
   };
   const startSpeech = (): void => {
     voiceStart.disabled = true;
@@ -333,7 +378,13 @@ export function initSidePanel(chromeApi: typeof chrome): void {
         }
       }, (segment) => {
         const normalized = normalizeSpeech(segment);
-        if (!normalized) return;
+        if (!normalized || isDuplicateVoiceSegment(pendingVoiceSegments, normalized)) return;
+        if (classifyVoiceCommand(normalized) === "cancel") {
+          pendingVoiceSegments.length = 0;
+          pendingVoiceSince = undefined;
+          enqueueVoiceGoal(normalized);
+          return;
+        }
         pendingVoiceSegments.push(normalized);
         agentGoal.value = normalizeSpeech(pendingVoiceSegments.join(" "));
         voiceModeStatus.textContent = "Comando reconhecido";
@@ -351,7 +402,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
           voiceStatus.classList.remove("active");
           voiceModeStatus.textContent = statusText;
         }
-        if (!activeRequestId && queuedVoiceGoals.length === 0) agentResult.textContent = statusText;
+        if (!activeRequestId && queuedVoiceGoals.size === 0) agentResult.textContent = statusText;
       }, () => {
         clearVoiceTimers();
         voiceRecorder = undefined;
@@ -387,7 +438,7 @@ export function initSidePanel(chromeApi: typeof chrome): void {
         setVoiceMode(false);
         finalizeVoiceBuffer();
       }
-      if (!activeRequestId && queuedVoiceGoals.length === 0 && !text) agentResult.textContent = "Nenhuma fala suficiente para enviar.";
+      if (!activeRequestId && queuedVoiceGoals.size === 0 && !text) agentResult.textContent = "Nenhuma fala suficiente para enviar.";
     }).catch((error: unknown) => {
       clearVoiceTimers();
       voiceRecorder = undefined;
