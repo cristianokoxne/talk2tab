@@ -4,6 +4,19 @@ import { JSDOM } from "jsdom";
 
 const { ElementRegistry } = await import("../dist/agent/registry/elementRegistry.js");
 const { scanPage } = await import("../dist/agent/scanner/pageScanner.js");
+const { isElementVisible } = await import("../dist/agent/scanner/visibility.js");
+
+test("viewport root overflow does not clip a visible site header control", () => {
+  const dom = new JSDOM(`<header><input id="search" placeholder="Pesquisar"></header>`, { url: "https://youtube.com", pretendToBeVisual: true });
+  const { document, window } = dom.window;
+  Object.defineProperties(window, { innerWidth: { value: 1280 }, innerHeight: { value: 720 } });
+  document.body.style.overflowY = "auto";
+  document.body.getBoundingClientRect = () => ({ x: 0, y: 56, width: 1280, height: 2000, top: 56, right: 1280, bottom: 2056, left: 0, toJSON: () => ({}) });
+  document.querySelector("header").getBoundingClientRect = () => ({ x: 0, y: 0, width: 1280, height: 56, top: 0, right: 1280, bottom: 56, left: 0, toJSON: () => ({}) });
+  document.querySelector("input").getBoundingClientRect = () => ({ x: 320, y: 16, width: 460, height: 24, top: 16, right: 780, bottom: 40, left: 320, toJSON: () => ({}) });
+
+  assert.equal(isElementVisible(document.querySelector("input"), window), true);
+});
 
 test("collects visible interactive controls with accessible names and no sensitive values", () => {
   const dom = new JSDOM(`

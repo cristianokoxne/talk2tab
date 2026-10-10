@@ -130,8 +130,12 @@ npm run build       # compila TypeScript e prepara dist/
 npm run typecheck   # verifica tipos sem gerar arquivos
 npm run lint        # executa o ESLint
 npm test            # build + testes automatizados
+npm run test:e2e    # Chrome/Chromium com páginas de teste locais
+npm run test:live    # Chrome/Chromium real contra busca e vídeo no YouTube
 npm run test:watch  # testes em modo watch
 ```
+
+`npm run test:live` precisa de conexão com a internet e abre um perfil temporário do Chromium com a extensão carregada. O teste acessa uma busca pública no YouTube, exige refs para o campo de busca e para um vídeo e clica no primeiro vídeo para confirmar que a navegação chegou a `/watch`. Ele não usa a chave do Jev nem o perfil normal do navegador.
 
 ## Como contribuir
 

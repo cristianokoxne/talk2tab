@@ -11,6 +11,7 @@ export function isElementVisible(element: HTMLElement, viewport: Pick<Window, "i
   let right = Math.min(rect.right, viewport.innerWidth);
   let bottom = Math.min(rect.bottom, viewport.innerHeight);
   for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    if (ancestor === element.ownerDocument.body || ancestor === element.ownerDocument.documentElement) continue;
     const ancestorStyle = view.getComputedStyle(ancestor);
     if (ancestorStyle.display === "none" || ancestorStyle.visibility === "hidden" || ancestor.inert || ancestor.getAttribute("aria-hidden") === "true") return false;
     if (ancestorStyle.opacity === "0") return false;

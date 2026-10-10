@@ -9,6 +9,7 @@
     "lint": "eslint src --ext .ts",
     "test": "npm run build && node --test tests/**/*.test.mjs",
     "test:e2e": "npm run build && node --test tests/e2e/*.test.mjs",
+    "test:live": "npm run build && node --test tests/live/*.test.mjs",
     "bench:replay": "node scripts/run-benchmark.mjs",
     "bench:scanner": "npm run build && node scripts/bench-scanner.mjs",
     "bench:jev": "node scripts/run-jev-evaluation.mjs --run",
