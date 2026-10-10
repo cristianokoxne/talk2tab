@@ -1,0 +1,3559 @@
+{
+  "generatedAt": "2026-10-10T00:46:47.070Z",
+  "adapterVersion": "2",
+  "requestedModel": "jev-latest",
+  "returnedModels": [
+    "jev-1.13.0"
+  ],
+  "design": {
+    "cases": 30,
+    "holdoutCases": 30,
+    "templates": [
+      "scroll",
+      "tabs",
+      "ambiguous"
+    ],
+    "modes": [
+      "structural",
+      "history"
+    ],
+    "repetitions": 3,
+    "workers": 4,
+    "reservedOnly": true
+  },
+  "summary": {
+    "structural": {
+      "total": 90,
+      "valid": 90,
+      "invalid": 0,
+      "candidateMissing": 0,
+      "correct": 90,
+      "accuracy": 1,
+      "meanLatencyMs": 279,
+      "meanRequestBytes": 1159,
+      "creditObservations": 0,
+      "creditsReported": null
+    },
+    "history": {
+      "total": 90,
+      "valid": 90,
+      "invalid": 0,
+      "candidateMissing": 0,
+      "correct": 90,
+      "accuracy": 1,
+      "meanLatencyMs": 276,
+      "meanRequestBytes": 1314,
+      "creditObservations": 0,
+      "creditsReported": null
+    }
+  },
+  "holdout": {
+    "structural": {
+      "total": 90,
+      "valid": 90,
+      "invalid": 0,
+      "candidateMissing": 0,
+      "correct": 90,
+      "accuracy": 1,
+      "meanLatencyMs": 279,
+      "meanRequestBytes": 1159,
+      "creditObservations": 0,
+      "creditsReported": null
+    },
+    "history": {
+      "total": 90,
+      "valid": 90,
+      "invalid": 0,
+      "candidateMissing": 0,
+      "correct": 90,
+      "accuracy": 1,
+      "meanLatencyMs": 276,
+      "meanRequestBytes": 1314,
+      "creditObservations": 0,
+      "creditsReported": null
+    }
+  },
+  "errorCount": 0,
+  "results": [
+    {
+      "caseId": "scroll-01",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 311,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-01",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 313,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-01",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 339,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-01",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 366,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-01",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-02",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 262,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-01",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 297,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-02",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 243,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-02",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-02",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 250,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-02",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 264,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-02",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 275,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-03",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 249,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-03",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 273,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-03",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-03",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-03",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 249,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-03",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 276,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-04",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 288,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-04",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 272,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-04",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 260,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-04",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 295,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-04",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 288,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-04",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 385,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-05",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 261,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-05",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 257,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-05",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 254,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-05",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 298,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-05",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 252,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-05",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 265,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-06",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 244,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-06",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 328,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-06",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 260,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-06",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 260,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-06",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 301,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-06",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 335,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-07",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 279,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-07",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-07",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 287,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-07",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 336,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-07",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-08",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 253,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-07",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 287,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-08",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 263,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-08",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 248,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-08",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 309,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-08",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-09",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 255,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-08",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 302,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-09",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 259,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-09",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 292,
+      "requestBytes": 1242,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-09",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 259,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-10",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 265,
+      "requestBytes": 1253,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-09",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 305,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-09",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 300,
+      "requestBytes": 1396,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-10",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 307,
+      "requestBytes": 1253,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-10",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 249,
+      "requestBytes": 1407,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-10",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 276,
+      "requestBytes": 1253,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-10",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 280,
+      "requestBytes": 1407,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "scroll-10",
+      "template": "scroll",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_3",
+      "acceptable": [
+        "option_3"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 270,
+      "requestBytes": 1407,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-01",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-01",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 279,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-01",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 295,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-01",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 276,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-01",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 304,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-01",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-02",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 325,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-02",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 280,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-02",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 269,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-02",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 331,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-02",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 286,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-02",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-03",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 278,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-03",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 250,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-03",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 278,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-03",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 278,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-03",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 242,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-03",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 268,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-04",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 280,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-04",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 256,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-04",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 270,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-04",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 298,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-04",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 270,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-04",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 364,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-05",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 284,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-05",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 287,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-05",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 252,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-05",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 263,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-05",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-05",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 270,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-06",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-06",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-06",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 229,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-06",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 269,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-06",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 251,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-06",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 270,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-07",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 285,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-07",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 296,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-07",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 267,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-07",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 272,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-07",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 285,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-07",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 303,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-08",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 301,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-08",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 275,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-08",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 248,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-08",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 280,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-08",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 261,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-09",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 245,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-08",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 314,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-09",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-09",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-09",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 298,
+      "requestBytes": 1135,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-09",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 342,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-09",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 281,
+      "requestBytes": 1294,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-10",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 270,
+      "requestBytes": 1146,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-10",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 302,
+      "requestBytes": 1146,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-10",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 247,
+      "requestBytes": 1146,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-10",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 275,
+      "requestBytes": 1305,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-10",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 244,
+      "requestBytes": 1305,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "tabs-10",
+      "template": "tabs",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_4",
+      "acceptable": [
+        "option_4"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 279,
+      "requestBytes": 1305,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-01",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 249,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-01",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 278,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-01",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 284,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-01",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 262,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-01",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 300,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-01",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 494,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-02",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-02",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 288,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-02",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 306,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-02",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 322,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-02",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 265,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-02",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 287,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-03",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 242,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-03",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 263,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-03",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 272,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-03",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 370,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-03",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-03",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 249,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-04",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 268,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-04",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-04",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 273,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-04",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 254,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-04",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 306,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-04",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 291,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-05",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-05",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-05",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 276,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-05",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 279,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-05",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 245,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-05",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 257,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-06",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 273,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-06",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 268,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-06",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 264,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-06",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 250,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-06",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 255,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-06",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 264,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-07",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-07",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 277,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-07",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 269,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-07",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 279,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-07",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 247,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-07",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 253,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-08",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 258,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-08",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 302,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-08",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 252,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-08",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 260,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-08",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 287,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-08",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 269,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-09",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 259,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-09",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 249,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-09",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 277,
+      "requestBytes": 1098,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-09",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 269,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-09",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 275,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-09",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 250,
+      "requestBytes": 1250,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-10",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 274,
+      "requestBytes": 1109,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-10",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 255,
+      "requestBytes": 1109,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-10",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "structural",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 272,
+      "requestBytes": 1109,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-10",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 0,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 266,
+      "requestBytes": 1261,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-10",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 1,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 261,
+      "requestBytes": 1261,
+      "credits": null,
+      "requestId": null
+    },
+    {
+      "caseId": "ambiguous-10",
+      "template": "ambiguous",
+      "split": "holdout",
+      "mode": "history",
+      "repetition": 2,
+      "status": "ok",
+      "choice": "option_5",
+      "acceptable": [
+        "option_4",
+        "option_5"
+      ],
+      "candidatePresent": true,
+      "correct": true,
+      "modelReturned": "jev-1.13.0",
+      "latencyMs": 285,
+      "requestBytes": 1261,
+      "credits": null,
+      "requestId": null
+    }
+  ]
+}

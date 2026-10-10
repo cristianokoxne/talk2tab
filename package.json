@@ -12,6 +12,7 @@
     "bench:replay": "node scripts/run-benchmark.mjs",
     "bench:scanner": "npm run build && node scripts/bench-scanner.mjs",
     "bench:jev": "node scripts/run-jev-evaluation.mjs --run",
+    "bench:jev:holdout": "node scripts/run-jev-evaluation.mjs --reserved-only --run",
     "test:watch": "node --test --watch tests/**/*.test.mjs"
   },
   "keywords": [

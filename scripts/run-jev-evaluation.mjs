@@ -30,21 +30,23 @@ if (!model) {
   console.error(JSON.stringify({ requestedModel, availableJevModels: jevModels.map(({ name, displayName, pricing, limits }) => ({ name, displayName, pricing, limits })) }, null, 2));
   process.exit(2);
 }
-console.log(JSON.stringify({ catalog: "available", model: model.name, pricing: model.pricing, limits: model.limits, cases: evaluationCases.length, plannedRequests: evaluationCases.length * 3 * 3 }, null, 2));
+const reservedOnly = process.argv.includes("--reserved-only");
+const selectedCases = reservedOnly ? evaluationCases.filter(({ split }) => split === "holdout") : evaluationCases;
+const modes = reservedOnly ? ["structural", "history"] : ["baseline", "structural", "history"];
+console.log(JSON.stringify({ catalog: "available", model: model.name, pricing: model.pricing, limits: model.limits, cases: selectedCases.length, modes, repetitions: 3, plannedRequests: selectedCases.length * modes.length * 3 }, null, 2));
 if (!process.argv.includes("--run")) process.exit(0);
 
-const modes = ["baseline", "structural", "history"];
 const repetitions = 3;
 const results = [];
 let cursor = 0;
 const workerCount = 4;
 async function worker() {
-  while (cursor < evaluationCases.length * modes.length * repetitions) {
+  while (cursor < selectedCases.length * modes.length * repetitions) {
     const taskIndex = cursor++;
     const repetition = taskIndex % repetitions;
     const modeIndex = Math.floor(taskIndex / repetitions) % modes.length;
     const caseIndex = Math.floor(taskIndex / (repetitions * modes.length));
-    const scenario = evaluationCases[caseIndex];
+    const scenario = selectedCases[caseIndex];
     const mode = modes[modeIndex];
     const state = mode === "baseline"
       ? { objective: scenario.objective, controls: scenario.controls.map(({ id, role, name }) => ({ id, role, name })) }
@@ -112,13 +114,14 @@ const generatedAt = new Date().toISOString();
 const report = {
   generatedAt, adapterVersion: "2", requestedModel: model.name,
   returnedModels: [...new Set(results.map(({ modelReturned }) => modelReturned).filter(Boolean))],
-  design: { cases: evaluationCases.length, holdoutCases: evaluationCases.filter(({ split }) => split === "holdout").length, templates: [...new Set(evaluationCases.map(({ template }) => template))], modes, repetitions, workers: workerCount },
+  design: { cases: selectedCases.length, holdoutCases: selectedCases.filter(({ split }) => split === "holdout").length, templates: [...new Set(selectedCases.map(({ template }) => template))], modes, repetitions, workers: workerCount, reservedOnly },
   summary: Object.fromEntries(modes.map((mode) => [mode, summarize(results.filter((entry) => entry.mode === mode))])),
   holdout: Object.fromEntries(modes.map((mode) => [mode, summarize(results.filter((entry) => entry.mode === mode && entry.split === "holdout"))])),
   errorCount: results.filter((entry) => entry.status !== "ok").length,
   results,
 };
-const reportPath = `docs/validation/E06-results-${generatedAt.slice(0, 10)}.json`;
+const reportStage = reservedOnly ? "E19-jev" : "E06";
+const reportPath = `docs/validation/${reportStage}-results-${generatedAt.slice(0, 10)}.json`;
 await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, { flag: "wx" });
 console.log(JSON.stringify({ reportPath, summary: report.summary, holdout: report.holdout, errorCount: report.errorCount }, null, 2));
 if (Object.values(report.holdout).some((metrics) => metrics.accuracy === null || metrics.accuracy < 0.9) || report.errorCount > 0) process.exitCode = 1;
