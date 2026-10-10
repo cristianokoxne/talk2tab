@@ -108,6 +108,31 @@ function isSearchSubmitControl(element: ElementRef): boolean {
   return ["pesquisa", "pesquisar", "buscar", "busca", "search", "submit", "go"].some((term) => label.includes(term));
 }
 
+function searchQueryObserved(page: PageState, goalPlan: GoalPlan, history: GoalHistoryEvent[]): boolean {
+  const query = goalPlan.stages.find((stage) => stage.kind === "search")?.value;
+  if (!query) return false;
+  const queryTokens = normalizeForMatching(query).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  if (!queryTokens.length) return false;
+  try {
+    const url = new URL(page.url);
+    const queryValues: string[] = [];
+    url.searchParams.forEach((value) => queryValues.push(value));
+    const urlText = [...queryValues, url.pathname, url.hash].join(" ").replaceAll("+", " ");
+    const normalizedUrl = normalizeForMatching(decodeURIComponent(urlText));
+    if (queryTokens.every((token) => normalizedUrl.includes(token))) return true;
+  } catch {
+    // Continue to the semantic page-text check when the URL is not parseable.
+  }
+  const lastTypedIndex = history.map((entry) => entry.type === "type" && entry.progressed).lastIndexOf(true);
+  if (lastTypedIndex < 0) return false;
+  const submitted = history.slice(lastTypedIndex + 1).some((entry) => entry.progressed && (
+    entry.type === "keypress" || entry.type === "click" && /search|busca|pesquis|submit/i.test(entry.targetLabel ?? "")
+  ));
+  if (!submitted) return false;
+  const semanticText = normalizeForMatching(`${page.title} ${page.pageTextSummary}`);
+  return queryTokens.every((token) => semanticText.includes(token));
+}
+
 function isProhibitedByGoal(element: ElementRef, plan: GoalPlan): boolean {
   if (!plan.restrictions.length) return false;
   const restriction = plan.restrictions.join(" ").toLowerCase();
@@ -140,7 +165,12 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       ? [{ type: "select", selectionLabel: stage.target, progressed: true } satisfies GoalHistoryEvent]
       : [];
   });
-  const progressedPlan = updateGoalProgress(goalPlan, [...actionHistory, ...observedSelection]);
+  const searchObserved = searchQueryObserved(page, goalPlan, actionHistory);
+  const progressedByHistory = updateGoalProgress(goalPlan, [...actionHistory, ...observedSelection]);
+  const progressedPlan = {
+    ...progressedByHistory,
+    stages: progressedByHistory.stages.map((stage) => stage.kind === "search" ? { ...stage, status: searchObserved ? "complete" as const : "pending" as const } : stage),
+  };
   const pendingStage = progressedPlan.stages.find((stage) => stage.status === "pending");
   const textToType = goalPlan.stages.find((stage) => stage.kind === "search")?.value
     ?? goalPlan.stages.find((stage) => stage.kind === "fill_field")?.value
@@ -235,8 +265,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
     const prohibitsSending = goalPlan.restrictions.some((restriction) => /envie|enviar|submit|send/i.test(restriction));
     if (!prohibitsSending) options.push({ id: "submit_search", action: { type: "keypress", key: "ENTER" } });
     const openResultPending = progressedPlan.stages.some((stage) => stage.kind === "open_result" && stage.status === "pending");
-    const searchWasSubmitted = progressedPlan.stages.some((stage) => stage.kind === "search" && stage.status === "complete")
-      || completedActions.includes("keypress") || completedActions.includes("click");
+    const searchWasSubmitted = searchObserved;
     const openOption = options.find((option) => ["navigate", "open_tab", "open_window"].includes(option.action.type));
     if (openOption && !completedActions.includes(openOption.action.type)) {
       options.splice(0, options.length, openOption);
@@ -245,16 +274,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       const recoveryOptions = options.filter((option) => option.action.type === "scroll");
       const fallbackOptions: CommandOption[] = [{ id: "finish_failed", action: { type: "finish", status: "failed", message: "Não encontrei um campo de texto disponível nesta etapa." } }];
       options.splice(0, options.length, ...(typeOptions.length > 0 ? typeOptions : recoveryOptions.length > 0 ? recoveryOptions : fallbackOptions));
-    } else if (!completedActions.includes("click") && !completedActions.includes("keypress")) {
-      const searchSubmitOptions = options.filter((option) => {
-        if (option.action.type !== "click") return false;
-        const clickAction = option.action;
-        const element = page.elements.find((candidate) => candidate.ref === clickAction.target.ref);
-        return element ? isSearchSubmitControl(element) : false;
-      });
-      const enterOption: CommandOption = { id: "submit_search", action: { type: "keypress", key: "ENTER" } };
-      options.splice(0, options.length, ...(searchSubmitOptions.length > 0 ? searchSubmitOptions : [enterOption]));
-    } else if (openResultPending && searchWasSubmitted) {
+    } else if (searchWasSubmitted && openResultPending) {
       const resultLinks = options.filter((option) => {
         if (option.action.type !== "click") return false;
         const element = page.elements.find((candidate) => candidate.ref === targetRef(option.action));
@@ -265,8 +285,20 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       options.splice(0, options.length, ...(resultLinks.length ? resultLinks : scrollOptions.length ? scrollOptions : [
         noResult,
       ]));
-    } else {
+    } else if (searchWasSubmitted) {
       options.splice(0, options.length, { id: "finish_success", action: { type: "finish", status: "success", message: "Pesquisa concluída." } });
+    } else {
+      const searchSubmitOptions = options.filter((option) => {
+        if (option.action.type !== "click") return false;
+        const element = page.elements.find((candidate) => candidate.ref === targetRef(option.action));
+        const alreadyTried = actionHistory.some((entry) => entry.type === "click" && entry.progressed && /search|busca|pesquis|submit/i.test(entry.targetLabel ?? ""));
+        return Boolean(element && isSearchSubmitControl(element) && !alreadyTried);
+      });
+      const enterAlreadyAttempted = actionHistory.some((entry) => entry.type === "keypress");
+      const enterOption: CommandOption = { id: "submit_search", action: { type: "keypress", key: "ENTER" } };
+      if (searchSubmitOptions.length) options.splice(0, options.length, ...searchSubmitOptions);
+      else if (!enterAlreadyAttempted) options.splice(0, options.length, enterOption);
+      else options.splice(0, options.length, { id: "finish_search_unconfirmed", action: { type: "finish", status: "failed", message: "A pesquisa nÃ£o foi observada." } });
     }
   }
 

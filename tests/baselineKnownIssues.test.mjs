@@ -6,7 +6,7 @@ const { runAgentLoop } = await import("../dist/agent/loop.js");
 const { executeScroll } = await import("../dist/agent/executor/scroll.js");
 
 const page = {
-  url: "https://fixture.test/search", title: "Search results",
+  url: "https://fixture.test/search?q=teclado", title: "Search results",
   viewport: { width: 1280, height: 800, scrollY: 0 }, pageTextSummary: "Results",
   fingerprint: "stable-test-state", limitations: [], scrollContainers: [],
   elements: [
@@ -15,8 +15,12 @@ const page = {
   ],
 };
 
-test("compound search keeps opening a result pending after the search completes", () => {
-  const { options } = buildJevCommandMap("pesquise por teclado e abra o primeiro resultado", page, [], ["navigate", "type", "keypress"]);
+test("compound search keeps opening a result pending after the observed search completes", () => {
+  const history = [
+    { type: "type", targetLabel: "Busca", dispatched: true, progressed: true },
+    { type: "keypress", dispatched: true, progressed: true },
+  ];
+  const { options } = buildJevCommandMap("pesquise por teclado e abra o primeiro resultado", page, [], ["navigate", "type", "keypress"], 0, history);
   assert.equal(options.some((option) => option.action.type === "click" && option.action.target.ref === "el_1_2"), true);
   assert.equal(options.some((option) => option.action.type === "finish" && option.action.status === "success"), false);
 });

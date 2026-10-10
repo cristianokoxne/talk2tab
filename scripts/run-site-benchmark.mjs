@@ -54,11 +54,14 @@ const bundle = await build({
 });
 
 const requestedId = process.argv.find((value) => value.startsWith("--case="))?.slice("--case=".length);
+const developmentOnly = process.argv.includes("--development-only");
 const repetitions = requestedId ? 1 : 3;
-const selectedCases = requestedId ? siteBenchmarkCases.filter(({ id }) => id === requestedId) : siteBenchmarkCases;
+const selectedCases = requestedId ? siteBenchmarkCases.filter(({ id }) => id === requestedId)
+  : developmentOnly ? siteBenchmarkCases.filter(({ split }) => split === "development")
+    : siteBenchmarkCases;
 if (!selectedCases.length) throw new Error(`Unknown site benchmark case: ${requestedId}`);
 const runRequested = process.argv.includes("--run");
-console.log(JSON.stringify({ model, cases: selectedCases.length, domains: new Set(selectedCases.map(({ site }) => site)).size, repetitions, plannedRuns: selectedCases.length * repetitions, runRequested }, null, 2));
+console.log(JSON.stringify({ model, cases: selectedCases.length, domains: new Set(selectedCases.map(({ site }) => site)).size, repetitions, plannedRuns: selectedCases.length * repetitions, developmentOnly, runRequested }, null, 2));
 if (!runRequested) process.exit(0);
 
 const browser = await chromium.launch({ headless: true });
@@ -200,6 +203,7 @@ const report = { generatedAt: new Date().toISOString(), model, environment: { pl
 const timestamp = report.generatedAt.slice(0, 19).replaceAll(":", "-");
 const path = requestedId
   ? `docs/validation/E19-sites-pilot-${timestamp}-${requestedId}.json`
+  : developmentOnly ? `docs/validation/E19-development-${timestamp}.json`
   : `docs/validation/E19-sites-${timestamp}.json`;
 await fs.writeFile(path, `${JSON.stringify(report, null, 2)}\n`, { flag: "wx" });
 console.log(JSON.stringify({ reportPath: path, summary: summary.overall, byFamily: summary.byFamily, bySplit: summary.bySplit, totalRuns: results.length }, null, 2));

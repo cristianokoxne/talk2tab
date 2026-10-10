@@ -12,18 +12,19 @@ const group = (key) => Object.fromEntries([...new Set(development.map((entry) =>
     byStatus: Object.fromEntries([...new Set(entries.map(({ status }) => status))].sort().map((status) => [status, entries.filter((entry) => entry.status === status).length])),
   }];
 }));
-if (process.argv.includes("--cases")) {
+if (process.argv.includes("--cases") || process.argv.includes("--failures-only")) {
   console.log(JSON.stringify(Object.fromEntries([...new Set(development.map(({ caseId }) => caseId))].sort().map((caseId) => {
     const entries = development.filter((entry) => entry.caseId === caseId);
+    if (process.argv.includes("--failures-only") && entries.every(({ status }) => status === "success")) return null;
     return [caseId, {
       total: entries.length,
       successful: entries.filter(({ status }) => status === "success").length,
-      statuses: entries.map(({ status }) => status),
-      actionPatterns: entries.map(({ actionTypes }) => (actionTypes ?? []).join(" → ")),
-      queryObserved: entries.map(({ queryObserved }) => queryObserved ?? null),
-      targetKinds: entries.map(({ targetKinds }) => targetKinds ?? []),
+      statuses: [...new Set(entries.map(({ status }) => status))],
+      actionPatterns: [...new Set(entries.map(({ actionTypes }) => (actionTypes ?? []).join(" → ")))],
+      queryObserved: [...new Set(entries.map(({ queryObserved }) => queryObserved ?? null))],
+      targetKinds: [...new Set(entries.flatMap(({ targetKinds }) => targetKinds ?? []))],
     }];
-  })), null, 2));
+  }).filter(Boolean)), null, 2));
   process.exit(0);
 }
 console.log(JSON.stringify({

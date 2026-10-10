@@ -30,15 +30,18 @@ test("scripted Jev drives a complete search journey without network access", asy
   const goal = "pesquise sobre teclado sem fio";
   const result = await runAgentLoop({
     observe: async () => ({ ...state.page, fingerprint: `${state.query}:${state.submitted}` }),
-    decide: async (observed) => {
-      const { map, options } = buildJevCommandMap(goal, observed, [], state.completed ?? []);
+    decide: async (observed, _signal, history = []) => {
+      const { map, options } = buildJevCommandMap(goal, observed, [], history.map((entry) => entry.type), 0, history);
       currentOptions = options;
       return provider.chooseNextAction(map, options);
     },
     execute: async (action) => {
       state.completed ??= [];
       if (action.type === "type") state.query = action.text;
-      if (action.type === "click") state.submitted = true;
+      if (action.type === "click") {
+        state.submitted = true;
+        state.page.url = `https://fixture.test/catalog?q=${encodeURIComponent(state.query)}`;
+      }
       state.completed.push(action.type);
       return { ok: true, changed: true };
     },

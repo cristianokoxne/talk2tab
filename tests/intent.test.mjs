@@ -27,8 +27,12 @@ test("compound search preserves the original goal and keeps opening results pend
   assert.equal(typing.action.text, "teclado mecânico");
   assert.equal(initial.map.state.goal, goal);
   assert.deepEqual(initial.map.state.goalPlan.stages.map(({ kind }) => kind), ["search", "open_result"]);
-  const resultsPage = { ...page, elements: [{ ref: "el_1_2", frameId: 0, tag: "a", role: "link", name: "Teclado mecânico — loja", visible: true, enabled: true, bounds: { x: 0, y: 40, width: 300, height: 30 } }] };
-  const afterSearch = buildJevCommandMap(goal, resultsPage, [], ["type", "keypress"]);
+  const resultsPage = { ...page, url: "https://search.test/?q=teclado+mec%C3%A2nico", elements: [{ ref: "el_1_2", frameId: 0, tag: "a", role: "link", name: "Teclado mecânico — loja", visible: true, enabled: true, bounds: { x: 0, y: 40, width: 300, height: 30 } }] };
+  const observedSearch = [
+    { type: "type", targetLabel: "Busca", dispatched: true, progressed: true },
+    { type: "keypress", dispatched: true, progressed: true },
+  ];
+  const afterSearch = buildJevCommandMap(goal, resultsPage, [], ["type", "keypress"], 0, observedSearch);
   assert.ok(afterSearch.options.some((option) => option.action.type === "click"));
   assert.equal(afterSearch.options.some((option) => option.action.type === "finish" && option.action.status === "success"), false);
 });

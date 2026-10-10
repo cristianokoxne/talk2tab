@@ -144,10 +144,58 @@ test("search phase prefers a visible search button after typing", () => {
 test("compound search goals expose one deterministic phase at a time", () => {
   const inputPage = { ...page, elements: [{ ref: "el_1_2", frameId: 0, tag: "input", role: "textbox", name: "Busca", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 100, height: 30 } }] };
   const goal = "abra o Google e pesquise sobre cristiano koxne";
+  const typedHistory = [{ type: "type", targetLabel: "Busca", dispatched: true, progressed: true }];
+  const unsubmittedHistory = [...typedHistory, { type: "keypress", dispatched: true, progressed: false }];
   assert.deepEqual(buildJevCommandMap(goal, inputPage).options.map((option) => option.action.type), ["navigate"]);
   assert.deepEqual(buildJevCommandMap(goal, inputPage, [], ["navigate"]).options.map((option) => option.action.type), ["type"]);
-  assert.deepEqual(buildJevCommandMap(goal, inputPage, [], ["navigate", "type"]).options.map((option) => option.action.type), ["keypress"]);
-  assert.deepEqual(buildJevCommandMap(goal, inputPage, [], ["navigate", "type", "keypress"]).options.map((option) => option.action.type), ["finish"]);
+  assert.deepEqual(buildJevCommandMap(goal, inputPage, [], ["navigate", "type"], 0, typedHistory).options.map((option) => option.action.type), ["keypress"]);
+  const afterUnobservedEnter = buildJevCommandMap(goal, inputPage, [], ["navigate", "type", "keypress"], 0, unsubmittedHistory).options;
+  assert.equal(afterUnobservedEnter[0].action.type, "finish");
+  assert.equal(afterUnobservedEnter[0].action.status, "failed");
+});
+
+test("unrelated click does not count as a submitted search", () => {
+  const searchPage = { ...page, elements: [
+    { ref: "el_1_3", frameId: 0, tag: "input", role: "searchbox", name: "Search", type: "search", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 300, height: 30 } },
+    { ref: "el_1_4", frameId: 0, tag: "button", role: "button", name: "Suggested topic", visible: true, enabled: true, bounds: { x: 0, y: 40, width: 120, height: 30 } },
+  ] };
+  const history = [
+    { type: "type", targetLabel: "Search", dispatched: true, progressed: true },
+    { type: "click", targetLabel: "Suggested topic", targetRole: "button", dispatched: true, progressed: true },
+  ];
+  const { options } = buildJevCommandMap('search for "accessibility"', searchPage, [], ["type", "click"], 0, history);
+  assert.deepEqual(options.map((option) => option.action.type), ["keypress"]);
+});
+
+test("a search control click without observed query falls back to Enter instead of retrying the same click", () => {
+  const searchPage = { ...page, elements: [
+    { ref: "el_1_3", frameId: 0, tag: "input", role: "searchbox", name: "Search", type: "search", visible: true, enabled: true, bounds: { x: 0, y: 0, width: 300, height: 30 } },
+    { ref: "el_1_4", frameId: 0, tag: "button", role: "button", name: "Search", visible: true, enabled: true, bounds: { x: 0, y: 40, width: 120, height: 30 } },
+  ] };
+  const history = [
+    { type: "type", targetLabel: "Search", dispatched: true, progressed: true },
+    { type: "click", targetLabel: "Search", targetRole: "button", dispatched: true, progressed: true },
+  ];
+  const { options } = buildJevCommandMap('search for "accessibility"', searchPage, [], ["type", "click"], 0, history);
+  assert.deepEqual(options.map((option) => option.action.type), ["keypress"]);
+});
+
+test("observed query in URL completes search only after it is present", () => {
+  const searchResultsPage = { ...page, url: "https://example.com/search?q=accessibility" };
+  const { options } = buildJevCommandMap('search for "accessibility"', searchResultsPage);
+  assert.deepEqual(options.map((option) => option.action.type), ["finish"]);
+  assert.equal(options[0].action.status, "success");
+});
+
+test("observed result text can confirm an AJAX search after a successful submit", () => {
+  const searchResultsPage = { ...page, pageTextSummary: "Results for accessibility: Accessible name guide" };
+  const history = [
+    { type: "type", targetLabel: "Search", dispatched: true, progressed: true },
+    { type: "keypress", dispatched: true, progressed: true },
+  ];
+  const { options } = buildJevCommandMap('search for "accessibility"', searchResultsPage, [], ["type", "keypress"], 0, history);
+  assert.deepEqual(options.map((option) => option.action.type), ["finish"]);
+  assert.equal(options[0].action.status, "success");
 });
 
 test("search phase never sends an empty choice set when no textbox is visible", () => {
