@@ -42,3 +42,29 @@ test("titled YouTube video request builds navigate, search and open-result stage
   assert.deepEqual(search.options.map((option) => option.action.type), ["type"]);
   assert.equal(search.options[0].action.text, "Despacito");
 });
+
+test("YouTube video search does not use scrolling as a substitute for a missing search field", () => {
+  const goal = "Entre no video de Despacito no YouTube";
+  const noSearchField = { ...page, elements: [] };
+  const { options } = buildJevCommandMap(goal, noSearchField, [], ["navigate"], 0, [{ type: "navigate", progressed: true }]);
+  assert.equal(options.length, 1);
+  assert.equal(options[0].action.type, "finish");
+  assert.equal(options[0].action.status, "failed");
+});
+
+test("YouTube may scroll once to reveal lazy results, then must find a link or stop", () => {
+  const goal = "Entre no video de Despacito no YouTube";
+  const results = { ...page, url: "https://www.youtube.com/results?search_query=Despacito", pageTextSummary: "Despacito" };
+  const searchHistory = [
+    { type: "navigate", progressed: true },
+    { type: "type", targetLabel: "Search", progressed: true },
+    { type: "keypress", progressed: true },
+  ];
+  const firstObservation = buildJevCommandMap(goal, results, [], ["navigate", "type"], 0, searchHistory);
+  assert.ok(firstObservation.options.some((option) => option.action.type === "scroll"));
+
+  const afterScroll = buildJevCommandMap(goal, results, [], ["navigate", "type"], 0, [...searchHistory, { type: "scroll", progressed: true }]);
+  assert.equal(afterScroll.options.length, 1);
+  assert.equal(afterScroll.options[0].action.type, "finish");
+  assert.equal(afterScroll.options[0].action.status, "failed");
+});

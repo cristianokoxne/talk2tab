@@ -280,7 +280,7 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       const typeOptions = options.filter((option) => option.action.type === "type");
       const recoveryOptions = options.filter((option) => option.action.type === "scroll");
       const fallbackOptions: CommandOption[] = [{ id: "finish_failed", action: { type: "finish", status: "failed", message: "Não encontrei um campo de texto disponível nesta etapa." } }];
-      options.splice(0, options.length, ...(typeOptions.length > 0 ? typeOptions : recoveryOptions.length > 0 ? recoveryOptions : fallbackOptions));
+      options.splice(0, options.length, ...(typeOptions.length > 0 ? typeOptions : youtubeVideoNavigation ? fallbackOptions : recoveryOptions.length > 0 ? recoveryOptions : fallbackOptions));
     } else if (searchWasSubmitted && openResultPending) {
       const resultLinks = options.filter((option) => {
         if (option.action.type !== "click") return false;
@@ -289,7 +289,8 @@ export function buildJevCommandMap(goal: string, page: PageState, tabs: BrowserT
       });
       const scrollOptions = options.filter((option) => option.action.type === "scroll");
       const noResult: CommandOption = { id: "finish_failed", action: { type: "finish", status: "failed", message: "A pesquisa terminou, mas ainda não encontrei um resultado para abrir." } };
-      options.splice(0, options.length, ...(resultLinks.length ? resultLinks : scrollOptions.length ? scrollOptions : [
+      const alreadyWaitedByScrolling = actionHistory.some((entry) => entry.type === "scroll" && entry.progressed);
+      options.splice(0, options.length, ...(resultLinks.length ? resultLinks : scrollOptions.length && (!youtubeVideoNavigation || !alreadyWaitedByScrolling) ? scrollOptions : [
         noResult,
       ]));
     } else if (searchWasSubmitted) {
