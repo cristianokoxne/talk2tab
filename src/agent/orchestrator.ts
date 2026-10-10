@@ -7,6 +7,7 @@ import { verifyAction } from "./verification.js";
 import { parseGoal, updateGoalProgress } from "./intent.js";
 import { waitForPageEffect } from "./waitForEffect.js";
 import { findSpawnedChildTab, isRestrictedDocumentUrl, makeUninspectablePage, validateNavigationUrl } from "./navigation.js";
+import { aggregateFrameObservations, parseFrameScopedRef } from "./frames.js";
 import { TabRunRegistry } from "./tabRunRegistry.js";
 
 const activeRuns = new Map<string, AbortController>();
@@ -179,15 +180,59 @@ function isCancelAgentMessage(value: unknown): value is CancelAgentMessage {
 }
 
 async function scanTab(chromeApi: typeof chrome, tabId: number, requestId: string): Promise<PageState> {
-  let response: ContentScanResponse | undefined;
   try {
-    response = await chromeApi.tabs.sendMessage(tabId, { type: "PAGE_SCAN_REQUEST", requestId }) as ContentScanResponse | undefined;
+    await chromeApi.scripting.executeScript({ target: { tabId, allFrames: true }, files: ["contentScript.js"] });
   } catch {
-    await chromeApi.scripting.executeScript({ target: { tabId }, files: ["contentScript.js"] });
-    response = await chromeApi.tabs.sendMessage(tabId, { type: "PAGE_SCAN_REQUEST", requestId }) as ContentScanResponse | undefined;
+    // Static all-frame injection may already be active even when the document blocks reinjection.
   }
-  if (!response?.ok || !response.data) throw new Error("Could not inspect this page.");
-  return response.data;
+  let injections: Array<{ frameId: number; result?: { url: string; title: string } }>;
+  try {
+    injections = await chromeApi.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      func: () => ({ url: location.href, title: document.title }),
+    }) as Array<{ frameId: number; result?: { url: string; title: string } }>;
+  } catch {
+    injections = [{ frameId: 0, result: { url: "", title: "" } }];
+  }
+  const frames = new Map(injections.map((entry) => [entry.frameId, {
+    frameId: entry.frameId,
+    url: safeFrameUrl(entry.result?.url ?? ""),
+    title: entry.result?.title ?? "",
+    accessible: false,
+  }]));
+  if (!frames.has(0)) frames.set(0, { frameId: 0, url: "", title: "", accessible: false });
+  const observations = await Promise.all([...frames.values()].map(async (frame) => {
+    try {
+      const response = await chromeApi.tabs.sendMessage(tabId, { type: "PAGE_SCAN_REQUEST", requestId }, { frameId: frame.frameId }) as ContentScanResponse | undefined;
+      return response?.ok && response.data ? { frame: { ...frame, accessible: true }, state: response.data } : undefined;
+    } catch { return undefined; }
+  }));
+  const accessible = observations.filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
+  if (!accessible.some(({ frame }) => frame.frameId === 0)) throw new Error("Could not inspect the main page frame.");
+  const top = accessible.find(({ frame }) => frame.frameId === 0)!.state;
+  const missingEmbedded = Math.max(0, (top.embeddedFrames?.length ?? 0) - (accessible.length - 1));
+  return aggregateFrameObservations(accessible, missingEmbedded);
+}
+
+function safeFrameUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? `${url.origin}${url.pathname}` : `${url.protocol}//`;
+  } catch { return ""; }
+}
+
+function routeFrameAction(action: import("./types.js").BrowserAction, page: PageState): { frameId: number; action: import("./types.js").BrowserAction } {
+  let ref: string | undefined;
+  if ("target" in action) ref = action.target?.ref;
+  if (action.type === "keypress" && page.focusedElement) ref = page.focusedElement;
+  const parsed = ref ? parseFrameScopedRef(ref) : undefined;
+  if (!parsed) return { frameId: 0, action };
+  const routed = action.type === "scroll"
+    ? { ...action, target: action.target ? { ref: parsed.localRef } : undefined }
+    : action.type === "click" || action.type === "type" || action.type === "select"
+      ? { ...action, target: { ref: parsed.localRef } }
+      : action;
+  return { frameId: parsed.frameId, action: routed };
 }
 
 async function listTabs(chromeApi: typeof chrome): Promise<BrowserTabSummary[]> {
@@ -363,7 +408,8 @@ async function runAgent(chromeApi: typeof chrome, tabId: number, message: RunAge
       const knownTabIds = action.type === "click"
         ? new Set((await chromeApi.tabs.query({})).flatMap((tab) => tab.id === undefined ? [] : [tab.id]))
         : undefined;
-      const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId, action }) as ActionResult;
+      const routed = routeFrameAction(action as import("./types.js").BrowserAction, latestPage ?? await scanTab(chromeApi, currentTabId.value, message.requestId));
+      const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId, action: routed.action }, { frameId: routed.frameId }) as ActionResult;
       if (knownTabIds && result.dispatched) {
         const tabs = await chromeApi.tabs.query({});
         const childTabId = findSpawnedChildTab(tabs.flatMap((tab) => tab.id === undefined ? [] : [{ id: tab.id, openerTabId: tab.openerTabId }]), knownTabIds, currentTabId.value);
@@ -417,7 +463,8 @@ async function runContinuousScroll(chromeApi: typeof chrome, tabId: number, mess
     });
     const action = { type: "scroll", direction, amount: "viewport", target: namedContainer ? { ref: namedContainer.ref } : undefined } as const;
     if (signal.aborted) return { status: "cancelled", steps, message: "Rolagem contínua interrompida pelo usuário." };
-    const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId: `continuous_scroll_${step}`, action }) as ActionResult;
+    const routed = routeFrameAction(action, page);
+    const result = await chromeApi.tabs.sendMessage(currentTabId.value, { type: "EXECUTE_ACTION", actionId: `continuous_scroll_${step}`, action: routed.action }, { frameId: routed.frameId }) as ActionResult;
     steps.push({ step, action, result });
     if (!result.ok) return { status: "failed", steps, message: result.error ?? "Não foi possível continuar rolando." };
     if (steps.length > 100) steps.shift();

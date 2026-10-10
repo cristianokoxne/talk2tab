@@ -3,6 +3,8 @@ export class ElementRegistry {
   private sequence = 0;
   private readonly elements = new Map<string, HTMLElement>();
 
+  constructor(private readonly prefix = "") {}
+
   beginGeneration(): number {
     this.generation += 1;
     this.sequence = 0;
@@ -12,7 +14,7 @@ export class ElementRegistry {
 
   register(element: HTMLElement): string {
     this.sequence += 1;
-    const ref = `el_${this.generation}_${this.sequence}`;
+    const ref = this.prefix ? `el_${this.prefix}_${this.generation}_${this.sequence}` : `el_${this.generation}_${this.sequence}`;
     this.elements.set(ref, element);
     return ref;
   }

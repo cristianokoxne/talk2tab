@@ -52,6 +52,16 @@ function sanitizedHref(element: HTMLElement): string | undefined {
   }
 }
 
+function safeFrameUrl(frame: HTMLIFrameElement | HTMLFrameElement): string | undefined {
+  const source = frame instanceof HTMLIFrameElement ? frame.src : frame.src;
+  if (!source) return undefined;
+  try {
+    const url = new URL(source, frame.ownerDocument.location.href);
+    if (url.protocol === "http:" || url.protocol === "https:") return `${url.origin}${url.pathname}`;
+    return `${url.protocol}//`;
+  } catch { return undefined; }
+}
+
 function isSensitive(element: HTMLElement): boolean {
   if (element instanceof HTMLInputElement && sensitiveInputTypes.has(element.type)) return true;
   const hint = `${element.getAttribute("name")} ${element.id} ${element.getAttribute("autocomplete")}`.toLowerCase();
@@ -174,6 +184,7 @@ function fingerprint(state: Omit<PageState, "fingerprint">): string {
     viewport: { scrollY: state.viewport.scrollY, scrollX: state.viewport.scrollX, scrollHeight: state.viewport.scrollHeight, scrollWidth: state.viewport.scrollWidth },
     activeDialog: state.activeDialog,
     scrollLocked: state.scrollLocked,
+    embeddedFrames: state.embeddedFrames,
     elements: state.elements.map((element) => ({
       tag: element.tag,
       role: element.role,
@@ -219,13 +230,15 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
   const elements: ElementRef[] = [];
   const elementRefs = new Map<HTMLElement, string>();
   const candidates = collectInteractiveElements(document);
+  if (Array.from(document.querySelectorAll<HTMLElement>("*")).some((element) => element.tagName.includes("-") && !element.shadowRoot)) {
+    limitations.push("custom_elements_may_use_unavailable_closed_shadow_roots");
+  }
 
   for (const element of candidates) {
     if (!isElementVisible(element, window)) continue;
     const ref = registry.register(element);
     elementRefs.set(element, ref);
     elements.push(toElementRef(element, ref, document, window));
-    if (element.shadowRoot?.mode === "closed") limitations.push("closed_shadow_root_detected_or_suspected");
   }
 
   const scrollContainers: ScrollContainerRef[] = [];
@@ -270,6 +283,12 @@ export function scanPage(document: Document, window: Window, registry: ElementRe
         .find((dialog) => isElementVisible(dialog, window));
       return active ? regionName(active, document) ?? regionKind(active) : undefined;
     })(),
+    embeddedFrames: Array.from(document.querySelectorAll<HTMLIFrameElement | HTMLFrameElement>("iframe,frame")).slice(0, 30).map((frame) => ({
+      title: compactText(frame.getAttribute("title") || frame.getAttribute("aria-label") || "", 100) || undefined,
+      url: safeFrameUrl(frame),
+      sandboxed: frame instanceof HTMLIFrameElement && frame.hasAttribute("sandbox"),
+      loading: frame instanceof HTMLIFrameElement ? frame.loading : undefined,
+    })),
     scrollLocked: (() => {
       const rootStyle = window.getComputedStyle(document.documentElement);
       const bodyStyle = document.body ? window.getComputedStyle(document.body) : undefined;

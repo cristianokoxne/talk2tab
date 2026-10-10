@@ -27,7 +27,8 @@ function isScanRequest(value: unknown): value is ScanRequest {
 }
 
 export function initContentScript(chromeApi: typeof chrome, document: Document, window: Window): void {
-  const registry = new ElementRegistry();
+  const documentPrefix = `doc_${Math.random().toString(36).slice(2, 10)}`;
+  const registry = new ElementRegistry(documentPrefix);
   let latestState: ReturnType<typeof scanPage> | undefined;
   chromeApi.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
     if (isScanRequest(message)) {

@@ -42,13 +42,13 @@ async function startFixtureServer() {
 async function pageScan(worker, page) {
   const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
   assert.ok(tabId, "Fixture tab should be visible to the extension worker");
-  return worker.evaluate(async ({ tabId: targetTabId, requestId }) => chrome.tabs.sendMessage(targetTabId, { type: "PAGE_SCAN_REQUEST", requestId }), { tabId, requestId: crypto.randomUUID() });
+  return worker.evaluate(async ({ tabId: targetTabId, requestId }) => chrome.tabs.sendMessage(targetTabId, { type: "PAGE_SCAN_REQUEST", requestId }, { frameId: 0 }), { tabId, requestId: crypto.randomUUID() });
 }
 
 async function execute(worker, page, action) {
   const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
   assert.ok(tabId);
-  return worker.evaluate(async ({ tabId: targetTabId, action: selectedAction }) => chrome.tabs.sendMessage(targetTabId, { type: "EXECUTE_ACTION", actionId: crypto.randomUUID(), action: selectedAction }), { tabId, action });
+  return worker.evaluate(async ({ tabId: targetTabId, action: selectedAction }) => chrome.tabs.sendMessage(targetTabId, { type: "EXECUTE_ACTION", actionId: crypto.randomUUID(), action: selectedAction }, { frameId: 0 }), { tabId, action });
 }
 
 before(async () => {
@@ -88,7 +88,7 @@ test("extension scans, fills, submits, and opens the intended result", async () 
   const query = observation.data.elements.find((element) => element.name === "Buscar no catálogo");
   assert.ok(query, "Accessible search field should be present in the scan");
   const typed = await execute(worker, page, { type: "type", target: { ref: query.ref }, text: "teclado sem fio", replace: true });
-  assert.equal(typed.ok, true);
+  assert.equal(typed.ok, true, JSON.stringify(typed));
   assert.equal(await page.locator("#query").inputValue(), "teclado sem fio");
 
   observation = await pageScan(worker, page);
@@ -466,13 +466,35 @@ test("extension opens the second result only when its ref is selected", async ()
   await page.close();
 });
 
-test("baseline confirms controls inside an uninjected frame are absent from the scan", async () => {
-  const worker = context.serviceWorkers()[0];
+test("cross-origin child frames are injected and can be scanned independently", async () => {
+  const worker = context.serviceWorkers()[0] ?? await context.waitForEvent("serviceworker");
   const page = await openFixture(worker);
   const observation = await pageScan(worker, page);
   const frameInput = page.frameLocator("iframe[title='Frame de pesquisa']").locator("#frame-query");
   await frameInput.waitFor();
   assert.equal(observation.data.elements.some((element) => element.name === "Busca no frame"), false);
+  const tabId = await worker.evaluate(async (url) => (await chrome.tabs.query({ url: `${url}*` }))[0]?.id, browserOrigin);
+  const frames = await worker.evaluate(async (targetTabId) => chrome.scripting.executeScript({
+    target: { tabId: targetTabId, allFrames: true },
+    func: () => ({ title: document.title }),
+  }), tabId);
+  const childFrame = frames.find((entry) => entry.result?.title === "Frame E2E");
+  assert.ok(childFrame, "The authorized cross-origin frame should be discoverable");
+  const childObservation = await worker.evaluate(async ({ targetTabId, frameId }) => chrome.tabs.sendMessage(
+    targetTabId,
+    { type: "PAGE_SCAN_REQUEST", requestId: crypto.randomUUID() },
+    { frameId },
+  ), { targetTabId: tabId, frameId: childFrame.frameId });
+  assert.equal(childObservation.ok, true);
+  const childInput = childObservation.data.elements.find((element) => element.name === "Busca no frame");
+  assert.ok(childInput, "The frame-local scan should expose its labeled input");
+  const typed = await worker.evaluate(async ({ targetTabId, frameId, ref }) => chrome.tabs.sendMessage(
+    targetTabId,
+    { type: "EXECUTE_ACTION", actionId: crypto.randomUUID(), action: { type: "type", target: { ref }, text: "pesquisa isolada", replace: true } },
+    { frameId },
+  ), { targetTabId: tabId, frameId: childFrame.frameId, ref: childInput.ref });
+  assert.equal(typed.ok, true);
+  assert.equal(await frameInput.inputValue(), "pesquisa isolada");
   await page.close();
 });
 

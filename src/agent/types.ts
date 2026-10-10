@@ -79,11 +79,17 @@ export interface PageState {
   elements: ElementRef[];
   regions?: PageRegion[];
   focusedElement?: string;
+  focusedFrameId?: number;
   activeDialog?: string;
   scrollLocked?: boolean;
   scrollContainers?: ScrollContainerRef[];
+  frames?: FrameInfo[];
+  embeddedFrames?: EmbeddedFrameInfo[];
   limitations: string[];
 }
+
+export interface FrameInfo { frameId: number; url: string; title: string; accessible: boolean; }
+export interface EmbeddedFrameInfo { title?: string; url?: string; sandboxed: boolean; loading?: string; }
 
 export interface PageRegion {
   kind: string;
@@ -103,6 +109,7 @@ export interface ScrollContainerRef {
   scrollWidth?: number;
   scrollSnapType?: string;
   context?: string;
+  frameId?: number;
   bounds: ElementBounds;
 }
 
